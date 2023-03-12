@@ -1,0 +1,107 @@
+<html>
+<head>
+<title>Dalai LLaMA</title>
+<style>
+  body { margin: 0; padding: 10px; color: rgba(0,0,0,0.8); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  form { border: 2px solid rgba(0,0,0,0.2); display: flex; padding: 5px; box-sizing: border-box; margin: 0; }
+  #input { white-space: pre-wrap; padding: 5px; outline: none; border: none; flex-grow: 1;  font-size: 14px; box-sizing: border-box; }
+  #input:focus { outline: none; }
+  #form > button { padding: 10px; background: gold; border: none; border-radius: 3px; outline: none; color: black; box-sizing: border-box; }
+
+  #messages { list-style-type: none; margin: 0; box-sizing: border-box; font-size: 14px; padding: 0; }
+  #messages > li { padding: 10px; font-size: 14px; box-sizing: border-box; }
+  #messages > li:nth-child(odd) { background: #efefef; }
+  li { white-space: pre-wrap; }
+  .loading {
+    padding: 10px;
+    box-sizing: border-box;
+    color: rgba(0,0,0,0.7);
+    font-size: 14px;
+    background: #efefef;
+  }
+  .hidden {
+    display: none !important;
+  }
+  .info {
+    font-size: 12px;
+    padding: 5px;
+  }
+</style>
+</head>
+<body>
+<form id="form" action="">
+  <div contenteditable id='input'></div>
+  <button>autocomplete</button>
+</form>
+<div class='info'>TIP: shift+enter for multiple lines</div>
+<div class='loading hidden'></div>
+<ul id="messages"></ul>
+<script src="/socket.io.min.js"></script>
+<script>
+const socket = io();
+const form = document.getElementById('form');
+const input = document.querySelector('#input');
+const loading = (on) => {
+  if (on) {
+    document.querySelector(".loading").textContent = on
+    document.querySelector(".loading").classList.remove("hidden")
+  } else {
+    document.querySelector(".loading").textContent = ""
+    document.querySelector(".loading").classList.add("hidden")
+  }
+}
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  e.stopPropagation()
+  if (input.textContent) {
+    socket.emit('request', {
+      prompt: input.textContent,
+      n_predict: 256
+    })
+    loading(input.textContent)
+    input.textContent = "";
+  }
+});
+input.addEventListener("keydown", (e) => {
+  console.log("e", e)
+  if (e.keyCode === 13) {
+    e.preventDefault();
+    if (e.shiftKey) {
+      document.execCommand("insertLineBreak");
+    } else {
+      form.requestSubmit()
+    }
+  }
+})
+
+const sha256 = async (input) => {
+  const textAsBuffer = new TextEncoder().encode(input);
+  const hashBuffer = await window.crypto.subtle.digest("SHA-256", textAsBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hash = hashArray
+    .map((item) => item.toString(16).padStart(2, "0"))
+    .join("");
+  return hash;
+};
+const say = (msg, id) => {
+  let item = document.createElement('li');
+  if (id) item.setAttribute("data-id", id)
+  item.textContent = msg;
+  messages.prepend(item);
+}
+socket.on('result', async ({ request, response }) => {
+  loading(false)
+  const id = await sha256(request.prompt) 
+  console.log({ id, prompt: request.prompt })
+
+  let existing = document.querySelector(`[data-id='${id}']`)
+  if (existing) {
+    existing.textContent = existing.textContent + response
+  } else {
+    say(response, id)
+  }
+//  window.scrollTo(0, document.body.scrollHeight);
+});
+</script>
+</body>
+</html>

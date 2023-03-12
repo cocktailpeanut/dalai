@@ -1,0 +1,218 @@
+:root {
+  --theme-color: rgb(154, 205, 50);
+  --theme-color-light: rgba(154, 205, 50, 0.05);
+  --theme-color-medium: rgba(154, 205, 50, 0.1);
+  --dark-color: rgba(0,0,0,0.8);
+  --dark-focused: rgb(154, 205, 50);
+
+}
+* {
+  word-wrap: break-word;
+}
+body {
+  font-family: "Helvetica Neue", helvetica, arial, "sans serif";
+  margin: 0;
+}
+section.cover .cover-main {
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-top: 50px;
+  height: 100%;
+  max-width: 1000px;
+  text-align: center;
+}
+.cover-main blockquote {
+  font-size: 14px;
+  margin: 0;
+  text-transform: uppercase;
+  font-family: Sans-serif !important;
+}
+.cover-main blockquote {
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  font-family: Sans-serif !important;
+  font-size: 14px !important;
+}
+section.cover h1 img {
+  vertical-align: text-bottom;
+  height: 45px;
+  width: 45px;
+}
+section.cover h1 {
+  margin: 0 !important;
+  color: black;
+}
+section.cover p {
+  font-size: 14px;
+  margin: 0;
+}
+section.cover p a {
+  background: black;
+  color: white;
+  text-decoration: none;
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 2px;
+}
+/*
+section.cover p {
+  margin: 0;
+  font-size: 14px;
+}
+*/
+section.cover .cover-main>p:last-child a {
+  margin: 20px 0 !important;
+}
+
+.sidebar {
+  border: none;
+  color: rgba(0,0,0,0.8);
+  background: rgba(0,0,100,0.05);
+}
+.sidebar li {
+  margin: 0;
+}
+.sidebar ul li a {
+  color: rgba(0,0,0,0.8);
+  line-height: 19px;
+  font-size: 13px;
+}
+.sidebar ul li.active>a {
+  color: var(--theme-color);
+  border: none !important;
+}
+.markdown-section {
+  max-width: 1000px;
+  margin: 20px;
+}
+.markdown-section blockquote {
+  padding: 5px 20px;
+  border: none !important;
+  background: rgba(0,0,100,0.05);
+}
+.cover-main h1 {
+  font-size: 40px !important;
+  letter-spacing: -2px;
+  font-weight: bold !important;
+}
+.cover-main img {
+  width: 50px;
+}
+section.cover .cover-main>p:last-child a, section.cover .btn {
+  padding: 2px 10px;
+  font-weight: bold;
+  margin: 5px 0;
+  border-radius: 2px;
+  background: black !important;
+  color: white;
+  border: none;
+  display: inline-block;
+}
+.markdown-section code, .markdown-section pre {
+  font-size: 12px;
+  line-height: 16px;
+}
+h1, h2, h3, h4, h5 {
+}
+.content {
+  padding-top: 0;
+}
+.markdown-section h1 {
+  font-size: 60px;
+  letter-spacing: -4px;
+}
+.markdown-section h2 {
+  font-size: 40px;
+  letter-spacing: -2px;
+}
+.markdown-section h3 {
+  font-size: 30px;
+  /*
+  border-left: 10px solid black;
+  padding-left: 15px;
+  */
+}
+.anchor span {
+  color: var(--dark-color);
+}
+.markdown-section ol, .markdown-section p, .markdown-section ul {
+  line-height: 1.4rem;
+}
+.markdown-section textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px;
+  height: 400px;
+  font-size: 12px;
+  border: none;
+  background: rgba(0,0,0,0.8);
+  color: white;
+}
+.home {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 100px 0;
+  text-align: center;
+  color: rgba(255,255,255,0.9);
+  background: rgba(0,0,0,0.9);
+}
+.home .item {
+  font-size: 12px;
+  font-weight: bold;
+  color: rgba(255,255,255,0.8);
+  padding: 10px 20px;
+  background: rgba(0,0,0,0.2);
+  text-decoration: none;
+  border-radius: 2px;
+  display: inline-block;
+}
+.home #title i {
+  font-size: 80px;
+}
+.home #title {
+  font-size: 35px;
+  letter-spacing: -1px;
+}
+a.btn {
+  display: inline-block;
+  background: var(--theme-color);
+  color: white;
+  padding: 5px 20px;
+  border-radius: 5px;
+  color: white;
+  text-decoration: none;
+  border: 2px solid black;
+}
+.btn.inverse {
+  border: 2px solid black;
+  color: black;
+  background: white;
+}
+section.cover.show {
+  background: rgba(0,0,100,0.05) !important;
+}
+.videoWrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
+  margin-top: 10px;
+}
+.videoWrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+@media screen and (max-width: 840px){
+  a.btn {
+    display: block;
+    margin-bottom: 10px;
+    text-align: center;
+    width: 150px;
+    padding: 5px;
+  }
+  .markdown-section {
+    margin: 0;
+  }
+}

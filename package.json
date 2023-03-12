@@ -1,0 +1,18 @@
+{
+  "name": "dalai",
+  "version": "0.0.7",
+  "description": "",
+  "main": "index.js",
+  "author": "cocktailpeanut",
+  "license": "MIT",
+  "dependencies": {
+    "node-pty": "^0.10.1",
+    "nodejs-file-downloader": "^4.10.6",
+    "socket.io": "^4.6.1",
+    "socket.io-client": "^4.6.1",
+    "terminal-kit": "^3.0.0",
+    "ejs": "^3.1.8",
+    "express": "^4.18.2"
+  },
+  "bin": "bin/cli.js"
+}

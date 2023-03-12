@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>dalai</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Dalai" />
+  <meta name="twitter:description" content="Dead simple way to run LLaMA on your computer" />
+  <meta name="twitter:image" content="https://cocktailpeanut.github.io/dalai/preview.png" />
+  <meta property="og:url" content="https://github.com/cocktailpeanut/dalai" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Dalai" />
+  <meta property="og:description" content="IBrowse, Search, and Manage Stablediffusion Images in One Place" />
+  <meta property="og:image" content="https://cocktailpeanut.github.io/dalai/preview.png" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Dead simple way to run LLaMA on your computer">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="vue.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    window.$docsify = {
+      name: '',
+      repo: '',
+      maxLevel: 3,
+  //    coverpage: true,
+      themeColor: "black",
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => {
+        let el = document.querySelector("#" + location.hash.split("=")[1])
+        if (el) {
+          const y = el.getBoundingClientRect().top + window.pageYOffset;
+          window.scrollTo({top: y});
+        }
+      }, 1000)
+
+      document.body.addEventListener("click", (e) => {
+        let el = e.target.closest("a")
+        if (el && el.getAttribute("href").startsWith("#/?id=")) {
+          location.hash = el.getAttribute("href").slice(1)
+        } else if (e.target.tagName === "A" && e.target.getAttribute("href").startsWith("#/?id=")) {
+          location.hash = e.target.getAttribute("href").slice(1)
+        }
+      })
+    })
+  </script>
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
+</body>
+</html>
