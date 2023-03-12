@@ -15,6 +15,25 @@ Dead simple way to run LLaMA on your computer.
 
 ---
 
+# Quickstart
+
+Install the 7B model (default) and start a web UI:
+
+```
+npx dalai install
+npx dalai serve
+```
+
+Then go to http://localhost:3000
+
+Above two commands do the following:
+
+1. First installs the 7B module (default)
+2. Then starts a web/API server at port 3000
+
+
+---
+
 # Install
 
 Basic install (7B model only)
@@ -35,24 +54,6 @@ The install command :
 2. Installs and builds the [llama.cpp](https://github.com/ggerganov/llama.cpp) project under `~/dalai`
 3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/dalai/models`
 4. Runs some tasks to convert the LLaMA models so they can be used
-
----
-
-# Quickstart
-
-Install the 7B model (default) and start a web UI:
-
-```
-npx dalai install
-npx dalai serve
-```
-
-Then go to http://localhost:3000
-
-Above two commands do the following:
-
-1. First installs the 7B module (default)
-2. Then starts a web/API server at port 3000
 
 ---
 
