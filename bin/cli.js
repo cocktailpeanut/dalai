@@ -6,7 +6,7 @@ if (process.argv.length > 0) {
   if (cmd === "serve") {
     const port = (args.length > 0 ? parseInt(args[0]) : 3000)
     Web(port)
-  } else if (cmd === "install") {
+  } else if (cmd === "llama" || cmd === "install") {
     if (args.length === 0) args = ["7B"]
     for(let arg of args) {
       if (!["7B", "13B",  "30B", "65B"].includes(arg)) {

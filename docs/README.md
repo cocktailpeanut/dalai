@@ -7,11 +7,20 @@ Dead simple way to run LLaMA on your computer.
 
 ---
 
-1. Powered by [llama.cpp](https://github.com/ggerganov/llama.cpp) and [llama-dl CDN](https://github.com/shawwn/llama-dl)
-2. Web app included
-3. Super simple JavaScript API
+#### JUST RUN THIS:
+
+<img src="terminal.png" class='round'>
+
+#### TO GET:
 
 ![dalai.gif](dalai.gif)
+
+---
+
+1. Powered by [llama.cpp](https://github.com/ggerganov/llama.cpp) and [llama-dl CDN](https://github.com/shawwn/llama-dl)
+2. Hackable web app included
+3. Ships with JavaScript API
+4. Ships with [Socket.io](https://socket.io/) API
 
 ---
 
@@ -20,7 +29,7 @@ Dead simple way to run LLaMA on your computer.
 Install the 7B model (default) and start a web UI:
 
 ```
-npx dalai install
+npx dalai llama
 npx dalai serve
 ```
 
@@ -39,13 +48,13 @@ Above two commands do the following:
 Basic install (7B model only)
 
 ```
-npx dalai install
+npx dalai llama
 ```
 
 Install all models
 
 ```
-npx dalai install 7B 13B 30B 65B
+npx dalai llama 7B 13B 30B 65B
 ```
 
 The install command :

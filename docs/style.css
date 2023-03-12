@@ -9,6 +9,10 @@
 * {
   word-wrap: break-word;
 }
+img.round {
+  border-radius: 20px;
+  width: 100%;
+}
 body {
   font-family: "Helvetica Neue", helvetica, arial, "sans serif";
   margin: 0;

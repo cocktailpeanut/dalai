@@ -77,6 +77,8 @@ class Dalai {
   }
   async install(...models) {
     // install to ~/llama.cpp
+    await this.exec("pip3 install torch torchvision torchaudio sentencepiece numpy")
+    await this.exec("pip install torch torchvision torchaudio sentencepiece numpy")
     await this.exec("git clone https://github.com/ggerganov/llama.cpp.git dalai", os.homedir())
     await this.exec("make", this.home)
     for(let model of models) {
