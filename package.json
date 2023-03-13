@@ -8,7 +8,8 @@
   "scripts": {
     "download": "./dalai llama",
     "start": "./dalai serve",
-    "just:run": "yarn && yarn download && yarn start"
+    "just:run": "yarn && yarn download && yarn start",
+    "just:fix": "npx prettier --write ."
   },
   "dependencies": {
     "node-pty": "^0.10.1",
@@ -18,6 +19,9 @@
     "terminal-kit": "^3.0.0",
     "ejs": "^3.1.8",
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "prettier": "^2.8.4"
   },
   "bin": "bin/cli.js"
 }
