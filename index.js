@@ -188,7 +188,7 @@ class Dalai {
     }
     for(let i=0; i<num[model]; i++) {
       const suffix = (i === 0 ? "" : `.${i}`)
-      await this.exec(`./quantize ./models/${model}/ggml-model-f16.bin ./models/${model}/ggml-model-q4_0.bin${suffix} 2`, this.home)
+      await this.exec(`./quantize ./models/${model}/ggml-model-f16.bin${suffix} ./models/${model}/ggml-model-q4_0.bin${suffix} 2`, this.home)
     }
   }
   progress(task, percent) {
