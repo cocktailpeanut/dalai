@@ -11,7 +11,7 @@ const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
 class Dalai {
   constructor(url) {
     if (url) this.url = url
-    this.home = path.resolve(os.homedir(), "dalai")
+    this.home = process.env['LLAMA_DIR'] ? path.resolve(process.env['LLAMA_DIR']) : path.resolve(process.cwd(), "llama.cpp")
     try {
       fs.mkdirSync(this.home, { recursive: true })
     } catch (e) { }
@@ -89,7 +89,7 @@ class Dalai {
     // install to ~/llama.cpp
     await this.exec("pip3 install torch torchvision torchaudio sentencepiece numpy")
     await this.exec("pip install torch torchvision torchaudio sentencepiece numpy")
-    await this.exec("git clone https://github.com/ggerganov/llama.cpp.git dalai", os.homedir())
+    await this.exec(`git clone https://github.com/ggerganov/llama.cpp.git ${this.home}`)
     await this.exec("make", this.home)
     for(let model of models) {
       await this.download(model)
