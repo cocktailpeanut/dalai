@@ -21,60 +21,70 @@ class Dalai {
       rows: 30,
     }
   }
-  async download(model) {
-    const num = {
-      "7B": 1,
-      "13B": 2,
-      "30B": 4,
-      "65B": 8,
-    }
-    const files = ["checklist.chk", "params.json"]
-    for(let i=0; i<num[model]; i++) {
-      files.push(`consolidated.0${i}.pth`)
-    }
-    const resolvedPath = path.resolve(this.home, "models", model)
-    await fs.promises.mkdir(resolvedPath, { recursive: true }).catch((e) => { })
-
-    for(let file of files) {
-      const task = `downloading ${file}`
-      const downloader = new Downloader({
-        url: `https://agi.gpt4.org/llama/LLaMA/${model}/${file}`,
-        directory: path.resolve(this.home, "models", model),
-        onProgress: (percentage, chunk, remainingSize) => {
-          this.progress(task, percentage)
-        },
-      });
-      try {
-        await this.startProgress(task)
-        await downloader.download();
-      } catch (error) {
-        console.log(error);
-      }
-      this.progressBar.update(1);
-      term("\n")
-    }
-
-    const files2 = ["tokenizer_checklist.chk", "tokenizer.model"]
-    for(let file of files2) {
-      const task = `downloading ${file}`
-      const downloader = new Downloader({
-        url: `https://agi.gpt4.org/llama/LLaMA/${file}`,
-        directory: path.resolve(this.home, "models"),
-        onProgress: (percentage, chunk, remainingSize) => {
-          this.progress(task, percentage)
-        },
-      });
-      try {
-        await this.startProgress(task)
-        await downloader.download();
-      } catch (error) {
-        console.log(error);
-      }
-      this.progressBar.update(1);
-      term("\n")
-    }
-
+async download(model) {
+  const num = {
+    "7B": 1,
+    "13B": 2,
+    "30B": 4,
+    "65B": 8,
   }
+  const files = ["checklist.chk", "params.json"]
+  for(let i=0; i<num[model]; i++) {
+    files.push(`consolidated.0${i}.pth`)
+  }
+
+  const resolvedPath = path.resolve(this.home, "models", model)
+  await fs.promises.mkdir(resolvedPath, { recursive: true }).catch((e) => { })
+
+  for(let file of files) {
+    const task = `downloading ${file}`
+    const filePath = path.resolve(resolvedPath, file);
+    if (fs.existsSync(filePath)) {
+      console.log(`Skipping download of ${file} as it already exists.`)
+      continue;
+    }
+    const downloader = new Downloader({
+      url: `https://agi.gpt4.org/llama/LLaMA/${model}/${file}`,
+      directory: path.resolve(this.home, "models", model),
+      onProgress: (percentage, chunk, remainingSize) => {
+        this.progress(task, percentage)
+      },
+    });
+    try {
+      await this.startProgress(task)
+      await downloader.download();
+    } catch (error) {
+      console.log(error);
+    }
+    this.progressBar.update(1);
+    term("\n")
+  }
+
+  const files2 = ["tokenizer_checklist.chk", "tokenizer.model"]
+  for(let file of files2) {
+    const task = `downloading ${file}`
+    const filePath = path.resolve(this.home, "models", file);
+    if (fs.existsSync(filePath)) {
+      console.log(`Skipping download of ${file} as it already exists.`)
+      continue;
+    }
+    const downloader = new Downloader({
+      url: `https://agi.gpt4.org/llama/LLaMA/${file}`,
+      directory: path.resolve(this.home, "models"),
+      onProgress: (percentage, chunk, remainingSize) => {
+        this.progress(task, percentage)
+      },
+    });
+    try {
+      await this.startProgress(task)
+      await downloader.download();
+    } catch (error) {
+      console.log(error);
+    }
+    this.progressBar.update(1);
+    term("\n")
+  }
+}
   async install(...models) {
     // install to ~/llama.cpp
     await this.exec("pip3 install torch torchvision torchaudio sentencepiece numpy")
