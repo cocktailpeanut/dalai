@@ -11,7 +11,7 @@ const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
 class Dalai {
   constructor(url) {
     if (url) this.url = url
-    this.home = path.resolve(os.homedir(), "dalai")
+    this.home = process.env['LLAMA_DIR'] ? path.resolve(process.env['LLAMA_DIR']) : path.resolve(process.cwd(), "llama.cpp")
     try {
       fs.mkdirSync(this.home, { recursive: true })
     } catch (e) { }
@@ -22,6 +22,7 @@ class Dalai {
     }
   }
   async download(model) {
+    console.log(`Download model ${model}`)
     const num = {
       "7B": 1,
       "13B": 2,
@@ -36,6 +37,11 @@ class Dalai {
     await fs.promises.mkdir(resolvedPath, { recursive: true }).catch((e) => { })
 
     for(let file of files) {
+      if (fs.existsSync(path.resolve(resolvedPath, file))) {
+        console.log(`Skip file download, it already exists: ${file}`)
+        continue;
+      }
+
       const task = `downloading ${file}`
       const downloader = new Downloader({
         url: `https://agi.gpt4.org/llama/LLaMA/${model}/${file}`,
@@ -56,6 +62,10 @@ class Dalai {
 
     const files2 = ["tokenizer_checklist.chk", "tokenizer.model"]
     for(let file of files2) {
+      if (fs.existsSync(path.resolve(this.home, "models", file))) {
+        console.log(`Skip file download, it already exists: ${file}`)
+        continue;
+      }
       const task = `downloading ${file}`
       const downloader = new Downloader({
         url: `https://agi.gpt4.org/llama/LLaMA/${file}`,
@@ -79,11 +89,16 @@ class Dalai {
     // install to ~/llama.cpp
     await this.exec("pip3 install torch torchvision torchaudio sentencepiece numpy")
     await this.exec("pip install torch torchvision torchaudio sentencepiece numpy")
-    await this.exec("git clone https://github.com/ggerganov/llama.cpp.git dalai", os.homedir())
+    await this.exec(`git clone https://github.com/ggerganov/llama.cpp.git ${this.home}`)
     await this.exec("make", this.home)
     for(let model of models) {
       await this.download(model)
-      await this.exec(`python3 convert-pth-to-ggml.py models/${model}/ 1`, this.home)
+      const outputFile = path.resolve(this.home, 'models', model, 'ggml-model-f16.bin')
+      if (fs.existsSync(outputFile)) {
+        console.log(`Skip conversion, file already exists: ${outputFile}`)
+      } else {
+        await this.exec(`python3 convert-pth-to-ggml.py models/${model}/ 1`, this.home)
+      }
       await this.quantize(model)
     }
   }
@@ -117,12 +132,19 @@ class Dalai {
     }
   }
   async query(req, cb) {
+    console.log(`> query:`, req)
     let o = {
       seed: req.seed || -1,
       threads: req.threads || 8,
       n_predict: req.n_predict || 128,
       model: `./models/${req.model || "7B"}/ggml-model-q4_0.bin`
     }
+
+    if (!fs.existsSync(path.resolve(this.home, o.model))) {
+      cb(`File does not exist: ${o.model}. Try "dalai llama ${req.model}" first.`)
+      return
+    }
+
     if (req.top_k) o.top_k = req.top_k
     if (req.top_p) o.top_p = req.top_p
     if (req.temp) o.temp = req.temp
@@ -141,10 +163,14 @@ class Dalai {
       const endpattern = /.*mem per token.*/g
       let started = false
       let ended = false
+      let writeEnd = !req.skipEnd
       await this.exec(`./main ${chunks.join(" ")}`, this.home, (msg) => {
         if (endpattern.test(msg)) ended = true
         if (started && !ended) {
           cb(msg)
+        } else if (ended && writeEnd) {
+          cb('\n\n<end>')
+          writeEnd = false
         }
         if (startpattern.test(msg)) started = true
       })
@@ -164,6 +190,7 @@ class Dalai {
       if (cwd) {
         config.cwd = path.resolve(cwd)
       }
+      console.log(`exec: ${cmd} in ${config.cwd}`)
       const ptyProcess = pty.spawn(shell, [], config)
       ptyProcess.onData((data) => {
         if (cb) {
@@ -188,7 +215,13 @@ class Dalai {
     }
     for(let i=0; i<num[model]; i++) {
       const suffix = (i === 0 ? "" : `.${i}`)
-      await this.exec(`./quantize ./models/${model}/ggml-model-f16.bin${suffix} ./models/${model}/ggml-model-q4_0.bin${suffix} 2`, this.home)
+      const outputFile1 = `./models/${model}/ggml-model-f16.bin${suffix}`
+      const outputFile2 = `./models/${model}/ggml-model-q4_0.bin${suffix}`
+      if (fs.existsSync(path.resolve(this.home, outputFile1)) && fs.existsSync(path.resolve(this.home, outputFile2))) {
+        console.log(`Skip quantization, files already exists: ${outputFile1} and ${outputFile2}}`)
+        continue
+      }
+      await this.exec(`./quantize ${outputFile1} ${outputFile2} 2`, this.home)
     }
   }
   progress(task, percent) {

@@ -5,6 +5,12 @@
   "main": "index.js",
   "author": "cocktailpeanut",
   "license": "MIT",
+  "scripts": {
+    "dalai:llama": "./dalai llama",
+    "start": "./dalai serve",
+    "just:run": "wrap () { yarn && yarn dalai:llama $1 && yarn start; }; wrap",
+    "just:fix": "npx prettier --write ."
+  },
   "dependencies": {
     "node-pty": "^0.10.1",
     "nodejs-file-downloader": "^4.10.6",
@@ -13,6 +19,9 @@
     "terminal-kit": "^3.0.0",
     "ejs": "^3.1.8",
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "prettier": "^2.8.4"
   },
   "bin": "bin/cli.js"
 }

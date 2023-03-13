@@ -35,7 +35,7 @@ npx dalai install 7B 13B
       }
     }
     new Dalai().install(...args).then(() => {
-      process.exit(1)
+      process.exit(0)
     })
   }
 } else {
