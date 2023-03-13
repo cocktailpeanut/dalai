@@ -132,6 +132,7 @@ class Dalai {
     }
   }
   async query(req, cb) {
+    console.log(`> query:`, req)
     let o = {
       seed: req.seed || -1,
       threads: req.threads || 8,
