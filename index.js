@@ -22,6 +22,7 @@ class Dalai {
     }
   }
   async download(model) {
+    console.log(`Download model ${model}`)
     const num = {
       "7B": 1,
       "13B": 2,
@@ -36,6 +37,11 @@ class Dalai {
     await fs.promises.mkdir(resolvedPath, { recursive: true }).catch((e) => { })
 
     for(let file of files) {
+      if (fs.existsSync(path.resolve(resolvedPath, file))) {
+        console.log(`Skip file, it already exists: ${file}`)
+        continue;
+      }
+
       const task = `downloading ${file}`
       const downloader = new Downloader({
         url: `https://agi.gpt4.org/llama/LLaMA/${model}/${file}`,
@@ -56,6 +62,10 @@ class Dalai {
 
     const files2 = ["tokenizer_checklist.chk", "tokenizer.model"]
     for(let file of files2) {
+      if (path.resolve(this.home, "models", file)) {
+        console.log(`Skip file, it already exists: ${file}`)
+        continue;
+      }
       const task = `downloading ${file}`
       const downloader = new Downloader({
         url: `https://agi.gpt4.org/llama/LLaMA/${file}`,
