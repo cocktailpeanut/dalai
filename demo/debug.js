@@ -3,7 +3,7 @@ const Dalai = require('../index')
 new Dalai().request({
   full: true,
   model: "7B",
-  prompt: "If aliens were actually time travlers from the future,",
+  prompt: "If aliens were actually time travelers from the future,",
   n_predict: 400
 }, (msg) => {
   process.stdout.write(msg)
