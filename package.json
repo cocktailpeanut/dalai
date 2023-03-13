@@ -6,8 +6,8 @@
   "author": "cocktailpeanut",
   "license": "MIT",
   "scripts": {
-    "download": "dalai llama",
-    "start": "dalai serve",
+    "download": "./dalai llama",
+    "start": "./dalai serve",
     "just:run": "yarn && yarn download && yarn start"
   },
   "dependencies": {
