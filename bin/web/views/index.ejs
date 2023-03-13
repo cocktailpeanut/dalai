@@ -30,6 +30,13 @@
 </head>
 <body>
 <form id="form" action="">
+  <select id="model">
+    <!-- options: 7B, 13B, 30B, 65B -->
+    <option value="7B">7B</option>
+    <option value="13B">13B</option>
+    <option value="30B">30B</option>
+    <option value="65B">65B</option>
+  </select>
   <div contenteditable id='input'></div>
   <button>autocomplete</button>
 </form>
@@ -41,6 +48,7 @@
 const socket = io();
 const form = document.getElementById('form');
 const input = document.querySelector('#input');
+const model = document.querySelector('#model');
 const loading = (on) => {
   if (on) {
     document.querySelector(".loading").textContent = on
@@ -56,7 +64,8 @@ form.addEventListener('submit', (e) => {
   if (input.textContent) {
     socket.emit('request', {
       prompt: input.textContent,
-      n_predict: 256
+      n_predict: 256,
+      model: model.value,
     })
     loading(input.textContent)
     input.textContent = "";

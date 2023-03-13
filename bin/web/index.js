@@ -9,14 +9,14 @@ const start = (port) => {
   dalai.http(httpServer)
   app.use(express.static(path.resolve(__dirname, 'public')))
   app.use(express.json());
-  app.use(express.urlencoded());
+  app.use(express.urlencoded({ extended: true }));
   app.set('view engine', 'ejs');
   app.set('views', path.resolve(__dirname, "views"))
   app.get("/", (req, res) => {
     res.render("index")
   })
   httpServer.listen(port, () => {
-    console.log("started server")
+    console.log(`Server running on http://localhost:${port}/`)
   })
 }
 module.exports = start
