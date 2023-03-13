@@ -163,10 +163,14 @@ class Dalai {
       const endpattern = /.*mem per token.*/g
       let started = false
       let ended = false
+      let writeEnd = !req.skipEnd
       await this.exec(`./main ${chunks.join(" ")}`, this.home, (msg) => {
         if (endpattern.test(msg)) ended = true
         if (started && !ended) {
           cb(msg)
+        } else if (ended && writeEnd) {
+          cb('\n\n<end>')
+          writeEnd = false
         }
         if (startpattern.test(msg)) started = true
       })
