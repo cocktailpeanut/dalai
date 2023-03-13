@@ -16,7 +16,7 @@ const start = (port) => {
     res.render("index")
   })
   httpServer.listen(port, () => {
-    console.log("started server")
+    console.log(`Server running on http://localhost:${port}/`)
   })
 }
 module.exports = start
