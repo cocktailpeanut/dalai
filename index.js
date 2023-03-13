@@ -9,9 +9,22 @@ const term = require( 'terminal-kit' ).terminal;
 const Downloader = require("nodejs-file-downloader");
 const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
 class Dalai {
-  constructor(url) {
-    if (url) this.url = url
-    this.home = process.env['LLAMA_DIR'] ? path.resolve(process.env['LLAMA_DIR']) : path.resolve(process.cwd(), "llama.cpp")
+  constructor(home) {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // 1. manually set llama.cpp home
+    // 2. otherwise store llama.cpp at ~/llama.cpp
+    //
+    //  # NOTE
+    //  Could have used process.cwd() (The current execution directory) to download llama.cpp
+    //  but this makes it cumbersome as you try to build multiple apps, because by default Dalai client will
+    //  look for the current execution directory for llama.cpp.
+    //  It's simpler to set the ~/llama.cpp as the default directory and use that path as the single source
+    //  of truth and let multiple apps all connect to that path
+    //  Otherwise if you want to customize the path you can just pass in the "home" attribute to manually set it.
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    this.home = home ? path.resolve(home) : path.resolve(os.homedir(), "llama.cpp")
     try {
       fs.mkdirSync(this.home, { recursive: true })
     } catch (e) { }
@@ -85,18 +98,61 @@ class Dalai {
     }
 
   }
+  async installed() {
+    const modelsPath = path.resolve(this.home, "models") 
+    console.log("modelsPath", modelsPath)
+    const modelFolders = (await fs.promises.readdir(modelsPath, { withFileTypes: true }))
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name)
+
+    console.log({ modelFolders })
+    const modelNames = []
+    for(let modelFolder of modelFolders) {
+      if (fs.existsSync(path.resolve(modelsPath, modelFolder, 'ggml-model-q4_0.bin'))) {
+        modelNames.push(modelFolder) 
+        console.log("exists", modelFolder)
+      }
+    }
+    return modelNames
+  }
   async install(...models) {
+    // install llama.cpp to home
+    let success = await this.exec(`git clone https://github.com/ggerganov/llama.cpp.git ${this.home}`)
+    if (!success) {
+      // soemthing went wrong. try pulling
+      success = await this.exec(`git pull`, this.home)
+      if (!success) {
+        throw new Error("cannot git clone or pull")
+        return
+      }
+    }
+
     // create venv
     const venv_path = path.join(this.home, "venv")
     const platform = os.platform()
-    await this.exec(`python3 -m venv ${venv_path}`)
+    success = await this.exec(`python3 -m venv ${venv_path}`)
+    if (!success) {
+      success = await this.exec(`python -m venv ${venv_path}`)
+      if (!success) {
+        throw new Error("cannot execute python3 or python")
+        return
+      }
+    }
     // different venv paths for Windows
     const pip_path = platform === "win32" ? path.join(venv_path, "Scripts", "pip.exe") : path.join(venv_path, "bin", "pip")
     const python_path = platform == "win32" ? path.join(venv_path, "Script", "python.exe") : path.join(venv_path, 'bin', 'python')
     // install to ~/llama.cpp
-    await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy`)
-    await this.exec(`git clone https://github.com/ggerganov/llama.cpp.git ${this.home}`)
-    await this.exec("make", this.home)
+    success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy`)
+    if (!success) {
+      throw new Error("dependency installation failed")
+      return
+    }
+
+    success = await this.exec("make", this.home)
+    if (!success) {
+      throw new Error("running 'make' failed")
+      return
+    }
     for(let model of models) {
       await this.download(model)
       const outputFile = path.resolve(this.home, 'models', model, 'ggml-model-f16.bin')
@@ -131,7 +187,7 @@ class Dalai {
     });
   }
   async request(req, cb) {
-    if (this.url) {
+    if (req.url) {
       await this.connect(req, cb)
     } else {
       await this.query(req, cb)
@@ -139,11 +195,20 @@ class Dalai {
   }
   async query(req, cb) {
     console.log(`> query:`, req)
+    if (req.method === "installed") {
+      let models = await this.installed()
+      for(let model of models) {
+        cb(model)
+      }
+      cb('\n\n<end>')
+      return
+    }
+
     let o = {
       seed: req.seed || -1,
       threads: req.threads || 8,
       n_predict: req.n_predict || 128,
-      model: `./models/${req.model || "7B"}/ggml-model-q4_0.bin`
+      model: `models/${req.model || "7B"}/ggml-model-q4_0.bin`
     }
 
     if (!fs.existsSync(path.resolve(this.home, o.model))) {
@@ -155,6 +220,8 @@ class Dalai {
     if (req.top_p) o.top_p = req.top_p
     if (req.temp) o.temp = req.temp
     if (req.batch_size) o.batch_size = req.batch_size
+    if (req.repeat_last_n) o.repeat_last_n = req.repeat_last_n
+    if (req.repeat_penalty) o.repeat_penalty = req.repeat_penalty
 
     let chunks = [] 
     for(let key in o) {
@@ -169,7 +236,7 @@ class Dalai {
       const endpattern = /.*mem per token.*/g
       let started = false
       let ended = false
-      let writeEnd = !req.skipEnd
+      let writeEnd = !req.skip_end
       await this.exec(`./main ${chunks.join(" ")}`, this.home, (msg) => {
         if (endpattern.test(msg)) ended = true
         if (started && !ended) {
@@ -183,7 +250,7 @@ class Dalai {
     }
   }
   connect(req, cb) {
-    const socket = io(this.url)
+    const socket = io(req.url)
     socket.emit('request', req)
     socket.on('response', cb)
     socket.on('error', function(e) {
@@ -206,7 +273,13 @@ class Dalai {
         }
       });
       ptyProcess.onExit((res) => {
-        resolve(res)
+        if (res.exitCode === 0) {
+          // successful
+          resolve(true)
+        } else {
+          // something went wrong
+          resolve(false)
+        }
       });
       ptyProcess.write(`${cmd}\r`)
       ptyProcess.write("exit\r")

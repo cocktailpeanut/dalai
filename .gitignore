@@ -1,3 +1,5 @@
 .env
 .DS_Store
+venv
 node_modules
+llama.cpp

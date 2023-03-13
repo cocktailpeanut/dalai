@@ -60,8 +60,8 @@ npx dalai llama 7B 13B 30B 65B
 The install command :
 
 1. Creates a folder named `dalai` under your home directory (`~`)
-2. Installs and builds the [llama.cpp](https://github.com/ggerganov/llama.cpp) project under `~/dalai`
-3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/dalai/models`
+2. Installs and builds the [llama.cpp](https://github.com/ggerganov/llama.cpp) project under `~/llama.cpp`
+3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/llama.cpp/models`
 4. Runs some tasks to convert the LLaMA models so they can be used
 
 ---
@@ -88,25 +88,32 @@ npm install dalai
 ### Syntax
 
 ```javascript
-const dalai = new Dalai(url)
+const dalai = new Dalai(home)
 ```
 
-- `url`: (optional)
-  - if unspecified, it uses the node.js API to directly run dalai
-  - if specified (for example `ws://localhost:3000`) it looks for a socket.io endpoint at the URL and connects to it.
+- `home`: (optional) manually specify the [llama.cpp](https://github.com/ggerganov/llama.cpp) folder
+
+By default, Dalai automatically stores the entire `llama.cpp` repository under `~/llama.cpp`.
+
+However, often you may already have a `llama.cpp` repository somewhere else on your machine and want to just use that folder. In this case you can pass in the `home` attribute.
 
 ### Examples
 
-Initializing a client that connects to a local model (no network):
+#### Basic
+
+Creates a workspace  at `~/llama.cpp` 
 
 ```javascript
 const dalai = new Dalai()
 ```
 
-Initializing a client that connects to a remote dalai server (a dalai server must be running at the URL):
+#### Custom path
+
+Manually set the `llama.cpp` path:
+
 
 ```javascript
-const dalai = new Dalai("ws://localhost:3000")
+const dalai = new Dalai("/Documents/llama.cpp")
 ```
 
 ---
@@ -122,13 +129,19 @@ dalai.request(req, callback)
 - `req`: a request object. made up of the following attributes:
   - `prompt`: **(required)** The prompt string
   - `model`: **(required)** The model name to query ("7B", "13B", etc.)
+  - `url`: only needed if connecting to a remote dalai server
+    - if unspecified, it uses the node.js API to directly run dalai locally
+    - if specified (for example `ws://localhost:3000`) it looks for a socket.io endpoint at the URL and connects to it.
   - `threads`: The number of threads to use (The default is 8 if unspecified)
   - `n_predict`: The number of tokens to return (The default is 128 if unspecified)
   - `seed`: The seed. The default is -1 (none)
   - `top_k`
   - `top_p`
+  - `repeat_last_n`
+  - `repeat_penalty`
   - `temp`: temperature
   - `batch_size`: batch size
+  - `skip_end`: by default, every session ends with `\n\n<end>`, which can be used as a marker to know when the full response has returned. However sometimes you may not want this suffix. Set `skip_end: true` and the response will no longer end with `\n\n<end>`
 - `callback`: the streaming callback function that gets called every time the client gets any token response back from the model
 
 ### Examples
@@ -167,7 +180,8 @@ Then once the server is running, simply make requests to it by passing the `ws:/
 
 ```javascript
 const Dalai = require("dalai")
-new Dalai("ws://localhost:3000").request({
+new Dalai().request({
+  url: "ws://localhost:3000",
   model: "7B",
   prompt: "The following is a conversation between a boy and a girl:",
 }, (token) => {
@@ -219,4 +233,47 @@ dalai.http(http)
 http.listen(3000, () => {
   console.log("server started")
 })
+```
+
+## 5. install()
+
+### Syntax
+
+```javascript
+await dalai.install(model1, model2, ...)
+```
+
+- `models`: the model names to install ("7B"`, "13B", "30B", "65B", etc)
+
+### Examples
+
+Install the "7B" and "13B" models:
+
+
+```javascript
+const Dalai = require("dalai");
+const dalai = new Dalai()
+await dalai.install("7B", "13B")
+```
+
+---
+
+## 6. installed()
+
+returns the array of installed models
+
+### Syntax
+
+```javascript
+const models = await dalai.installed()
+```
+
+### Examples
+
+
+```javascript
+const Dalai = require("dalai");
+const dalai = new Dalai()
+const models = await dalai.installed()
+console.log(models)     // prints ["7B", "13B"]
 ```

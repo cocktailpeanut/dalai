@@ -1,18 +1,36 @@
 <html>
 <head>
 <title>Dalai LLaMA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  body { margin: 0; padding: 10px; color: rgba(0,0,0,0.8); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-  form { border: 2px solid rgba(0,0,0,0.2); display: flex; padding: 5px; box-sizing: border-box; margin: 0; }
-  #input { white-space: pre-wrap; padding: 5px; outline: none; border: none; flex-grow: 1;  font-size: 14px; box-sizing: border-box; }
+  body { margin: 0; padding: 0px; color: rgba(0,0,0,0.8); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .input-field {
+  /*
+    border: 2px solid rgba(0,0,0,0.2);
+    */
+    background: rgba(0,0,0,0.04);
+    display: flex;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  #input {
+    white-space: pre-wrap;
+    padding: 5px;
+    outline: none;
+    border: none;
+    flex-grow: 1;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
   #input:focus { outline: none; }
-  #form > button { padding: 10px; background: gold; border: none; border-radius: 3px; outline: none; color: black; box-sizing: border-box; }
+  button { padding: 10px; background: rgba(0,0,0,0.8); color: white; border: none; border-radius: 3px; outline: none; box-sizing: border-box; }
 
   #messages { list-style-type: none; margin: 0; box-sizing: border-box; font-size: 14px; padding: 0; }
   #messages > li { padding: 10px; font-size: 14px; box-sizing: border-box; }
   #messages > li:nth-child(odd) { background: #efefef; }
   li { white-space: pre-wrap; }
   .loading {
+    margin-bottom: 10px;
     padding: 10px;
     box-sizing: border-box;
     color: rgba(0,0,0,0.7);
@@ -22,33 +40,112 @@
   .hidden {
     display: none !important;
   }
+  .input-container {
+    margin: 10px;
+  }
   .info {
     font-size: 12px;
     padding: 5px;
+  }
+  .form-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 0;
+    background: rgba(0,0,0,0.04);
+    padding: 10px 20px;
+  }
+  .stretch {
+    flex-grow: 1;
+  }
+  input[type=text] , select {
+    margin-right: 5px;
+    border: none;
+    background: rgba(0,0,0,0.08);
+    padding: 5px 10px;
+    box-sizing: border-box;
+  }
+  .logo {
+    font-weight: bold;
+    text-decoration: none;
+    color: black;
+    display: block;
+    font-size: 30px;
+    letter-spacing: -1px;
+    font-weight: bold;
+    font-family: georgia;
+
+  }
+  .config-container {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .kv {
+    display: block;
+    font-size: 14px;
+  }
+  .kv label {
+    display: block;
+    padding: 5px 0px;
+    font-weight: bold;
+    color: rgba(0,0,0,0.7);
+    font-size: 12px;
   }
 </style>
 </head>
 <body>
 <form id="form" action="">
-  <select id="model">
-    <!-- options: 7B, 13B, 30B, 65B -->
-    <option value="7B">7B</option>
-    <option value="13B">13B</option>
-    <option value="30B">30B</option>
-    <option value="65B">65B</option>
-  </select>
-  <div contenteditable id='input'></div>
-  <button>autocomplete</button>
+  <div class='form-header'></div>
+  <div class='input-container'>
+    <div class='input-field'>
+      <div contenteditable id='input'></div>
+      <button>Autocomplete</button>
+    </div>
+    <div class='info'>TIP: shift+enter for multiple lines</div>
+  </div>
 </form>
-<div class='info'>TIP: shift+enter for multiple lines</div>
 <div class='loading hidden'></div>
 <ul id="messages"></ul>
 <script src="/socket.io.min.js"></script>
 <script>
+const config = {
+  seed: -1,
+  threads: 4,
+  n_predict: 256,
+  model: "7B",
+  top_k: 40,
+  top_p: 0.9,
+  temp: 0.8,
+  repeat_last_n: 64,
+  repeat_penalty: 1.3,
+  models: []
+}
 const socket = io();
 const form = document.getElementById('form');
 const input = document.querySelector('#input');
 const model = document.querySelector('#model');
+const renderHeader = (config) => {
+  const fields = ["n_predict", "repeat_last_n", "repeat_penalty", "top_k", "top_p", "temp", "seed"].map((key) => {
+    return `<div class='kv'>
+<label>${key}</label>
+<input name="${key}" type='text' placeholder="${key}" value="${config[key] || ''}">
+</div>`
+
+  }).join("")
+
+
+  const models = config.models.map((model) => {
+    return `<option value="7B" ${config.model === model ? "selected" : ""}>${model}</option>`
+  }).join("")
+  return `<a class='logo' href="/">Dalai</a><div class='stretch'></div>
+<div class='config-container'>
+${fields}
+<div class='kv'>
+<label>model</label>
+<select id="model" name="model">${models}</select>
+</div>
+</div>`
+}
 const loading = (on) => {
   if (on) {
     document.querySelector(".loading").textContent = on
@@ -58,21 +155,24 @@ const loading = (on) => {
     document.querySelector(".loading").classList.add("hidden")
   }
 }
+document.querySelector("form").addEventListener("input", (e) => {
+  if (e.target.tagName === "SELECT") {
+    config[e.target.name] = config.models[e.target.selectedIndex]
+  } else {
+    config[e.target.name] = e.target.value
+  }
+})
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   e.stopPropagation()
   if (input.textContent) {
-    socket.emit('request', {
-      prompt: input.textContent,
-      n_predict: 256,
-      model: model.value,
-    })
-    loading(input.textContent)
+    config.prompt = input.textContent
+    socket.emit('request', config)
+    loading(config.prompt)
     input.textContent = "";
   }
 });
 input.addEventListener("keydown", (e) => {
-  console.log("e", e)
   if (e.keyCode === 13) {
     e.preventDefault();
     if (e.shiftKey) {
@@ -98,16 +198,28 @@ const say = (msg, id) => {
   item.textContent = msg;
   messages.prepend(item);
 }
+socket.emit('request', {
+  method: "installed"
+})
 socket.on('result', async ({ request, response }) => {
   loading(false)
-  const id = await sha256(request.prompt) 
-  console.log({ id, prompt: request.prompt })
-
-  let existing = document.querySelector(`[data-id='${id}']`)
-  if (existing) {
-    existing.textContent = existing.textContent + response
+  if (request.method === "installed") {
+    if (response == "\n\n<end>") {
+      document.querySelector(".form-header").innerHTML = renderHeader(config)
+    } else {
+      config.models.push(response)
+    }
   } else {
-    say(response, id)
+    if (response == "\n\n<end>") {
+    } else {
+      const id = await sha256(request.prompt) 
+      let existing = document.querySelector(`[data-id='${id}']`)
+      if (existing) {
+        existing.textContent = existing.textContent + response
+      } else {
+        say(response, id)
+      }
+    }
   }
 //  window.scrollTo(0, document.body.scrollHeight);
 });
