@@ -38,7 +38,7 @@ class Dalai {
 
     for(let file of files) {
       if (fs.existsSync(path.resolve(resolvedPath, file))) {
-        console.log(`Skip file, it already exists: ${file}`)
+        console.log(`Skip file download, it already exists: ${file}`)
         continue;
       }
 
@@ -62,8 +62,8 @@ class Dalai {
 
     const files2 = ["tokenizer_checklist.chk", "tokenizer.model"]
     for(let file of files2) {
-      if (path.resolve(this.home, "models", file)) {
-        console.log(`Skip file, it already exists: ${file}`)
+      if (fs.existsSync(path.resolve(this.home, "models", file))) {
+        console.log(`Skip file download, it already exists: ${file}`)
         continue;
       }
       const task = `downloading ${file}`
@@ -93,7 +93,12 @@ class Dalai {
     await this.exec("make", this.home)
     for(let model of models) {
       await this.download(model)
-      await this.exec(`python3 convert-pth-to-ggml.py models/${model}/ 1`, this.home)
+      const outputFile = path.resolve(this.home, 'models', model, 'ggml-model-f16.bin')
+      if (fs.existsSync(outputFile)) {
+        console.log(`Skip conversion, file already exists: ${outputFile}`)
+      } else {
+        await this.exec(`python3 convert-pth-to-ggml.py models/${model}/ 1`, this.home)
+      }
       await this.quantize(model)
     }
   }
@@ -198,7 +203,13 @@ class Dalai {
     }
     for(let i=0; i<num[model]; i++) {
       const suffix = (i === 0 ? "" : `.${i}`)
-      await this.exec(`./quantize ./models/${model}/ggml-model-f16.bin${suffix} ./models/${model}/ggml-model-q4_0.bin${suffix} 2`, this.home)
+      const outputFile1 = `./models/${model}/ggml-model-f16.bin${suffix}`
+      const outputFile2 = `./models/${model}/ggml-model-q4_0.bin${suffix}`
+      if (fs.existsSync(path.resolve(this.home, outputFile1)) && fs.existsSync(path.resolve(this.home, outputFile2))) {
+        console.log(`Skip quantization, files already exists: ${outputFile1} and ${outputFile2}}`)
+        continue
+      }
+      await this.exec(`./quantize ${outputFile1} ${outputFile2} 2`, this.home)
     }
   }
   progress(task, percent) {
