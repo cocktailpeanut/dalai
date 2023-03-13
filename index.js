@@ -190,6 +190,7 @@ class Dalai {
       if (cwd) {
         config.cwd = path.resolve(cwd)
       }
+      console.log(`exec: ${cmd} in ${config.cwd}`)
       const ptyProcess = pty.spawn(shell, [], config)
       ptyProcess.onData((data) => {
         if (cb) {
