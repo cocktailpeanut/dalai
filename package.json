@@ -5,6 +5,11 @@
   "main": "index.js",
   "author": "cocktailpeanut",
   "license": "MIT",
+  "scripts": {
+    "download": "dalai llama",
+    "start": "dalai serve",
+    "just:run": "yarn && yarn download && yarn start"
+  },
   "dependencies": {
     "node-pty": "^0.10.1",
     "nodejs-file-downloader": "^4.10.6",
