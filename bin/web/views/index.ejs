@@ -111,7 +111,7 @@
 const config = {
   seed: -1,
   threads: 4,
-  n_predict: 256,
+  n_predict: 1000,
   model: "7B",
   top_k: 40,
   top_p: 0.9,
@@ -221,7 +221,6 @@ socket.on('result', async ({ request, response }) => {
       }
     }
   }
-//  window.scrollTo(0, document.body.scrollHeight);
 });
 </script>
 </body>
