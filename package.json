@@ -6,9 +6,9 @@
   "author": "cocktailpeanut",
   "license": "MIT",
   "scripts": {
-    "download": "./dalai llama",
+    "dalai:llama": "./dalai llama",
     "start": "./dalai serve",
-    "just:run": "wrap () { yarn && yarn download $1 && yarn start; }; wrap",
+    "just:run": "wrap () { yarn && yarn dalai:llama $1 && yarn start; }; wrap",
     "just:fix": "npx prettier --write ."
   },
   "dependencies": {
