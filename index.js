@@ -76,14 +76,20 @@ class Dalai {
 
   }
   async install(...models) {
+    // create venv
+    const venv_path = path.join(this.home, "venv")
+    const platform = os.platform()
+    await this.exec(`python3 -m venv ${venv_path}`)
+    // different venv paths for Windows
+    const pip_path = platform === "win32" ? path.join(venv_path, "Scripts", "pip.exe") : path.join(venv_path, "bin", "pip")
+    const python_path = platform == "win32" ? path.join(venv_path, "Script", "python.exe") : path.join(venv_path, 'bin', 'python')
     // install to ~/llama.cpp
-    await this.exec("pip3 install torch torchvision torchaudio sentencepiece numpy")
-    await this.exec("pip install torch torchvision torchaudio sentencepiece numpy")
+    await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy`)
     await this.exec("git clone https://github.com/ggerganov/llama.cpp.git dalai", os.homedir())
     await this.exec("make", this.home)
     for(let model of models) {
       await this.download(model)
-      await this.exec(`python3 convert-pth-to-ggml.py models/${model}/ 1`, this.home)
+      await this.exec(`${python_path} convert-pth-to-ggml.py models/${model}/ 1`, this.home)
       await this.quantize(model)
     }
   }
