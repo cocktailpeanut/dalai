@@ -138,6 +138,12 @@ class Dalai {
       n_predict: req.n_predict || 128,
       model: `./models/${req.model || "7B"}/ggml-model-q4_0.bin`
     }
+
+    if (!fs.existsSync(path.resolve(this.home, o.model))) {
+      cb(`File does not exist: ${o.model}. Try "dalai llama ${req.model}" first.`)
+      return
+    }
+
     if (req.top_k) o.top_k = req.top_k
     if (req.top_p) o.top_p = req.top_p
     if (req.temp) o.temp = req.temp
