@@ -8,7 +8,7 @@
   "scripts": {
     "download": "./dalai llama",
     "start": "./dalai serve",
-    "just:run": "yarn && yarn download && yarn start",
+    "just:run": "wrap () { yarn && yarn download $1 && yarn start; }; wrap",
     "just:fix": "npx prettier --write ."
   },
   "dependencies": {
