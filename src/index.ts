@@ -44,7 +44,7 @@ export default class Dalai {
     this.modelsPath =
       process.env.MODELS_PATH ?? path.resolve(this.llamaPath, "models");
     this.tempPromptsPath =
-      process.env.TEMP_PROMPTS_PATH ?? path.resolve(os.tmpdir(), "prompt-tmp");
+      process.env.TEMP_PROMPTS_PATH ?? path.resolve(os.tmpdir(), "dalai");
 
     console.log("settings", {
       llamaPath: this.llamaPath,
