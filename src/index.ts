@@ -439,8 +439,11 @@ export default class Dalai {
         config.cwd = path.resolve(cwd);
       }
 
-      const commandToWrite = `${cmd} ${args.join(" ")}\r`;
-      console.log(`🤖 writing command: ${commandToWrite}`);
+      console.log(
+        `🤖 executing command - cmd: ${cmd}, args: ${args.join(" ")}, cwd: ${
+          cwd ?? process.cwd()
+        }`
+      );
 
       const ptyProcess = pty.spawn(cmd, args, config);
       ptyProcess.onData((data) => {
