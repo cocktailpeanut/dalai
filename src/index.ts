@@ -160,12 +160,14 @@ export default class Dalai {
   }
   async install(...models: ModelType[]) {
     // install llama.cpp to home
-    let success = await this.exec(
-      `git clone https://github.com/ggerganov/llama.cpp.git ${this.llamaPath}`
-    );
+    let success = await this.exec("git", [
+      "clone",
+      "https://github.com/ggerganov/llama.cpp.git",
+      this.llamaPath,
+    ]);
     if (!success) {
       // soemthing went wrong. try pulling
-      success = await this.exec(`git pull`, this.llamaPath);
+      success = await this.exec("git", ["pull"], this.llamaPath);
       if (!success) {
         throw new Error("cannot git clone or pull");
       }
@@ -174,32 +176,42 @@ export default class Dalai {
     // on linux, first install all the prerequisites
     if (platform === "linux") {
       // ubuntu debian
-      success = await this.exec(
-        "apt-get install build-essential python3-venv -y"
-      );
+      success = await this.exec("apt-get", [
+        "install",
+        "build-essential",
+        "python3-venv",
+        "-y",
+      ]);
       if (!success) {
         // fefdora
-        await this.exec(
-          "dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y"
-        );
+        await this.exec("dnf", [
+          "install",
+          "make",
+          "automake",
+          "gcc",
+          "gcc-c++",
+          "kernel-devel",
+          "python3-virtualenv",
+          "-y",
+        ]);
       }
     }
 
     let pip_path = platform === "win32" ? "pip.exe" : "pip";
     let python_path = platform === "win32" ? "python3.exe" : "python3";
 
-    if (!(await this.exec(python_path + " --version"))) {
+    if (!(await this.exec(python_path, ["--version"]))) {
       python_path = platform === "win32" ? "python.exe" : "python";
     }
 
-    if (!(await this.exec(python_path + " --version"))) {
+    if (!(await this.exec(python_path, ["--version"]))) {
       throw new Error("cannot execute python3 or python");
     }
 
     // create venv
     if (this.usePyEnv) {
       const venv_path = path.join(this.llamaPath, "venv");
-      await this.exec(`${python_path} -m venv ${venv_path}`);
+      await this.exec(python_path, ["-m", "venv", venv_path]);
       // different venv paths for Windows
       pip_path =
         platform === "win32"
@@ -212,35 +224,44 @@ export default class Dalai {
     }
 
     // upgrade setuptools
-    success = await this.exec(
-      `${pip_path} install --upgrade pip setuptools wheel`
-    );
+    success = await this.exec(pip_path, [
+      "install",
+      "--upgrade",
+      "pip",
+      "setuptools",
+      "wheel",
+    ]);
     if (!success) {
       throw new Error("pip setuptools wheel upgrade failed");
     }
 
     // install to ~/llama.cpp
-    success = await this.exec(
-      `${pip_path} install torch torchvision torchaudio sentencepiece numpy`
-    );
+    success = await this.exec(pip_path, [
+      "install",
+      "torch",
+      "torchvision",
+      "torchaudio",
+      "sentencepiece",
+      "numpy",
+    ]);
     if (!success) {
       throw new Error("dependency installation failed");
-      return;
     }
 
     if (platform === "win32") {
-      success = await this.exec(`${pip_path} install cmake`);
+      success = await this.exec(pip_path, ["install", "cmake"]);
       if (!success) {
         throw new Error("cmake installation failed");
       }
-      await this.exec("mkdir build", this.llamaPath);
-      await this.exec("cmake -S . -B build", this.llamaPath);
+      await this.exec("mkdir", ["build", this.llamaPath]);
+      await this.exec("cmake", ["-S", ".", "-B", "build", this.llamaPath]);
       await this.exec(
-        "cmake --build . --config Release",
+        "cmake",
+        ["--build", ".", "--config", "Release"],
         path.resolve(this.llamaPath, "build")
       );
     } else {
-      success = await this.exec("make", this.llamaPath);
+      success = await this.exec("make", [this.llamaPath]);
       if (!success) {
         throw new Error("running 'make' failed");
       }
@@ -256,7 +277,8 @@ export default class Dalai {
         console.log(`Skip conversion, file already exists: ${outputFile}`);
       } else {
         await this.exec(
-          `${python_path} convert-pth-to-ggml.py ${this.modelsPath}/${model}/ 1`,
+          python_path,
+          ["convert-pth-to-ggml.py", `${this.modelsPath}/${model}/`, "1"],
           this.llamaPath
         );
       }
@@ -345,19 +367,21 @@ export default class Dalai {
 
     let chunks = [];
     for (let key in o) {
-      chunks.push(`--${key} ${(o as any)[key]}`);
+      chunks.push(`--${key}`);
+      chunks.push((o as any)[key]);
     }
-    chunks.push(`-p "${req.prompt}"`);
+    chunks.push(`-p`);
+    chunks.push(req.prompt);
 
     if (req.full) {
-      await this.exec(`./main ${chunks.join(" ")}`, this.llamaPath, cb);
+      await this.exec(`./main`, chunks, this.llamaPath, cb);
     } else {
       const startpattern = /.*sampling parameters:.*/g;
       const endpattern = /.*mem per token.*/g;
       let started = false;
       let ended = false;
       let writeEnd = !req.skip_end;
-      await this.exec(`./main ${chunks.join(" ")}`, this.llamaPath, (msg) => {
+      await this.exec(`./main`, chunks, this.llamaPath, (msg) => {
         if (endpattern.test(msg)) ended = true;
         if (started && !ended) {
           cb(msg);
@@ -378,13 +402,25 @@ export default class Dalai {
       throw e;
     });
   }
-  exec(cmd: string, cwd?: string, cb?: (payload: string) => void) {
+  exec(
+    cmd: string,
+    args: string[],
+    cwd?: string,
+    cb?: (payload: string) => void
+  ) {
+    const escapedArgs = args
+      .map((x) => `"${this.escapeShellArg(x)}"`)
+      .join(" ");
+
     return new Promise((resolve, reject) => {
-      const config = Object.assign({}, this.config);
+      const config: pty.IPtyForkOptions | pty.IWindowsPtyForkOptions =
+        Object.assign({}, this.config);
       if (cwd) {
         config.cwd = path.resolve(cwd);
       }
-      console.log(`exec: ${cmd} in ${config.cwd}`);
+      console.log(
+        `exec: ${cmd}, with args: ${escapedArgs} in working dir: ${config.cwd}`
+      );
       const ptyProcess = pty.spawn(shell, [], config);
       ptyProcess.onData((data) => {
         if (cb) {
@@ -396,17 +432,19 @@ export default class Dalai {
       ptyProcess.onExit((res) => {
         if (res.exitCode === 0) {
           // successful
-          console.log(`Completed command 😀`);
+          console.log(`🤖 Completed command `);
           resolve(true);
         } else {
           // something went wrong
           console.log(
-            `⚠️ An error ocurred processing command, exit code: ${res.exitCode}`
+            `⚠️  An error ocurred processing command, exit code: ${res.exitCode}`
           );
           resolve(false);
         }
       });
-      ptyProcess.write(`${cmd}\r`);
+      const commandToWrite = `${cmd} ${escapedArgs}\r`;
+      console.log(`🤖 writing command: ${commandToWrite}`);
+      ptyProcess.write(commandToWrite);
       ptyProcess.write("exit\r");
     });
   }
@@ -432,9 +470,18 @@ export default class Dalai {
         continue;
       }
       await this.exec(
-        `./quantize ${outputFile1} ${outputFile2} 2`,
+        `./quantize`,
+        [outputFile1, outputFile2, "2"],
         this.llamaPath
       );
+    }
+  }
+
+  escapeShellArg(arg: unknown) {
+    if (typeof arg === "string") {
+      return arg.replace(/([\"\'\`\$])/g, "\\$1");
+    } else {
+      return arg + "";
     }
   }
 }
