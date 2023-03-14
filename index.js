@@ -7,6 +7,7 @@ const { Server } = require("socket.io");
 const { io } = require("socket.io-client");
 const term = require( 'terminal-kit' ).terminal;
 const Downloader = require("nodejs-file-downloader");
+const semver = require('semver');
 const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 class Dalai {
@@ -117,6 +118,12 @@ class Dalai {
     return modelNames
   }
   async install(...models) {
+    // Check if current version is greater than or equal to 18
+    const node_version = process.version;
+    if (!semver.gte(node_version, '18.0.0')) {
+      throw new Error("outdated Node version, please install Node 18 or newer")
+    }
+
     // install llama.cpp to home
     let success = await this.exec(`git clone https://github.com/ggerganov/llama.cpp.git ${this.home}`)
     if (!success) {
