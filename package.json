@@ -2,26 +2,34 @@
   "name": "dalai",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "bin/index.js",
+  "bin": "bin/cli.js",
   "author": "cocktailpeanut",
   "license": "MIT",
   "scripts": {
+    "prebuild": "rimraf bin",
+    "build": "tsc",
+    "prepublishOnly": "tsc",
     "dalai:llama": "./dalai llama",
     "start": "./dalai serve",
-    "just:run": "wrap () { yarn && yarn dalai:llama $1 && yarn start; }; wrap",
-    "just:fix": "npx prettier --write ."
+    "just:run": "wrap () { yarn && yarn build && yarn dalai:llama $1 && yarn start; }; wrap",
+    "just:fix": "npx prettier --write .",
+    "run:docker": "mkdir -p models && docker-compose up"
   },
   "dependencies": {
+    "ejs": "^3.1.8",
+    "express": "^4.18.2",
     "node-pty": "^0.10.1",
     "nodejs-file-downloader": "^4.10.6",
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1",
-    "terminal-kit": "^3.0.0",
-    "ejs": "^3.1.8",
-    "express": "^4.18.2"
+    "terminal-kit": "^3.0.0"
   },
   "devDependencies": {
-    "prettier": "^2.8.4"
-  },
-  "bin": "bin/cli.js"
+    "@types/express": "^4.17.17",
+    "@types/terminal-kit": "^2.5.1",
+    "prettier": "^2.8.4",
+    "rimraf": "^4.4.0",
+    "typescript": "^4.9.5"
+  }
 }
