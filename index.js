@@ -166,14 +166,14 @@ class Dalai {
     }
 
     if (platform === "win32") {
-      success = await this.exec(`${pip_path} install cmake`)
+      success = await this.exec(`winget install kitware.cmake`)
       if (!success) {
         throw new Error("cmake installation failed")
         return
       }
       await this.exec("mkdir build", this.home)
       await this.exec("cmake -S . -B build", this.home)
-      await this.exec("cmake --build . --config Release", path.resolve(this.home, build))
+      await this.exec("cmake --build . --config Release", path.resolve(this.home, "build"))
     } else {
       success = await this.exec("make", this.home)
       if (!success) {
