@@ -7,7 +7,8 @@ const { Server } = require("socket.io");
 const { io } = require("socket.io-client");
 const term = require( 'terminal-kit' ).terminal;
 const Downloader = require("nodejs-file-downloader");
-const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
+const platform = os.platform()
+const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 class Dalai {
   constructor(home) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,7 +100,7 @@ class Dalai {
 
   }
   async installed() {
-    const modelsPath = path.resolve(this.home, "models") 
+    const modelsPath = path.resolve(this.home, "models")
     console.log("modelsPath", modelsPath)
     const modelFolders = (await fs.promises.readdir(modelsPath, { withFileTypes: true }))
       .filter(dirent => dirent.isDirectory())
@@ -109,7 +110,7 @@ class Dalai {
     const modelNames = []
     for(let modelFolder of modelFolders) {
       if (fs.existsSync(path.resolve(modelsPath, modelFolder, 'ggml-model-q4_0.bin'))) {
-        modelNames.push(modelFolder) 
+        modelNames.push(modelFolder)
         console.log("exists", modelFolder)
       }
     }
@@ -127,9 +128,17 @@ class Dalai {
       }
     }
 
+    // on linux, first install all the prerequisites
+    if (platform === "linux") {
+      // ubuntu debian
+      success = await this.exec("apt-get install build-essential python3-venv -y")
+      if (!success) {
+        // fefdora
+        await this.exec("dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y")
+      }
+    }
     // create venv
     const venv_path = path.join(this.home, "venv")
-    const platform = os.platform()
     success = await this.exec(`python3 -m venv ${venv_path}`)
     if (!success) {
       success = await this.exec(`python -m venv ${venv_path}`)
@@ -141,6 +150,14 @@ class Dalai {
     // different venv paths for Windows
     const pip_path = platform === "win32" ? path.join(venv_path, "Scripts", "pip.exe") : path.join(venv_path, "bin", "pip")
     const python_path = platform == "win32" ? path.join(venv_path, "Script", "python.exe") : path.join(venv_path, 'bin', 'python')
+
+    // upgrade setuptools
+    success = await this.exec(`${pip_path} install --upgrade pip setuptools wheel`)
+    if (!success) {
+      throw new Error("pip setuptools wheel upgrade failed")
+      return
+    }
+
     // install to ~/llama.cpp
     success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy`)
     if (!success) {
@@ -148,10 +165,21 @@ class Dalai {
       return
     }
 
-    success = await this.exec("make", this.home)
-    if (!success) {
-      throw new Error("running 'make' failed")
-      return
+    if (platform === "win32") {
+      success = await this.exec(`${pip_path} install cmake`)
+      if (!success) {
+        throw new Error("cmake installation failed")
+        return
+      }
+      await this.exec("mkdir build", this.home)
+      await this.exec("cmake -S . -B build", this.home)
+      await this.exec("cmake --build . --config Release", path.resolve(this.home, build))
+    } else {
+      success = await this.exec("make", this.home)
+      if (!success) {
+        throw new Error("running 'make' failed")
+        return
+      }
     }
     for(let model of models) {
       await this.download(model)
@@ -223,9 +251,9 @@ class Dalai {
     if (req.repeat_last_n) o.repeat_last_n = req.repeat_last_n
     if (req.repeat_penalty) o.repeat_penalty = req.repeat_penalty
 
-    let chunks = [] 
+    let chunks = []
     for(let key in o) {
-      chunks.push(`--${key} ${o[key]}`) 
+      chunks.push(`--${key} ${o[key]}`)
     }
     chunks.push(`-p "${req.prompt}"`)
 
