@@ -43,6 +43,8 @@ RUN yarn install
 
 COPY . .
 
+RUN yarn build
+
 EXPOSE 3000
 
 CMD yarn just:run $LLAMA_MODEL

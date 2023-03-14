@@ -6,3 +6,4 @@ docs
 venv
 node_modules
 models
+bin
