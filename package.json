@@ -9,7 +9,8 @@
     "dalai:llama": "./dalai llama",
     "start": "./dalai serve",
     "just:run": "wrap () { yarn && yarn dalai:llama $1 && yarn start; }; wrap",
-    "just:fix": "npx prettier --write ."
+    "just:fix": "npx prettier --write .",
+    "run:docker": "mkdir -p models && docker-compose up"
   },
   "dependencies": {
     "node-pty": "^0.10.1",
