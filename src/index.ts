@@ -17,6 +17,7 @@ export default class Dalai {
   private llamaPath: string;
   private modelsPath: string;
   private usePyEnv: boolean;
+  private tempPromptsPath: string;
   private config: pty.IPtyForkOptions | pty.IWindowsPtyForkOptions;
 
   constructor(llamaPath?: string) {
@@ -42,6 +43,8 @@ export default class Dalai {
       process.env.USE_PYTHON_ENV === "1";
     this.modelsPath =
       process.env.MODELS_PATH ?? path.resolve(this.llamaPath, "models");
+    this.tempPromptsPath =
+      process.env.TEMP_PROMPTS_PATH ?? path.resolve(os.homedir(), "prompt-tmp");
 
     console.log("settings", {
       llamaPath: this.llamaPath,
@@ -55,6 +58,10 @@ export default class Dalai {
 
     try {
       fs.mkdirSync(this.modelsPath, { recursive: true });
+    } catch (e) {}
+
+    try {
+      fs.mkdirSync(this.tempPromptsPath, { recursive: true });
     } catch (e) {}
 
     this.config = {
@@ -358,41 +365,57 @@ export default class Dalai {
       return;
     }
 
-    if (req.top_k) o.top_k = req.top_k;
-    if (req.top_p) o.top_p = req.top_p;
-    if (req.temp) o.temp = req.temp;
-    if (req.batch_size) o.batch_size = req.batch_size;
-    if (req.repeat_last_n) o.repeat_last_n = req.repeat_last_n;
-    if (req.repeat_penalty) o.repeat_penalty = req.repeat_penalty;
-
     let chunks = [];
     for (let key in o) {
       chunks.push(`--${key}`);
       chunks.push((o as any)[key]);
     }
-    chunks.push(`-p`);
-    chunks.push(req.prompt);
+    const tmpPromptPath = this.generateTempPrompt(req.prompt);
+    chunks.push(`-f`);
+    chunks.push(tmpPromptPath);
 
-    if (req.full) {
-      await this.exec(`./main`, chunks, this.llamaPath, cb);
-    } else {
-      const startpattern = /.*sampling parameters:.*/g;
-      const endpattern = /.*mem per token.*/g;
-      let started = false;
-      let ended = false;
-      let writeEnd = !req.skip_end;
-      await this.exec(`./main`, chunks, this.llamaPath, (msg) => {
-        if (endpattern.test(msg)) ended = true;
-        if (started && !ended) {
-          cb(msg);
-        } else if (ended && writeEnd) {
-          cb("\n\n<end>");
-          writeEnd = false;
-        }
-        if (startpattern.test(msg)) started = true;
+    try {
+      if (req.full) {
+        await this.exec(`./main`, chunks, this.llamaPath, cb);
+      } else {
+        const startpattern = /.*sampling parameters:.*/g;
+        const endpattern = /.*mem per token.*/g;
+        let started = false;
+        let ended = false;
+        let writeEnd = !req.skip_end;
+        await this.exec(`./main`, chunks, this.llamaPath, (msg) => {
+          if (endpattern.test(msg)) ended = true;
+          if (started && !ended) {
+            cb(msg);
+          } else if (ended && writeEnd) {
+            cb("\n\n<end>");
+            writeEnd = false;
+          }
+          if (startpattern.test(msg)) started = true;
+        });
+      }
+    } finally {
+      fs.unlink(tmpPromptPath, (err) => {
+        if (err)
+          console.error(
+            `An error ocurred deleting temporal file: ${tmpPromptPath}\nError: ${err.toString()}`
+          );
       });
     }
   }
+
+  generateTempPrompt(prompt: string) {
+    var timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+    var random = ("" + Math.random()).substring(2, 8);
+    var random_number = timestamp + random;
+    const tmpPath = path.join(
+      this.tempPromptsPath,
+      `prompt_${random_number}.tmp`
+    );
+    fs.writeFileSync(tmpPath, prompt, { encoding: "utf-8" });
+    return tmpPath;
+  }
+
   connect(req: http.IncomingMessage, cb: (payload: string) => void) {
     if (!req.url) return;
     const socket = io(req.url);
@@ -408,20 +431,18 @@ export default class Dalai {
     cwd?: string,
     cb?: (payload: string) => void
   ) {
-    const escapedArgs = args
-      .map((x) => `"${this.escapeShellArg(x)}"`)
-      .join(" ");
-
     return new Promise((resolve, reject) => {
       const config: pty.IPtyForkOptions | pty.IWindowsPtyForkOptions =
         Object.assign({}, this.config);
+
       if (cwd) {
         config.cwd = path.resolve(cwd);
       }
-      console.log(
-        `exec: ${cmd}, with args: ${escapedArgs} in working dir: ${config.cwd}`
-      );
-      const ptyProcess = pty.spawn(shell, [], config);
+
+      const commandToWrite = `${cmd} ${args.join(" ")}\r`;
+      console.log(`🤖 writing command: ${commandToWrite}`);
+
+      const ptyProcess = pty.spawn(cmd, args, config);
       ptyProcess.onData((data) => {
         if (cb) {
           cb(data);
@@ -442,10 +463,6 @@ export default class Dalai {
           resolve(false);
         }
       });
-      const commandToWrite = `${cmd} ${escapedArgs}\r`;
-      console.log(`🤖 writing command: ${commandToWrite}`);
-      ptyProcess.write(commandToWrite);
-      ptyProcess.write("exit\r");
     });
   }
 
@@ -474,14 +491,6 @@ export default class Dalai {
         [outputFile1, outputFile2, "2"],
         this.llamaPath
       );
-    }
-  }
-
-  escapeShellArg(arg: unknown) {
-    if (typeof arg === "string") {
-      return arg.replace(/([\"\'\`\$])/g, "\\$1");
-    } else {
-      return arg + "";
     }
   }
 }
