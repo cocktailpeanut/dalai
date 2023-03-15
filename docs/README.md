@@ -114,6 +114,7 @@ The install command :
 
 After everything has been installed, open http://localhost:3000 in your browser. Have fun!
 
+---
 
 ## Windows
 
@@ -137,7 +138,8 @@ When installing Visual Studio, make sure to check the 3 options as highlighted b
 
 ![vs.png](vs.png)
 
-### Step 2. Install Dalai
+
+### Step 2.1. Install Dalai
 
 Basic install (7B model only)
 
@@ -158,9 +160,33 @@ The install command :
 3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/llama.cpp/models`
 4. Runs some tasks to convert the LLaMA models so they can be used
 
+If this worked without any errors, go to step 3.
+
+Ohterwise try the troubleshoot below:
+
+### Step 2.2. Troubleshoot (optional)
+
+In case above steps fail to install, try installing node.js and python separately.
+
+Install Python:
+
+<a href="https://www.python.org/ftp/python/3.10.10/python-3.10.10-embed-amd64.zip" class='btn'>Download Python</a>
+
+Install Node.js:
+
+<a href="https://nodejs.org/en/download/" class='btn'>Download Node.js</a>
+
+After both have been installed, open powershell and type `python` to see if the application exists. And also type `node` to see if the application exists as well.
+
+Once you've checked that they both exist, try the `npx dalai llama` command again.
+
+
 ### Step 3. Run Web UI
 
 After everything has been installed, open http://localhost:3000 in your browser. Have fun!
+
+---
+
 
 ## Linux
 
@@ -405,7 +431,31 @@ const models = await dalai.installed()
 console.log(models)     // prints ["7B", "13B"]
 ```
 
+## 6. zip()
+
+Create a portable compressed archive
+
+1. quantize the original model files
+2. prune out the original files and only keep the quantized ones
+3. initialize a git repository
+
+```javascript
+await dalai.zip({
+  
+})
+```
+
 ---
+
+## 7. load()
+
+Load from a zipped repository
+
+```javascript
+await dalai.load({
+  
+})
+```
 
 # FAQ
 
