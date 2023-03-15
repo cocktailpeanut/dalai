@@ -11,6 +11,7 @@ const { io } = require("socket.io-client");
 const term = require( 'terminal-kit' ).terminal;
 const Downloader = require("nodejs-file-downloader");
 const semver = require('semver');
+const _7z = require('7zip-min');
 const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 class Dalai {
@@ -150,23 +151,40 @@ class Dalai {
     console.log("cleaning up temp files")
     await fs.promises.rm(path.resolve(this.home, filename))
   }
+  async mingw() {
+    const mingw = "https://github.com/niXman/mingw-builds-binaries/releases/download/12.2.0-rt_v10-rev2/x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"
+    const downloader = new Downloader({
+      url: mingw,
+      directory: this.home,
+      onProgress: (percentage, chunk, remainingSize) => {
+        this.progress("download mingw", percentage)
+      },
+    });
+    try {
+      await this.startProgress("download mingw")
+      await downloader.download();
+    } catch (error) {
+      console.log(error);
+    }
+    this.progressBar.update(1);
+    await new Promise((resolve, reject) => {
+      _7z.unpack(path.resolve(this.home, "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"), this.home, (err) => {
+        if (err) { 
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
+    console.log("cleaning up temp files")
+    await fs.promises.rm(path.resolve(this.home, "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"))
+  }
   async install(...models) {
     // Check if current version is greater than or equal to 18
     const node_version = process.version;
     if (!semver.gte(node_version, '18.0.0')) {
       throw new Error("outdated Node version, please install Node 18 or newer")
     }
-    // install llama.cpp to home
-    //let success = await this.exec(`git clone https://github.com/ggerganov/llama.cpp.git ${this.home}`)
-    //if (!success) {
-    //  // soemthing went wrong. try pulling
-    //  success = await this.exec(`git pull`, this.home)
-    //  if (!success) {
-    //    throw new Error("cannot git clone or pull")
-    //    return
-    //  }
-    //}
-
     let success;
     try {
       console.log("try cloning")
@@ -237,9 +255,22 @@ class Dalai {
         throw new Error("cmake installation failed")
         return
       }
-      await this.exec("mkdir build", this.home)
-      await this.exec("cmake -S . -B build", this.home)
-      await this.exec("cmake --build . --config Release", path.resolve(this.home, "build"))
+      await this.exec("mkdir build", this.home)      
+      await this.exec(`Remove-Item -path ${path.resolve(this.home, "build", "CMakeCache.txt")}`, this.home)
+      
+      const cmake_path = path.join(venv_path, "Scripts", "cmake")
+      const ninja_path = path.join(venv_path, "Scripts", "ninja").replaceAll("\\", "/")
+      const gcc_path = path.join(this.home, "mingw64", "bin", 'gcc.exe').replaceAll("\\", "/")
+      const gxx_path = path.join(this.home, "mingw64", "bin", 'g++.exe').replaceAll("\\", "/")
+
+      // Install compiler (mingw gcc/g++)
+      await this.mingw()
+      // Install generator (ninja)
+      await this.exec(`${pip_path} install ninja`);
+      // CMake with the compiler and the generator
+      await this.exec(`${cmake_path} -S .. -G Ninja -DCMAKE_MAKE_PROGRAM=${ninja_path} -DCMAKE_C_COMPILER=${gcc_path} -DCMAKE_CXX_COMPILER=${gxx_path}`, path.resolve(this.home, "build"))
+      await this.exec(`${cmake_path} --build . --config Release`, path.resolve(this.home, "build"))
+
     } else {
       success = await this.exec("make", this.home)
       if (!success) {
@@ -394,7 +425,8 @@ class Dalai {
         console.log(`Skip quantization, files already exists: ${outputFile1} and ${outputFile2}}`)
         continue
       }
-      await this.exec(`./quantize ${outputFile1} ${outputFile2} 2`, this.home)
+      const bin_path = platform === "win32" ? path.resolve(this.home, "build") : this.home
+      await this.exec(`./quantize ${outputFile1} ${outputFile2} 2`, bin_path)
     }
   }
   progress(task, percent) {
