@@ -36,7 +36,7 @@ class Dalai {
     } catch (e) { }
     this.config = {
       name: 'xterm-color',
-      cols: 80,
+      cols: 200,
       rows: 30,
     }
   }
@@ -345,15 +345,17 @@ class Dalai {
     }
     chunks.push(`-p "${req.prompt}"`)
 
+    const main_bin_path = platform === "win32" ? path.resolve(this.home, "build", "Release", "llama") : path.resolve(this.home, "main")
     if (req.full) {
-      await this.exec(`./main ${chunks.join(" ")}`, this.home, cb)
+      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.home, cb)
     } else {
       const startpattern = /.*sampling parameters:.*/g
       const endpattern = /.*mem per token.*/g
       let started = false
       let ended = false
       let writeEnd = !req.skip_end
-      await this.exec(`./main ${chunks.join(" ")}`, this.home, (msg) => {
+      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.home, (msg) => {
+        console.log(msg)
         if (endpattern.test(msg)) ended = true
         if (started && !ended) {
           cb(msg)
