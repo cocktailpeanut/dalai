@@ -180,8 +180,8 @@ class Dalai {
     if (platform === "win32") {
       await this.python() 
     }
-    const root_python_paths = (platform === "win32" ? [path.resolve(this.home, "python", "bin", "python3")] : ["python3", "python"])
-    const root_pip_paths = (platform === "win32" ? [path.resolve(this.home, "python", "bin", "pip3")] : ["pip3", "pip"])
+    const root_python_paths = (platform === "win32" ? [path.resolve(this.home, "python", "python.exe")] : ["python3", "python"])
+    const root_pip_paths = (platform === "win32" ? [path.resolve(this.home, "python", "python -m pip")] : ["pip3", "pip"])
 
     // prerequisites
     if (platform === "linux") {
