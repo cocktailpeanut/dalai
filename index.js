@@ -233,7 +233,7 @@ class Dalai {
 
     // different venv paths for Windows
     const pip_path = platform === "win32" ? path.join(venv_path, "Scripts", "pip.exe") : path.join(venv_path, "bin", "pip")
-    const python_path = platform == "win32" ? path.join(venv_path, "Script", "python.exe") : path.join(venv_path, 'bin', 'python')
+    const python_path = platform == "win32" ? path.join(venv_path, "Scripts", "python.exe") : path.join(venv_path, 'bin', 'python')
 
     // upgrade setuptools
     success = await this.exec(`${pip_path} install --upgrade pip setuptools wheel`)
@@ -257,18 +257,9 @@ class Dalai {
       }
       await this.exec("mkdir build", this.home)      
       await this.exec(`Remove-Item -path ${path.resolve(this.home, "build", "CMakeCache.txt")}`, this.home)
-      
-      const cmake_path = path.join(venv_path, "Scripts", "cmake")
-      const ninja_path = path.join(venv_path, "Scripts", "ninja").replaceAll("\\", "/")
-      const gcc_path = path.join(this.home, "mingw64", "bin", 'gcc.exe').replaceAll("\\", "/")
-      const gxx_path = path.join(this.home, "mingw64", "bin", 'g++.exe').replaceAll("\\", "/")
 
-      // Install compiler (mingw gcc/g++)
-      await this.mingw()
-      // Install generator (ninja)
-      await this.exec(`${pip_path} install ninja`);
-      // CMake with the compiler and the generator
-      await this.exec(`${cmake_path} -S .. -G Ninja -DCMAKE_MAKE_PROGRAM=${ninja_path} -DCMAKE_C_COMPILER=${gcc_path} -DCMAKE_CXX_COMPILER=${gxx_path}`, path.resolve(this.home, "build"))
+      const cmake_path = path.join(venv_path, "Scripts", "cmake")
+      await this.exec(`${cmake_path} ..`, path.resolve(this.home, "build"))
       await this.exec(`${cmake_path} --build . --config Release`, path.resolve(this.home, "build"))
 
     } else {
@@ -419,13 +410,13 @@ class Dalai {
     }
     for(let i=0; i<num[model]; i++) {
       const suffix = (i === 0 ? "" : `.${i}`)
-      const outputFile1 = `./models/${model}/ggml-model-f16.bin${suffix}`
-      const outputFile2 = `./models/${model}/ggml-model-q4_0.bin${suffix}`
-      if (fs.existsSync(path.resolve(this.home, outputFile1)) && fs.existsSync(path.resolve(this.home, outputFile2))) {
+      const outputFile1 = path.resolve(this.home, `./models/${model}/ggml-model-f16.bin${suffix}`)
+      const outputFile2 = path.resolve(this.home, `./models/${model}/ggml-model-q4_0.bin${suffix}`)
+      if (fs.existsSync(outputFile1) && fs.existsSync(outputFile2)) {
         console.log(`Skip quantization, files already exists: ${outputFile1} and ${outputFile2}}`)
         continue
       }
-      const bin_path = platform === "win32" ? path.resolve(this.home, "build") : this.home
+      const bin_path = platform === "win32" ? path.resolve(this.home, "build", "Release") : this.home
       await this.exec(`./quantize ${outputFile1} ${outputFile2} 2`, bin_path)
     }
   }
