@@ -4,6 +4,7 @@ Dead simple way to run LLaMA on your computer.
 
 <a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> Github</a>
 <a href="https://twitter.com/cocktailpeanut" class='inverse btn'><i class="fa-brands fa-twitter"></i> Twitter</a>
+<a href="https://discord.gg/XahBUrbVwz" class='inverse btn'><i class="fa-brands fa-discord"></i> Discord</a>
 
 ---
 
@@ -24,26 +25,71 @@ Dead simple way to run LLaMA on your computer.
 
 ---
 
-# Quickstart
+# Intro
 
-Install the 7B model (default) and start a web UI:
+## 1. Cross platform
 
-```
-npx dalai llama
-npx dalai serve
-```
+Dalai runs on all of the following operating systems:
 
-Then go to http://localhost:3000
+1. Linux
+2. Mac
+3. Windows
 
-Above two commands do the following:
+## 2. System Requirements
 
-1. First installs the 7B module (default)
-2. Then starts a web/API server at port 3000
+Runs on most modern computers. Unless your computer is very very old, it should work.
 
+## 3. Disk Space Requirements
+
+You need a lot of space for storing the models.
+
+You do NOT have to install all models, you can install one by one. Let's take a look at how much space each model takes up:
+
+> NOTE
+>
+> The following numbers assume that you DO NOT touch the original model files and keep BOTH the original model files AND the quantized versions.
+>
+> You can optimize this if you delete the original models (which are much larger) after installation and keep only the quantized versions.
+
+### 7B
+
+- Full: The model takes up 31.17GB
+- Quantized: 4.21GB
+
+![7b.png](7b.png)
+
+### 13B
+
+- Full: The model takes up 60.21GB
+- Quantized: 4.07GB * 2 = 8.14GB
+
+![13b.png](13b.png)
+
+### 30B
+
+- Full: The model takes up 150.48GB
+- Quantized: 5.09GB * 4 = 20.36GB
+
+![30b.png](30b.png)
+
+### 65B
+
+- Full: The model takes up 432.64GB
+- Quantized: 5.11GB * 8 = 40.88GB
+
+![65b.png](65b.png)
 
 ---
 
-# Install
+# Quickstart
+
+## Mac
+
+### Step 1. Install node.js
+
+<a href="https://nodejs.org/en/download/" class='btn'>Install Node.js</a>
+
+### Step 2. Install Dalai
 
 Basic install (7B model only)
 
@@ -51,7 +97,7 @@ Basic install (7B model only)
 npx dalai llama
 ```
 
-Install all models
+Or, install all models
 
 ```
 npx dalai llama 7B 13B 30B 65B
@@ -63,6 +109,87 @@ The install command :
 2. Installs and builds the [llama.cpp](https://github.com/ggerganov/llama.cpp) project under `~/llama.cpp`
 3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/llama.cpp/models`
 4. Runs some tasks to convert the LLaMA models so they can be used
+
+### Step 3. Run Web UI
+
+After everything has been installed, open http://localhost:3000 in your browser. Have fun!
+
+
+## Windows
+
+### Step 1. Install Visual Studio
+
+On windows, you need to install Visual Studio before installing Dalai.
+
+Press the button below to visit the Visual Studio downloads page and download:
+
+<a href="https://visualstudio.microsoft.com/downloads/" class='btn'>Download Microsoft Visual Studio</a>
+
+---
+
+**IMPORTANT!!!**
+
+When installing Visual Studio, make sure to check the 3 options as highlighted below:
+
+1. Python development
+2. Node.js development
+3. Desktop development with C++
+
+![vs.png](vs.png)
+
+### Step 2. Install Dalai
+
+Basic install (7B model only)
+
+```
+npx dalai llama
+```
+
+Or, install all models
+
+```
+npx dalai llama 7B 13B 30B 65B
+```
+
+The install command :
+
+1. Creates a folder named `dalai` under your home directory (`~`)
+2. Installs and builds the [llama.cpp](https://github.com/ggerganov/llama.cpp) project under `~/llama.cpp`
+3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/llama.cpp/models`
+4. Runs some tasks to convert the LLaMA models so they can be used
+
+### Step 3. Run Web UI
+
+After everything has been installed, open http://localhost:3000 in your browser. Have fun!
+
+## Linux
+
+### Step 1. Install
+
+After everything has been installed, open http://localhost:3000 in your browser. Have fun!
+
+Basic install (7B model only)
+
+```
+npx dalai llama
+```
+
+Or, install all models
+
+```
+npx dalai llama 7B 13B 30B 65B
+```
+
+The install command :
+
+1. Creates a folder named `dalai` under your home directory (`~`)
+2. Installs and builds the [llama.cpp](https://github.com/ggerganov/llama.cpp) project under `~/llama.cpp`
+3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/llama.cpp/models`
+4. Runs some tasks to convert the LLaMA models so they can be used
+
+### Step 2. Run Web UI
+
+After everything has been installed, open http://localhost:3000 in your browser. Have fun!
 
 ---
 

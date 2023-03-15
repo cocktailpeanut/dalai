@@ -1,6 +1,6 @@
 {
   "name": "dalai",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "",
   "main": "index.js",
   "author": "cocktailpeanut",
@@ -27,5 +27,7 @@
   "devDependencies": {
     "prettier": "^2.8.4"
   },
-  "bin": "bin/cli.js"
+  "bin": {
+    "dalai": "bin/cli.js"
+  }
 }
