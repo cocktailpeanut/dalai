@@ -155,10 +155,10 @@ ${fields}
 let isRunningModel = false
 const loading = (on) => {
   if (on) {
-    document.querySelector(".loading").textContent = on
+    document.querySelector(".loading").innerText = on
     document.querySelector(".loading").classList.remove("hidden")
   } else {
-    document.querySelector(".loading").textContent = ""
+    document.querySelector(".loading").innerText = ""
     document.querySelector(".loading").classList.add("hidden")
   }
 }
@@ -220,7 +220,7 @@ const sha256 = async (input) => {
 const say = (msg, id) => {
   let item = document.createElement('li');
   if (id) item.setAttribute("data-id", id)
-  item.textContent = msg;
+  item.innerText = msg;
   messages.prepend(item);
 }
 socket.emit('request', {
@@ -244,7 +244,7 @@ socket.on('result', async ({ request, response, isRunning }) => {
       const id = await sha256(request.prompt) 
       let existing = document.querySelector(`[data-id='${id}']`)
       if (existing) {
-        existing.textContent = existing.textContent + response
+        existing.innerText = existing.innerText + response.replaceAll("\r", "")
       } else {
         say(response, id)
       }
