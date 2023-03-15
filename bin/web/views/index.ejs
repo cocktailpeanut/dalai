@@ -169,6 +169,7 @@ document.querySelector("form").addEventListener("input", (e) => {
     config[e.target.name] = e.target.value
   }
 })
+let submitCounter = 0;
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   e.stopPropagation()
@@ -177,6 +178,7 @@ form.addEventListener('submit', (e) => {
   }
   if (input.innerText) {
     config.prompt = input.innerText
+    config.id = `${new Date().getTime()}_${submitCounter++}`;
     socket.emit('request', config)
     loading(config.prompt)
     input.innerText = "";
@@ -241,7 +243,7 @@ socket.on('result', async ({ request, response, isRunning }) => {
   } else {
     if (response == "\n\n<end>") {
     } else {
-      const id = await sha256(request.prompt) 
+      const id = `thread-${request.id}`
       let existing = document.querySelector(`[data-id='${id}']`)
       if (existing) {
         existing.innerText = existing.innerText + response.replaceAll("\r", "")
