@@ -23,7 +23,11 @@
     box-sizing: border-box;
   }
   #input:focus { outline: none; }
-  button { padding: 10px; background: rgba(0,0,0,0.8); color: white; border: none; border-radius: 3px; outline: none; box-sizing: border-box; }
+  button { padding: 10px; color: white; border: none; border-radius: 3px; outline: none; box-sizing: border-box; }
+  button#stop { background: rgba(0,0,0,0.4) }
+  .running-model button#stop { background: rgba(0,0,0,0.8) }
+  button#autocomplete { background: rgba(0,0,0,0.8) }
+  .running-model button#autocomplete { background: rgba(0,0,0,0.4) }
 
   #messages { list-style-type: none; margin: 0; box-sizing: border-box; font-size: 14px; padding: 0; }
   #messages > li { padding: 10px; font-size: 14px; box-sizing: border-box; }
@@ -99,7 +103,8 @@
   <div class='input-container'>
     <div class='input-field'>
       <div contenteditable id='input'></div>
-      <button>Autocomplete</button>
+      <button id="autocomplete">Autocomplete</button>
+      <button id="stop">Stop</button>
     </div>
     <div class='info'>TIP: shift+enter for multiple lines</div>
   </div>
@@ -122,6 +127,7 @@ const config = {
 }
 const socket = io();
 const form = document.getElementById('form');
+const stopButton = document.getElementById('stop');
 const input = document.querySelector('#input');
 const model = document.querySelector('#model');
 const renderHeader = (config) => {
@@ -146,6 +152,7 @@ ${fields}
 </div>
 </div>`
 }
+let isRunningModel = false
 const loading = (on) => {
   if (on) {
     document.querySelector(".loading").textContent = on
@@ -165,6 +172,9 @@ document.querySelector("form").addEventListener("input", (e) => {
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   e.stopPropagation()
+  if (isRunningModel) {
+    return;
+  }
   if (input.textContent) {
     config.prompt = input.textContent
     socket.emit('request', config)
@@ -173,6 +183,10 @@ form.addEventListener('submit', (e) => {
   }
 });
 input.addEventListener("keydown", (e) => {
+  if (isRunningModel) {
+    e.preventDefault();
+    return;
+  }
   if (e.keyCode === 13) {
     e.preventDefault();
     if (e.shiftKey) {
@@ -181,6 +195,17 @@ input.addEventListener("keydown", (e) => {
       form.requestSubmit()
     }
   }
+})
+stopButton.addEventListener("click", (e) => {
+  e.preventDefault()
+  e.stopPropagation()
+  if (!isRunningModel) {
+    return;
+  }
+
+  socket.emit('request', {
+    method: "stop"
+  })
 })
 
 const sha256 = async (input) => {
@@ -201,8 +226,12 @@ const say = (msg, id) => {
 socket.emit('request', {
   method: "installed"
 })
-socket.on('result', async ({ request, response }) => {
+socket.on('result', async ({ request, response, isRunning }) => {
   loading(false)
+  if (isRunningModel != isRunning) {
+    isRunningModel = isRunning;
+    form.setAttribute("class", isRunningModel ? "running-model" : "")
+  }
   if (request.method === "installed") {
     if (response == "\n\n<end>") {
       document.querySelector(".form-header").innerHTML = renderHeader(config)

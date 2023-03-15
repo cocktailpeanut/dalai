@@ -14,6 +14,7 @@ const semver = require('semver');
 const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 class Dalai {
+  _runningShell = undefined;
   constructor(home) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -264,7 +265,7 @@ class Dalai {
     io.on("connection", (socket) => {
       socket.on('request', async (req) => {
         await this.query(req, (str) => {
-          io.emit("result", { response: str, request: req })
+          io.emit("result", { response: str, request: req, isRunning: this._runningShell != null })
         })
       });
     });
@@ -275,7 +276,7 @@ class Dalai {
     io.on("connection", (socket) => {
       socket.on('request', async (req) => {
         await this.query(req, (str) => {
-          io.emit("result", { response: str, request: req })
+          io.emit("result", { response: str, request: req, isRunning: this._runningShell != null })
         })
       });
     });
@@ -293,6 +294,14 @@ class Dalai {
       let models = await this.installed()
       for(let model of models) {
         cb(model)
+      }
+      cb('\n\n<end>')
+      return
+    }
+    if (req.method === "stop") {
+      if (this._runningShell) {
+        this._runningShell.kill()
+        this._runningShell = undefined
       }
       cb('\n\n<end>')
       return
@@ -317,25 +326,35 @@ class Dalai {
     if (req.repeat_last_n) o.repeat_last_n = req.repeat_last_n
     if (req.repeat_penalty) o.repeat_penalty = req.repeat_penalty
 
-    let chunks = []
+    let namedArgs = {};
     for(let key in o) {
-      chunks.push(`--${key} ${o[key]}`)
+      namedArgs[`--${key}`] = o[key];
     }
-    chunks.push(`-p "${req.prompt}"`)
+    namedArgs["-p"] = req.prompt;
 
     if (req.full) {
-      await this.exec(`./main ${chunks.join(" ")}`, this.home, cb)
+      await this.exec("./main", namedArgs, this.home, cb);
     } else {
-      const startpattern = /.*sampling parameters:.*/g
+      const startpattern = /.*repeat_penalty = .*/g
       const endpattern = /.*mem per token.*/g
       let started = false
+      let starting = true
       let ended = false
       let writeEnd = !req.skip_end
-      await this.exec(`./main ${chunks.join(" ")}`, this.home, (msg) => {
+      await this.exec("./main", namedArgs, this.home, (msg) => {
         if (endpattern.test(msg)) ended = true
         if (started && !ended) {
-          cb(msg)
+          if (starting) {
+            const trimmed = msg.replace(/^\s+/, "");
+            if (trimmed.length > 0) {
+              starting = false;
+              cb(trimmed)
+            }
+          } else {
+            cb(msg)
+          }
         } else if (ended && writeEnd) {
+          this._runningShell = undefined
           cb('\n\n<end>')
           writeEnd = false
         }
@@ -351,32 +370,71 @@ class Dalai {
       throw e
     });
   }
-  exec(cmd, cwd, cb) {
+  exec(cmd, namedArgs, cwd, cb) {
+    const escapeShellArg = (arg) => {
+      if (typeof arg != "string") {
+        return arg;
+      }
+      if (platform == "win32") {
+        return `"${arg.replaceAll("\"", "`\"`\"").replaceAll("\n", "`n")}"`;
+      } else {
+        return `'${arg.replaceAll("\\", "\\\\").replaceAll("'", "\\'").replaceAll("\n", "\\n")}'`;
+      }
+    }
+    const processData = (data) => {
+      // Clean up e.g. escape sequences
+      return data.replaceAll(/\r?\n\u001b\[\d+;\d+H./g, "");
+    }
+
     return new Promise((resolve, reject) => {
+      if(this._runningShell != null) {
+        resolve(false);
+        return;
+      }
+
       const config = Object.assign({}, this.config)
       if (cwd) {
         config.cwd = path.resolve(cwd)
       }
-      console.log(`exec: ${cmd} in ${config.cwd}`)
+      // Escape the named args
+      let args = [];
+      Object.keys(namedArgs).forEach(key => {
+        args.push(key);
+        args.push(escapeShellArg(namedArgs[key]));
+      });
+      const fullCmd = `${cmd} ${args.join(" ")}`;
+      console.log(`exec: ${fullCmd} in ${config.cwd}`)
       const ptyProcess = pty.spawn(shell, [], config)
+      this._runningShell = ptyProcess;
       ptyProcess.onData((data) => {
         if (cb) {
-          cb(data)
+          cb(processData(data))
         } else {
           process.stdout.write(data);
         }
       });
       ptyProcess.onExit((res) => {
+        this._runningShell = undefined;
+        cb("");
         if (res.exitCode === 0) {
           // successful
           resolve(true)
         } else {
           // something went wrong
+          console.error("Failed during execution", res.exitCode);
           resolve(false)
         }
       });
-      ptyProcess.write(`${cmd}\r`)
-      ptyProcess.write("exit\r")
+      if (platform == "win32") {
+        ptyProcess.write("[System.Console]::OutputEncoding = [System.Console]::InputEncoding = [System.Text.Encoding]::UTF8\r")
+      }
+      ptyProcess.write(`${fullCmd}\r`)
+
+      if (platform == "win32") {
+        ptyProcess.write("exit $LASTEXITCODE\r")
+      } else {
+        ptyProcess.write("exit $?\r")
+      }
     })
   }
   async quantize(model) {
