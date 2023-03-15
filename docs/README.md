@@ -1,6 +1,6 @@
 # Dalai
 
-Dead simple way to run LLaMA on your computer.
+Run LLaMA on your computer.
 
 <a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> Github</a>
 <a href="https://twitter.com/cocktailpeanut" class='inverse btn'><i class="fa-brands fa-twitter"></i> Twitter</a>
@@ -404,3 +404,35 @@ const dalai = new Dalai()
 const models = await dalai.installed()
 console.log(models)     // prints ["7B", "13B"]
 ```
+
+---
+
+# FAQ
+
+## Updating to the latest
+
+Dalai is a young project and will evolve quickly.
+
+To update dalai, you will need to run the dalai command with a version number specified (You only need to do this once when you update).
+
+For example, let's say you've been using `dalai@0.1.0` but a new version `dalai@0.2.0` came out.
+
+The simplest way to update is to just run the dalai server:
+
+```
+npx dalai@0.2.0 serve
+```
+
+Once you run the command it will ask you if you want to update. Confirm, and it will now install `0.2.0`, and from that point on you don't need to specify the version. You can just run `npx dalai serve` and the new version will be executed from that point on.
+
+
+## Staying up to date
+
+Have questions or feedback? Follow the project through the following outlets:
+
+<a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> Github</a>
+<a href="https://twitter.com/cocktailpeanut" class='inverse btn'><i class="fa-brands fa-twitter"></i> Twitter</a>
+<a href="https://discord.gg/XahBUrbVwz" class='inverse btn'><i class="fa-brands fa-discord"></i> Discord</a>
+
+
+---
