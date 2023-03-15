@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  dalai:
+    build: .
+    user: "1000:1000"
+    environment:
+      - LLAMA_MODEL=7B
+    volumes:
+      - .:/home/dalai/app
+      - ./models:/home/dalai/models
+    ports:
+      - 3000:3000
+    # command: tail -f /dev/null

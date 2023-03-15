@@ -1,6 +1,8 @@
+llama.cpp
+demo
+docs
 .env
 .DS_Store
 venv
 node_modules
-llama.cpp
 models
