@@ -176,7 +176,14 @@ class Dalai {
       await git.pull({ fs, http, dir: this.home, url: "https://github.com/ggerganov/llama.cpp.git" })
     }
 
-    // on linux, first install all the prerequisites
+    // windows don't ship with python, so install a dedicated self-contained python
+    if (platform === "win32") {
+      await this.python() 
+    }
+    const root_python_paths = (platform === "win32" ? [path.resolve(this.home, "python", "bin", "python3")] : ["python3", "python"])
+    const root_pip_paths = (platform === "win32" ? [path.resolve(this.home, "python", "bin", "pip3")] : ["pip3", "pip"])
+
+    // prerequisites
     if (platform === "linux") {
       // ubuntu debian
       success = await this.exec("apt-get install build-essential python3-venv -y")
@@ -184,15 +191,19 @@ class Dalai {
         // fefdora
         await this.exec("dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y")
       }
+    } else {
+      // for win32 / darwin
+      for(let root_pip_path of root_pip_paths) {
+        success = await this.exec(`${root_pip_path} install --user virtualenv`)
+        if (success) break;
+      }
+      if (!success) {
+        throw new Error("cannot install virtualenv")
+      }
     }
     // create venv
     const venv_path = path.join(this.home, "venv")
 
-    if (platform === "win32") {
-      // windows don't ship with python, so install a dedicated self-contained python
-      await this.python() 
-    }
-    const root_python_paths = (platform === "win32" ? [path.resolve(this.home, "python", "bin", "python3")] : ["python3", "python"])
     for(let root_python_path of root_python_paths) {
       success = await this.exec(`${root_python_path} -m venv ${venv_path}`)
       if (success) break;
