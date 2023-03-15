@@ -1,12 +1,17 @@
 const os = require('os');
 const pty = require('node-pty');
+const git = require('isomorphic-git');
+const http = require('isomorphic-git/http/node');
 const path = require('path');
 const fs = require("fs");
+const tar = require('tar');
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { io } = require("socket.io-client");
 const term = require( 'terminal-kit' ).terminal;
 const Downloader = require("nodejs-file-downloader");
+const semver = require('semver');
+const _7z = require('7zip-min');
 const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 
@@ -131,19 +136,83 @@ class Dalai {
     }
     return modelNames
   }
+  async python () {
+    // install self-contained python => only for windows for now
+    // 1. download
+    // 2. unzip
+
+    const filename = "cpython-3.10.9+20230116-x86_64-pc-windows-msvc-shared-install_only.tar.gz"
+    const task = "ddownloading self contained python"
+    const downloader = new Downloader({
+      url: `https://github.com/indygreg/python-build-standalone/releases/download/20230116/${filename}`,
+      directory: this.home,
+      onProgress: (percentage, chunk, remainingSize) => {
+        this.progress(task, percentage)
+      },
+    });
+    try {
+      await this.startProgress(task)
+      await downloader.download();
+    } catch (error) {
+      console.log(error);
+    }
+    this.progressBar.update(1);
+    console.log("extracting python")
+    await tar.x({
+      file: path.resolve(this.home, filename),
+      C: this.home,
+      strict: true
+    })
+    console.log("cleaning up temp files")
+    await fs.promises.rm(path.resolve(this.home, filename))
+  }
+  async mingw() {
+    const mingw = "https://github.com/niXman/mingw-builds-binaries/releases/download/12.2.0-rt_v10-rev2/x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"
+    const downloader = new Downloader({
+      url: mingw,
+      directory: this.home,
+      onProgress: (percentage, chunk, remainingSize) => {
+        this.progress("download mingw", percentage)
+      },
+    });
+    try {
+      await this.startProgress("download mingw")
+      await downloader.download();
+    } catch (error) {
+      console.log(error);
+    }
+    this.progressBar.update(1);
+    await new Promise((resolve, reject) => {
+      _7z.unpack(path.resolve(this.home, "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"), this.home, (err) => {
+        if (err) { 
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
+    console.log("cleaning up temp files")
+    await fs.promises.rm(path.resolve(this.home, "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"))
+  }
   async install(...models) {
-    // install llama.cpp to home
-    let success = await this.exec(`git clone https://github.com/ggerganov/llama.cpp.git ${this.llamaPath}`)
-    if (!success) {
-      // soemthing went wrong. try pulling
-      success = await this.exec(`git pull`, this.llamaPath)
-      if (!success) {
-        throw new Error("cannot git clone or pull")
-      }
+    // Check if current version is greater than or equal to 18
+    const node_version = process.version;
+    if (!semver.gte(node_version, '18.0.0')) {
+      throw new Error("outdated Node version, please install Node 18 or newer")
+    }
+    let success;
+    try {
+      console.log("try cloning")
+      await git.clone({ fs, http, dir: this.llamaPath, url: "https://github.com/ggerganov/llama.cpp.git" })
+    } catch (e) {
+      console.log("try pulling")
+      await git.pull({ fs, http, dir: this.llamaPath, url: "https://github.com/ggerganov/llama.cpp.git" })
     }
 
-    // on linux, first install all the prerequisites
-    if (platform === "linux") {
+    // windows don't ship with python, so install a dedicated self-contained python
+    if (platform === "win32") {
+      await this.python()
+    }else{
       // ubuntu debian
       success = await this.exec("apt-get install build-essential python3-venv -y")
       if (!success) {
@@ -151,25 +220,50 @@ class Dalai {
         await this.exec("dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y")
       }
     }
-    
-    let pip_path = platform === "win32" ? 'pip.exe' : 'pip';
-    let python_path = platform === "win32" ? 'python3.exe' : 'python3';
 
-    if(!await this.exec(python_path + ' --version')){
-      python_path = platform === "win32" ? 'python.exe' : 'python';
+    const root_python_paths = (platform === "win32" ? [path.resolve(this.home, "python", "python.exe")] : ["python3", "python"])
+    const root_pip_paths = (platform === "win32" ? [path.resolve(this.home, "python", "python -m pip")] : ["pip3", "pip"])
+
+    let pip_path = null;
+    let python_path = null;
+
+    for(let root_python_path of root_python_paths) {
+      success = await this.exec(`${root_python_path} --version`)
+      if (success) {
+        python_path = root_python_path;
+        break;
+      }
     }
 
-    if(!await this.exec(python_path + ' --version')){
-      throw new Error("cannot execute python3 or python")
+    if(python_path === null){
+      throw new Error(`Not installed python`)
+    }
+
+    for(let root_pip_path of root_pip_paths) {
+      success = await this.exec(`${root_pip_path} --version`)
+      if (success) {
+        pip_path = root_pip_path;
+        break;
+      }
+    }
+
+    if(pip_path === null){
+      throw new Error(`Not installed python pip`)
     }
 
     // create venv
     if(this.usePyEnv){
-      const venv_path = path.join(this.llamaPath, "venv")
-      await this.exec(`${python_path} -m venv ${venv_path}`)
-      // different venv paths for Windows
-      pip_path = platform === "win32" ? path.join(venv_path, "Scripts", "pip.exe") : path.join(venv_path, "bin", "pip")
-      python_path = platform == "win32" ? path.join(venv_path, "Script", "python.exe") : path.join(venv_path, 'bin', 'python')
+      if(platform === 'win32') {
+        success = await this.exec(`${pip_path} install --user virtualenv`)
+        if (!success) {
+          throw new Error("cannot install virtualenv")
+        }
+      }
+      const venv_path = path.join(this.home, "venv")
+      success = await this.exec(`${python_path} -m venv ${venv_path}`)
+      if (!success) {
+        throw new Error("cannot execute python3 or python")
+      }
     }
 
     // upgrade setuptools
@@ -190,9 +284,22 @@ class Dalai {
       if (!success) {
         throw new Error("cmake installation failed")
       }
-      await this.exec("mkdir build", this.llamaPath)
-      await this.exec("cmake -S . -B build", this.llamaPath)
-      await this.exec("cmake --build . --config Release", path.resolve(this.llamaPath, "build"))
+      await this.exec("mkdir build", this.llamaPath)      
+      await this.exec(`Remove-Item -path ${path.resolve(this.llamaPath, "build", "CMakeCache.txt")}`, this.llamaPath)
+      
+      const cmake_path = path.join(venv_path, "Scripts", "cmake")
+      const ninja_path = path.join(venv_path, "Scripts", "ninja").replaceAll("\\", "/")
+      const gcc_path = path.join(this.llamaPath, "mingw64", "bin", 'gcc.exe').replaceAll("\\", "/")
+      const gxx_path = path.join(this.llamaPath, "mingw64", "bin", 'g++.exe').replaceAll("\\", "/")
+
+      // Install compiler (mingw gcc/g++)
+      await this.mingw()
+      // Install generator (ninja)
+      await this.exec(`${pip_path} install ninja`);
+      // CMake with the compiler and the generator
+      await this.exec(`${cmake_path} -S .. -G Ninja -DCMAKE_MAKE_PROGRAM=${ninja_path} -DCMAKE_C_COMPILER=${gcc_path} -DCMAKE_CXX_COMPILER=${gxx_path}`, path.resolve(this.llamaPath, "build"))
+      await this.exec(`${cmake_path} --build . --config Release`, path.resolve(this.llamaPath, "build"))
+
     } else {
       success = await this.exec("make", this.llamaPath)
       if (!success) {
@@ -340,13 +447,14 @@ class Dalai {
     }
     for(let i=0; i<num[model]; i++) {
       const suffix = (i === 0 ? "" : `.${i}`)
-      const outputFile1 = `${this.modelsPath}/${model}/ggml-model-f16.bin${suffix}`
-      const outputFile2 = `${this.modelsPath}/${model}/ggml-model-q4_0.bin${suffix}`
-      if (fs.existsSync(path.resolve(this.llamaPath, outputFile1)) && fs.existsSync(path.resolve(this.llamaPath, outputFile2))) {
-        console.log(`Skip quantization, files already exists: ${outputFile1} and ${outputFile2}}`)
+      const inputFile = `${this.modelsPath}/${model}/ggml-model-f16.bin${suffix}`
+      const outputFile = `${this.modelsPath}/${model}/ggml-model-q4_0.bin${suffix}`
+      if (fs.existsSync(path.resolve(this.llamaPath, inputFile)) && fs.existsSync(path.resolve(this.llamaPath, outputFile))) {
+        console.log(`Skip quantization, files already exists: ${inputFile} and ${outputFile}}`)
         continue
       }
-      await this.exec(`./quantize ${outputFile1} ${outputFile2} 2`, this.llamaPath)
+      const bin_path = platform === "win32" ? path.resolve(this.llamaPath, "build") : this.llamaPath
+      await this.exec(`./quantize ${inputFile} ${outputFile} 2`, bin_path)
     }
   }
   progress(task, percent) {

@@ -5,7 +5,7 @@ services:
     build: .
     user: "1000:1000"
     environment:
-      - LLAMA_MODEL=7B
+      - LLAMA_MODEL=13B
     volumes:
       - .:/home/dalai/app
       - ./models:/home/dalai/models
