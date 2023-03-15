@@ -355,7 +355,6 @@ class Dalai {
       let ended = false
       let writeEnd = !req.skip_end
       await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.home, (msg) => {
-        console.log(msg)
         if (endpattern.test(msg)) ended = true
         if (started && !ended) {
           cb(msg)
