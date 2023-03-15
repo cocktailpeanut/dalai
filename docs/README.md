@@ -41,6 +41,26 @@ Above two commands do the following:
 2. Then starts a web/API server at port 3000
 
 
+## Start with Docker
+
+Alternatively, you can also run the web UI with Docker, you will need to build the image first (this will take a while, the image is ~50GB).
+
+By default, the Dockerfile installs the 7B model. If you want to install other models, you can use the `--build-arg` flag to specify the `SIZE` you want to install (e.g. `--build-arg SIZE=13B`)
+
+```bash
+docker build -t dalai .
+# or
+docker build -t dalai --build-arg SIZE=13B .
+```
+
+Then run the container:
+
+```bash
+docker run --name dalai -p 3000:3000 dalai
+```
+
+Then go to http://localhost:3000
+
 ---
 
 # Install

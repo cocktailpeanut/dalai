@@ -42,3 +42,8 @@ npx dalai install 7B 13B
   console.log("ERROR: Please pass a command")
   process.exit(1)
 }
+
+// 'Gracefully' exit on SIGINT
+process.on('SIGINT', function() {
+  process.exit(0)
+})
