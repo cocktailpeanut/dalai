@@ -175,11 +175,11 @@ form.addEventListener('submit', (e) => {
   if (isRunningModel) {
     return;
   }
-  if (input.textContent) {
-    config.prompt = input.textContent
+  if (input.innerText) {
+    config.prompt = input.innerText
     socket.emit('request', config)
     loading(config.prompt)
-    input.textContent = "";
+    input.innerText = "";
   }
 });
 input.addEventListener("keydown", (e) => {
