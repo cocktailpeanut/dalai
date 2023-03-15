@@ -1,7 +1,10 @@
 const os = require('os');
 const pty = require('node-pty');
+const git = require('isomorphic-git');
+const http = require('isomorphic-git/http/node');
 const path = require('path');
 const fs = require("fs");
+const tar = require('tar');
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { io } = require("socket.io-client");
@@ -116,16 +119,57 @@ class Dalai {
     }
     return modelNames
   }
+  async python () {
+    // install self-contained python => only for windows for now
+    // 1. download
+    // 2. unzip
+
+    const filename = "cpython-3.10.9+20230116-x86_64-pc-windows-msvc-shared-install_only.tar.gz"
+    const task = "ddownloading self contained python"
+    const downloader = new Downloader({
+      url: `https://github.com/indygreg/python-build-standalone/releases/download/20230116/${filename}`,
+      directory: this.home,
+      onProgress: (percentage, chunk, remainingSize) => {
+        this.progress(task, percentage)
+      },
+    });
+    try {
+      await this.startProgress(task)
+      await downloader.download();
+    } catch (error) {
+      console.log(error);
+    }
+    this.progressBar.update(1);
+    console.log("extracting python")
+    await tar.x({
+      file: path.resolve(this.home, filename),
+      C: this.home,
+      strict: true
+    })
+    console.log("cleaning up temp files")
+    await fs.promises.rm(path.resolve(this.home, filename))
+  }
   async install(...models) {
+
+
     // install llama.cpp to home
-    let success = await this.exec(`git clone https://github.com/ggerganov/llama.cpp.git ${this.home}`)
-    if (!success) {
-      // soemthing went wrong. try pulling
-      success = await this.exec(`git pull`, this.home)
-      if (!success) {
-        throw new Error("cannot git clone or pull")
-        return
-      }
+    //let success = await this.exec(`git clone https://github.com/ggerganov/llama.cpp.git ${this.home}`)
+    //if (!success) {
+    //  // soemthing went wrong. try pulling
+    //  success = await this.exec(`git pull`, this.home)
+    //  if (!success) {
+    //    throw new Error("cannot git clone or pull")
+    //    return
+    //  }
+    //}
+
+    let success;
+    try {
+      console.log("try cloning")
+      await git.clone({ fs, http, dir: this.home, url: "https://github.com/ggerganov/llama.cpp.git" })
+    } catch (e) {
+      console.log("try pulling")
+      await git.pull({ fs, http, dir: this.home, url: "https://github.com/ggerganov/llama.cpp.git" })
     }
 
     // on linux, first install all the prerequisites
@@ -139,14 +183,21 @@ class Dalai {
     }
     // create venv
     const venv_path = path.join(this.home, "venv")
-    success = await this.exec(`python3 -m venv ${venv_path}`)
-    if (!success) {
-      success = await this.exec(`python -m venv ${venv_path}`)
-      if (!success) {
-        throw new Error("cannot execute python3 or python")
-        return
-      }
+
+    if (platform === "win32") {
+      // windows don't ship with python, so install a dedicated self-contained python
+      await this.python() 
     }
+    const root_python_paths = (platform === "win32" ? [path.resolve(this.home, "python", "bin", "python3")] : ["python3", "python"])
+    for(let root_python_path of root_python_paths) {
+      success = await this.exec(`${root_python_path} -m venv ${venv_path}`)
+      if (success) break;
+    }
+    if (!success) {
+      throw new Error("cannot execute python3 or python")
+      return
+    }
+
     // different venv paths for Windows
     const pip_path = platform === "win32" ? path.join(venv_path, "Scripts", "pip.exe") : path.join(venv_path, "bin", "pip")
     const python_path = platform == "win32" ? path.join(venv_path, "Script", "python.exe") : path.join(venv_path, 'bin', 'python')
