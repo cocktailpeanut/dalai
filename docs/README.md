@@ -166,8 +166,6 @@ After everything has been installed, open http://localhost:3000 in your browser.
 
 ### Step 1. Install
 
-After everything has been installed, open http://localhost:3000 in your browser. Have fun!
-
 Basic install (7B model only)
 
 ```
