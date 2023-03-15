@@ -114,7 +114,7 @@ const config = {
   seed: -1,
   threads: 4,
   n_predict: 1000,
-  model: "7B",
+  model: null,
   top_k: 40,
   top_p: 0.9,
   temp: 0.8,
@@ -137,7 +137,7 @@ const renderHeader = (config) => {
 
 
   const models = config.models.map((model) => {
-    return `<option value="7B" ${config.model === model ? "selected" : ""}>${model}</option>`
+    return `<option value="${model}" ${config.model === model ? "selected" : ""}>${model}</option>`
   }).join("")
   return `<a class='logo' href="/">Dalai</a><div class='stretch'></div>
 <div class='config-container'>
@@ -214,6 +214,9 @@ socket.on('result', async ({ request, response }) => {
       document.querySelector(".form-header").innerHTML = renderHeader(config)
     } else {
       config.models.push(response)
+      if(config.model === null){
+        config.model = response;
+      }
     }
   } else {
     if (response == "\n\n<end>") {
