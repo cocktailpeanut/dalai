@@ -18,6 +18,7 @@ class LLaMA {
     }
   }
   async make() {
+    console.log("make")
     let success
     if (platform === "win32") {
       // CMake on Windows
@@ -82,8 +83,6 @@ npx dalai install 7B 13B
       }
       await this.quantize(model)
     }
-  }
-  async make() {
   }
   async quantize(model) {
     let num = {

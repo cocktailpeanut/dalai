@@ -52,7 +52,7 @@ class Dalai {
     // 2. unzip
 
     const filename = "cpython-3.10.9+20230116-x86_64-pc-windows-msvc-shared-install_only.tar.gz"
-    const task = "ddownloading self contained python"
+    const task = "downloading self contained python"
     const downloader = new Downloader({
       url: `https://github.com/indygreg/python-build-standalone/releases/download/20230116/${filename}`,
       directory: this.home,
@@ -203,17 +203,16 @@ class Dalai {
     *
     **************************************************************************************************************/
     let engine = this.cores[core]
-    try {
-      if (fs.existsSync(path.resolve(engine.home))) {
-        console.log("try fetching", engine.home, engine.url)
-        await git.fetch({ fs, http, dir: engine.home, url: engine.url })
-      } else {
-        console.log("try cloning", engine.home, engine.url)
-        await git.clone({ fs, http, dir: engine.home, url: engine.url })
-      }
-    } catch (e) {
-      console.log("ERROR", e)
+    let exists = s => new Promise(r=>fs.access(s, fs.constants.F_OK, e => r(!e)))
+    let e = await exists(path.resolve(engine.home));
+    if (e) {
+      console.log("try fetching", engine.home, engine.url)
+      await git.fetch({ fs, http, dir: engine.home, url: engine.url })
+    } else {
+      console.log("try cloning", engine.home, engine.url)
+      await git.clone({ fs, http, dir: engine.home, url: engine.url })
     }
+    console.log("next", core, engine.make);
     /**************************************************************************************************************
     *
     * 4. Compile & Build
@@ -221,7 +220,7 @@ class Dalai {
     *   - cmake: windows
     *
     **************************************************************************************************************/
-    await this.cores[core].make()
+    await engine.make()
   }
   async setup() {
 
