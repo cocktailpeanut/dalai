@@ -11,11 +11,6 @@ class Alpaca {
     this.root = root
     this.home = path.resolve(this.root.home, "alpaca")
     this.url = "https://github.com/cocktailpeanut/alpaca.cpp.git"
-    this.launcher = {
-win32: "chat",
-      linux: "chat",
-      darwin: "chat",
-    }
   }
   async make() {
     let success
@@ -25,10 +20,12 @@ win32: "chat",
       const cmake_path = path.join(venv_path, "Scripts", "cmake")
       await this.root.exec("mkdir build", this.home)      
       await this.root.exec(`Remove-Item -path ${path.resolve(this.home, "build", "CMakeCache.txt")}`, this.home)
-      await this.root.exec(`make chat`, this.home)
+      //await this.root.exec(`${cmake_path} chat`, this.home)
+      await this.root.exec(`${cmake_path} ..`, path.resolve(this.home, "build"))
+      await this.root.exec(`${cmake_path} --build . --config Release`, path.resolve(this.home, "build"))
     } else {
       // Make on linux + mac
-      success = await this.root.exec(`make chat`, this.home)
+      success = await this.root.exec(`make`, this.home)
       if (!success) {
         throw new Error("running 'make' failed")
         return

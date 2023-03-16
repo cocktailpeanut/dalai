@@ -147,7 +147,7 @@ class Dalai {
     }
     chunks.push(`-p "${req.prompt}"`)
 
-    const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", this.cores[Core].launcher[platform]) : path.resolve(this.home, Core, this.cores[Core].launcher[platform])
+    const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "llama") : path.resolve(this.home, Core, "main")
     if (req.full) {
       await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, cb)
     } else {

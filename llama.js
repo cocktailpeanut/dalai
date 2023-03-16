@@ -11,11 +11,6 @@ class LLaMA {
     this.root = root
     this.home = path.resolve(this.root.home, "llama")
     this.url = "https://github.com/ggerganov/llama.cpp.git"
-    this.launcher = {
-      win32: "llama",
-      linux: "main",
-      darwin: "main"
-    }
   }
   async make() {
     console.log("make")
