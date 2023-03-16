@@ -273,14 +273,6 @@ class Dalai {
         throw new Error("cannot install virtualenv")
       }
 
-      // cmake (only on windows. the rest platforms use make)
-      if (platform === "win32") {
-        success = await this.exec(`${pip_path} install cmake`)
-        if (!success) {
-          throw new Error("cmake installation failed")
-          return
-        }
-      }
     }
 
     // 3.3. virtualenv
@@ -297,6 +289,14 @@ class Dalai {
     // 3.4. Python libraries
     const pip_path = platform === "win32" ? path.join(venv_path, "Scripts", "pip.exe") : path.join(venv_path, "bin", "pip")
     const python_path = platform == "win32" ? path.join(venv_path, "Scripts", "python.exe") : path.join(venv_path, 'bin', 'python')
+    // cmake (only on windows. the rest platforms use make)
+    if (platform === "win32") {
+      success = await this.exec(`${pip_path} install cmake`)
+      if (!success) {
+        throw new Error("cmake installation failed")
+        return
+      }
+    }
     success = await this.exec(`${pip_path} install --upgrade pip setuptools wheel`)
     if (!success) {
       throw new Error("pip setuptools wheel upgrade failed")
