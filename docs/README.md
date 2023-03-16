@@ -112,7 +112,14 @@ The install command :
 
 ### Step 3. Run Web UI
 
-After everything has been installed, open http://localhost:3000 in your browser. Have fun!
+After everything has been installed, launch the Web UI with:
+
+
+```
+npx dalai serve
+```
+
+Now open http://localhost:3000 in your browser. Have fun!
 
 ---
 
@@ -183,7 +190,15 @@ Once you've checked that they both exist, try the `npx dalai llama` command agai
 
 ### Step 3. Run Web UI
 
-After everything has been installed, open http://localhost:3000 in your browser. Have fun!
+After everything has been installed, launch the Web UI with:
+
+
+```
+npx dalai serve
+```
+
+Now open http://localhost:3000 in your browser. Have fun!
+
 
 ---
 
@@ -215,7 +230,15 @@ The install command :
 
 ### Step 2. Run Web UI
 
-After everything has been installed, open http://localhost:3000 in your browser. Have fun!
+After everything has been installed, launch the Web UI with:
+
+
+```
+npx dalai serve
+```
+
+Now open http://localhost:3000 in your browser. Have fun!
+
 
 ---
 
