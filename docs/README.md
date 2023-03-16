@@ -205,9 +205,27 @@ Now open http://localhost:3000 in your browser. Have fun!
 
 ## Linux
 
-### Step 1. Install
+### Step 1. Install Dependencies
 
-After everything has been installed, open http://localhost:3000 in your browser. Have fun!
+You need to make sure you have the correct version of Python and Node.js installed.
+
+#### Step 1.1. Python <= 3.10
+
+> Make sure the version is 3.10 or lower (not 3.11)
+
+Python must be 3.10 or below (pytorch and other libraries are not supported yet on the latest)
+
+<a href="https://pimylifeup.com/installing-python-on-linux/" class='btn'>Download node.js</a>
+
+
+#### Step 1.2. Node.js >= 18
+
+> Make sure the version is 18 or higher
+
+<a href="https://nodejs.org/en/download/package-manager/" class='btn'>Download node.js</a>
+
+
+### Step 2. Install
 
 Basic install (7B model only)
 
@@ -228,10 +246,9 @@ The install command :
 3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/llama.cpp/models`
 4. Runs some tasks to convert the LLaMA models so they can be used
 
-### Step 2. Run Web UI
+### Step 3. Run Web UI
 
 After everything has been installed, launch the Web UI with:
-
 
 ```
 npx dalai serve
