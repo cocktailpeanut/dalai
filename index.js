@@ -14,6 +14,8 @@ const semver = require('semver');
 const _7z = require('7zip-min');
 const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
+const L = require("./llama")
+const A = require("./alpaca")
 class Dalai {
   constructor(home) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +32,7 @@ class Dalai {
     //  Otherwise if you want to customize the path you can just pass in the "home" attribute to manually set it.
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    this.home = home ? path.resolve(home) : path.resolve(os.homedir(), "llama.cpp")
+    this.home = home ? path.resolve(home) : path.resolve(os.homedir(), "dalai")
     try {
       fs.mkdirSync(this.home, { recursive: true })
     } catch (e) { }
@@ -39,87 +41,10 @@ class Dalai {
       cols: 200,
       rows: 30,
     }
-  }
-  async download(model) {
-    console.log(`Download model ${model}`)
-    const num = {
-      "7B": 1,
-      "13B": 2,
-      "30B": 4,
-      "65B": 8,
+    this.cores = {
+      llama: new L(this),
+      alpaca: new A(this),
     }
-    const files = ["checklist.chk", "params.json"]
-    for(let i=0; i<num[model]; i++) {
-      files.push(`consolidated.0${i}.pth`)
-    }
-    const resolvedPath = path.resolve(this.home, "models", model)
-    await fs.promises.mkdir(resolvedPath, { recursive: true }).catch((e) => { })
-
-    for(let file of files) {
-      if (fs.existsSync(path.resolve(resolvedPath, file))) {
-        console.log(`Skip file download, it already exists: ${file}`)
-        continue;
-      }
-
-      const task = `downloading ${file}`
-      const downloader = new Downloader({
-        url: `https://agi.gpt4.org/llama/LLaMA/${model}/${file}`,
-        directory: path.resolve(this.home, "models", model),
-        onProgress: (percentage, chunk, remainingSize) => {
-          this.progress(task, percentage)
-        },
-      });
-      try {
-        await this.startProgress(task)
-        await downloader.download();
-      } catch (error) {
-        console.log(error);
-      }
-      this.progressBar.update(1);
-      term("\n")
-    }
-
-    const files2 = ["tokenizer_checklist.chk", "tokenizer.model"]
-    for(let file of files2) {
-      if (fs.existsSync(path.resolve(this.home, "models", file))) {
-        console.log(`Skip file download, it already exists: ${file}`)
-        continue;
-      }
-      const task = `downloading ${file}`
-      const downloader = new Downloader({
-        url: `https://agi.gpt4.org/llama/LLaMA/${file}`,
-        directory: path.resolve(this.home, "models"),
-        onProgress: (percentage, chunk, remainingSize) => {
-          this.progress(task, percentage)
-        },
-      });
-      try {
-        await this.startProgress(task)
-        await downloader.download();
-      } catch (error) {
-        console.log(error);
-      }
-      this.progressBar.update(1);
-      term("\n")
-    }
-
-  }
-  async installed() {
-    const modelsPath = path.resolve(this.home, "models")
-    console.log("modelsPath", modelsPath)
-    const modelFolders = (await fs.promises.readdir(modelsPath, { withFileTypes: true }))
-      .filter(dirent => dirent.isDirectory())
-      .map(dirent => dirent.name)
-
-    console.log({ modelFolders })
-    const modelNames = []
-    for(let modelFolder of modelFolders) {
-      if (fs.existsSync(path.resolve(modelsPath, modelFolder, 'ggml-model-q4_0.bin'))) {
-        modelNames.push(modelFolder)
-        console.log("exists", modelFolder)
-      }
-    }
-    return modelNames
   }
   async python () {
     // install self-contained python => only for windows for now
@@ -179,29 +104,160 @@ class Dalai {
     console.log("cleaning up temp files")
     await fs.promises.rm(path.resolve(this.home, "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"))
   }
-  async install(...models) {
+  async query(req, cb) {
+    
+    console.log(`> query:`, req)
+    if (req.method === "installed") {
+      let models = await this.installed()
+      for(let model of models) {
+        cb(model)
+      }
+      cb('\n\n<end>')
+      return
+    }
+
+
+    const [Core, Model] = req.model.split(".")
+
+    console.log( { Core, Model } )
+
+    let o = {
+      seed: req.seed || -1,
+      threads: req.threads || 8,
+      n_predict: req.n_predict || 128,
+      model: `models/${Model || "7B"}/ggml-model-q4_0.bin`,
+    }
+
+    if (!fs.existsSync(path.resolve(this.home, Core, "models", Model))) {
+      cb(`File does not exist: ${Model}. Try "dalai ${Core} get ${Model}" first.`)
+      return
+    }
+
+    if (req.top_k) o.top_k = req.top_k
+    if (req.top_p) o.top_p = req.top_p
+    if (req.temp) o.temp = req.temp
+    if (req.batch_size) o.batch_size = req.batch_size
+    if (req.repeat_last_n) o.repeat_last_n = req.repeat_last_n
+    if (req.repeat_penalty) o.repeat_penalty = req.repeat_penalty
+    if (typeof req.interactive !== "undefined") o.interactive = req.interactive
+
+    let chunks = []
+    for(let key in o) {
+      chunks.push(`--${key} ${o[key]}`)
+    }
+    chunks.push(`-p "${req.prompt}"`)
+
+    const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", this.cores[Core].launcher[platform]) : path.resolve(this.home, Core, this.cores[Core].launcher[platform])
+    if (req.full) {
+      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, cb)
+    } else {
+      const startpattern = /.*sampling parameters:.*/g
+      const endpattern = /.*mem per token.*/g
+      let started = req.debug
+      let ended = false
+      let writeEnd = !req.skip_end
+      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (msg) => {
+        if (endpattern.test(msg)) ended = true
+        if (started && !ended) {
+          cb(msg)
+        } else if (ended && writeEnd) {
+          cb('\n\n<end>')
+          writeEnd = false
+        }
+        if (startpattern.test(msg)) started = true
+      })
+    }
+  }
+  async get(core, ...models) {
+    let res = await this.cores[core].get(...models)
+    return res
+  }
+  async installed() {
+    // get cores
+    const modelNames = []
+    for(let core of ["alpaca", "llama"]) {
+      const modelsPath = path.resolve(this.home, core, "models")
+      console.log("modelsPath", modelsPath)
+      let modelFolders = []
+      try {
+        modelFolders = (await fs.promises.readdir(modelsPath, { withFileTypes: true }))
+          .filter(dirent => dirent.isDirectory())
+          .map(dirent => dirent.name)
+      } catch (e) {
+      }
+
+      console.log({ modelFolders })
+      for(let modelFolder of modelFolders) {
+        if (fs.existsSync(path.resolve(modelsPath, modelFolder, 'ggml-model-q4_0.bin'))) {
+          modelNames.push(`${core}.${modelFolder}`)
+          console.log("exists", modelFolder)
+        }
+      }
+    }
+    return modelNames
+  }
+  async install (core) {
+    /**************************************************************************************************************
+    *
+    * 2. Download Core
+    *
+    **************************************************************************************************************/
+    let engine = this.cores[core]
+    try {
+      if (fs.existsSync(path.resolve(engine.home))) {
+        console.log("try fetching", engine.home, engine.url)
+        await git.fetch({ fs, http, dir: engine.home, url: engine.url })
+      } else {
+        console.log("try cloning", engine.home, engine.url)
+        await git.clone({ fs, http, dir: engine.home, url: engine.url })
+      }
+    } catch (e) {
+      console.log("ERROR", e)
+    }
+    /**************************************************************************************************************
+    *
+    * 4. Compile & Build
+    *   - make: linux + mac
+    *   - cmake: windows
+    *
+    **************************************************************************************************************/
+    await this.cores[core].make()
+  }
+  async setup() {
+
+    let success;
+
+    /**************************************************************************************************************
+    *
+    * 1. Validate
+    *
+    **************************************************************************************************************/
     // Check if current version is greater than or equal to 18
     const node_version = process.version;
     if (!semver.gte(node_version, '18.0.0')) {
       throw new Error("outdated Node version, please install Node 18 or newer")
     }
-    let success;
-    try {
-      console.log("try cloning")
-      await git.clone({ fs, http, dir: this.home, url: "https://github.com/ggerganov/llama.cpp.git" })
-    } catch (e) {
-      console.log("try pulling")
-      await git.pull({ fs, http, dir: this.home, url: "https://github.com/ggerganov/llama.cpp.git" })
-    }
 
-    // windows don't ship with python, so install a dedicated self-contained python
+
+
+    /**************************************************************************************************************
+    *
+    * 3. Download Global Dependencies
+    *   - Python (windows only)
+    *   - build-essential (linux only)
+    *   - virtualenv
+    *   - torch, numpy, etc.
+    *
+    **************************************************************************************************************/
+
+    // 3.1. Python: Windows doesn't ship with python, so install a dedicated self-contained python
     if (platform === "win32") {
       await this.python() 
     }
     const root_python_paths = (platform === "win32" ? [path.resolve(this.home, "python", "python.exe")] : ["python3", "python"])
     const root_pip_paths = (platform === "win32" ? [path.resolve(this.home, "python", "python -m pip")] : ["pip3", "pip"])
 
-    // prerequisites
+    // 3.2. Build tools
     if (platform === "linux") {
       // ubuntu debian
       success = await this.exec("apt-get install build-essential python3-venv -y")
@@ -218,10 +274,19 @@ class Dalai {
       if (!success) {
         throw new Error("cannot install virtualenv")
       }
-    }
-    // create venv
-    const venv_path = path.join(this.home, "venv")
 
+      // cmake (only on windows. the rest platforms use make)
+      if (platform === "win32") {
+        success = await this.exec(`${pip_path} install cmake`)
+        if (!success) {
+          throw new Error("cmake installation failed")
+          return
+        }
+      }
+    }
+
+    // 3.3. virtualenv
+    const venv_path = path.join(this.home, "venv")
     for(let root_python_path of root_python_paths) {
       success = await this.exec(`${root_python_path} -m venv ${venv_path}`)
       if (success) break;
@@ -231,54 +296,21 @@ class Dalai {
       return
     }
 
-    // different venv paths for Windows
+    // 3.4. Python libraries
     const pip_path = platform === "win32" ? path.join(venv_path, "Scripts", "pip.exe") : path.join(venv_path, "bin", "pip")
     const python_path = platform == "win32" ? path.join(venv_path, "Scripts", "python.exe") : path.join(venv_path, 'bin', 'python')
-
-    // upgrade setuptools
     success = await this.exec(`${pip_path} install --upgrade pip setuptools wheel`)
     if (!success) {
       throw new Error("pip setuptools wheel upgrade failed")
       return
     }
-
-    // install to ~/llama.cpp
     success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy`)
     if (!success) {
       throw new Error("dependency installation failed")
       return
     }
 
-    if (platform === "win32") {
-      success = await this.exec(`${pip_path} install cmake`)
-      if (!success) {
-        throw new Error("cmake installation failed")
-        return
-      }
-      await this.exec("mkdir build", this.home)      
-      await this.exec(`Remove-Item -path ${path.resolve(this.home, "build", "CMakeCache.txt")}`, this.home)
 
-      const cmake_path = path.join(venv_path, "Scripts", "cmake")
-      await this.exec(`${cmake_path} ..`, path.resolve(this.home, "build"))
-      await this.exec(`${cmake_path} --build . --config Release`, path.resolve(this.home, "build"))
-
-    } else {
-      success = await this.exec("make", this.home)
-      if (!success) {
-        throw new Error("running 'make' failed")
-        return
-      }
-    }
-    for(let model of models) {
-      await this.download(model)
-      const outputFile = path.resolve(this.home, 'models', model, 'ggml-model-f16.bin')
-      if (fs.existsSync(outputFile)) {
-        console.log(`Skip conversion, file already exists: ${outputFile}`)
-      } else {
-        await this.exec(`${python_path} convert-pth-to-ggml.py models/${model}/ 1`, this.home)
-      }
-      await this.quantize(model)
-    }
   }
   serve(port) {
     const httpServer = createServer();
@@ -307,63 +339,6 @@ class Dalai {
       await this.connect(req, cb)
     } else {
       await this.query(req, cb)
-    }
-  }
-  async query(req, cb) {
-    console.log(`> query:`, req)
-    if (req.method === "installed") {
-      let models = await this.installed()
-      for(let model of models) {
-        cb(model)
-      }
-      cb('\n\n<end>')
-      return
-    }
-
-    let o = {
-      seed: req.seed || -1,
-      threads: req.threads || 8,
-      n_predict: req.n_predict || 128,
-      model: `models/${req.model || "7B"}/ggml-model-q4_0.bin`
-    }
-
-    if (!fs.existsSync(path.resolve(this.home, o.model))) {
-      cb(`File does not exist: ${o.model}. Try "dalai llama ${req.model}" first.`)
-      return
-    }
-
-    if (req.top_k) o.top_k = req.top_k
-    if (req.top_p) o.top_p = req.top_p
-    if (req.temp) o.temp = req.temp
-    if (req.batch_size) o.batch_size = req.batch_size
-    if (req.repeat_last_n) o.repeat_last_n = req.repeat_last_n
-    if (req.repeat_penalty) o.repeat_penalty = req.repeat_penalty
-
-    let chunks = []
-    for(let key in o) {
-      chunks.push(`--${key} ${o[key]}`)
-    }
-    chunks.push(`-p "${req.prompt}"`)
-
-    const main_bin_path = platform === "win32" ? path.resolve(this.home, "build", "Release", "llama") : path.resolve(this.home, "main")
-    if (req.full) {
-      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.home, cb)
-    } else {
-      const startpattern = /.*sampling parameters:.*/g
-      const endpattern = /.*mem per token.*/g
-      let started = false
-      let ended = false
-      let writeEnd = !req.skip_end
-      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.home, (msg) => {
-        if (endpattern.test(msg)) ended = true
-        if (started && !ended) {
-          cb(msg)
-        } else if (ended && writeEnd) {
-          cb('\n\n<end>')
-          writeEnd = false
-        }
-        if (startpattern.test(msg)) started = true
-      })
     }
   }
   connect(req, cb) {
@@ -401,25 +376,6 @@ class Dalai {
       ptyProcess.write(`${cmd}\r`)
       ptyProcess.write("exit\r")
     })
-  }
-  async quantize(model) {
-    let num = {
-      "7B": 1,
-      "13B": 2,
-      "30B": 4,
-      "65B": 8,
-    }
-    for(let i=0; i<num[model]; i++) {
-      const suffix = (i === 0 ? "" : `.${i}`)
-      const outputFile1 = path.resolve(this.home, `./models/${model}/ggml-model-f16.bin${suffix}`)
-      const outputFile2 = path.resolve(this.home, `./models/${model}/ggml-model-q4_0.bin${suffix}`)
-      if (fs.existsSync(outputFile1) && fs.existsSync(outputFile2)) {
-        console.log(`Skip quantization, files already exists: ${outputFile1} and ${outputFile2}}`)
-        continue
-      }
-      const bin_path = platform === "win32" ? path.resolve(this.home, "build", "Release") : this.home
-      await this.exec(`./quantize ${outputFile1} ${outputFile2} 2`, bin_path)
-    }
   }
   progress(task, percent) {
     this.progressBar.update(percent/100);

@@ -6,37 +6,42 @@ if (process.argv.length > 0) {
   if (cmd === "serve") {
     const port = (args.length > 0 ? parseInt(args[0]) : 3000)
     Web(port)
-  } else if (cmd === "llama" || cmd === "install") {
-    if (args.length === 0) args = ["7B"]
-    for(let arg of args) {
-      if (!["7B", "13B",  "30B", "65B"].includes(arg)) {
-        console.log(`##########################################################
-#
-#   ERROR
-#   The arguments must be one or more of the following:
-# 
-#   7B, 13B, 30B, 65B
-#
-##########################################################
-
-[Example]
-
-# install just 7B (default)
-npx dalai install   
-
-# install 7B manually
-npx dalai install 7B
-
-# install 7B and 13B
-npx dalai install 7B 13B
-`)
-        process.exit(1)
-        break;
-      }
-    }
-    new Dalai().install(...args).then(() => {
+  } else if (cmd === "setup") {
+    new Dalai().setup().then(() => {
       process.exit(0)
+    }).catch((e) => {
+      console.log("Error", e)
+      process.exit(1)
     })
+  } else {
+    if (args.length > 0) {
+      let core = cmd
+      let [method, ...callparams] = args 
+      let dalai = new Dalai()
+      console.log({ method, callparams })
+      // 1. install => install the core module
+      // 2. get => get models
+      dalai[method](core, ...callparams).then(() => {
+        process.exit(0)
+      }).catch((e) => {
+        console.log("ERROR", e)
+        process.exit(1)
+      })
+    } else {
+      console.log("############################################")
+      console.log("#")
+      console.log("#  Supported Commands:")
+      console.log("#")
+      console.log("#  1. System command")
+      console.log("#")
+      console.log("#    dalai serve <port (optional)>")
+      console.log("#")
+      console.log("#  2. Model command")
+      console.log("#")
+      console.log("#    dalai llama get <model names>")
+      console.log("#")
+      console.log("############################################")
+    }
   }
 } else {
   console.log("ERROR: Please pass a command")
