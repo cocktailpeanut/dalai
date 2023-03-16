@@ -238,8 +238,6 @@ class Dalai {
       throw new Error("outdated Node version, please install Node 18 or newer")
     }
 
-
-
     /**************************************************************************************************************
     *
     * 3. Download Global Dependencies
