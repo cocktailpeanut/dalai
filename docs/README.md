@@ -431,32 +431,6 @@ const models = await dalai.installed()
 console.log(models)     // prints ["7B", "13B"]
 ```
 
-## 6. zip()
-
-Create a portable compressed archive
-
-1. quantize the original model files
-2. prune out the original files and only keep the quantized ones
-3. initialize a git repository
-
-```javascript
-await dalai.zip({
-  
-})
-```
-
----
-
-## 7. load()
-
-Load from a zipped repository
-
-```javascript
-await dalai.load({
-  
-})
-```
-
 # FAQ
 
 ## Updating to the latest
