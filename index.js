@@ -187,11 +187,15 @@ class Dalai {
     }
     let success;
     try {
-      console.log("try cloning")
+      console.log("try cloning", this.home)
       await git.clone({ fs, http, dir: this.home, url: "https://github.com/ggerganov/llama.cpp.git" })
     } catch (e) {
-      console.log("try pulling")
-      await git.pull({ fs, http, dir: this.home, url: "https://github.com/ggerganov/llama.cpp.git" })
+      console.log("try pulling", this.home)
+      try {
+        await git.pull({ fs, http, dir: this.home, url: "https://github.com/ggerganov/llama.cpp.git" })
+      } catch (e2) {
+        console.log("#", e2)
+      }
     }
 
     // windows don't ship with python, so install a dedicated self-contained python
