@@ -3,7 +3,7 @@ const config = {
   seed: -1,
   threads: 4,
   n_predict: 10000,
-  model: "7B",
+  model: "30B",
   top_k: 40,
   top_p: 0.9,
   temp: 0.8,
@@ -54,11 +54,13 @@ const renderHeader = (config) => {
     .join("");
   return `
 <div class='config-container'>
-${fields}
-<div class='kv'>
-<label>model</label>
-<select id="model" name="model">${models}</select>
-</div>
+  ${fields}
+  <div class='kv'>
+    <label>model</label>
+    <label class="dropdown-arrow">
+      <select id="model" name="model">${models}</select>
+    </label>
+  </div>
 </div>`;
 };
 let isRunningModel = false;

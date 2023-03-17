@@ -294,6 +294,40 @@ input[type="text"]:focus,
 select:focus {
   border: #fff3 solid 1px;
 }
+select {
+  display: inline-block;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  width: 160px;
+}
+label.dropdown-arrow {
+  position: relative;
+}
+label.dropdown-arrow:after {
+  content: ">";
+  font: 16px "Consolas", monospace;
+  color: #888;
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  transform: rotate(90deg);
+  right: 10px;
+  top: 10px;
+  padding: 0 0 5px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #8885;
+  position: absolute;
+  pointer-events: none;
+}
+option {
+  background-color: #202123;
+  height: 20px;
+}
 
 .config-container {
   display: flex;

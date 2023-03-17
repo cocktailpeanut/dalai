@@ -30,7 +30,7 @@ class Dalai {
     //  Otherwise if you want to customize the path you can just pass in the "home" attribute to manually set it.
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    home = "D:\\Documents\\LLaMA\\llama.cpp";
+    // home = "D:\\Documents\\LLaMA\\llama.cpp";
     this.home = home
       ? path.resolve(home)
       : path.resolve(os.homedir(), "llama.cpp");
