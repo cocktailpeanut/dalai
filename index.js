@@ -37,8 +37,12 @@ class Dalai {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     this.home = home ? path.resolve(home) : path.resolve(os.homedir(), "dalai")
     try {
+      console.log("mkdir", this.home)
       fs.mkdirSync(this.home, { recursive: true })
-    } catch (e) { }
+    } catch (e) {
+      console.log("E", e)
+    }
+
     this.config = {
       name: 'xterm-color',
       cols: 200,
