@@ -125,26 +125,6 @@ npx dalai install 7B 13B
       await this.root.down(url, path.resolve(resolvedPath, file), {
         "User-Agent": "Mozilla/5.0"
       })
-//      await this.root.exec(`${python_path} -m wget --user-agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" ${url}`, resolvedPath)
-
-/*
-      const task = `downloading ${file}`
-      const downloader = new Downloader({
-        url: `https://agi.gpt4.org/llama/LLaMA/${model}/${file}`,
-        directory: path.resolve(this.home, "models", model),
-        onProgress: (percentage, chunk, remainingSize) => {
-          this.root.progress(task, percentage)
-        },
-      });
-      try {
-        await this.root.startProgress(task)
-        await downloader.download();
-      } catch (error) {
-        console.log(error);
-      }
-      this.root.progressBar.update(1);
-      term("\n")
-      */
     }
 
     const files2 = ["tokenizer_checklist.chk", "tokenizer.model"]
@@ -155,29 +135,9 @@ npx dalai install 7B 13B
 //      }
       const url = `https://agi.gpt4.org/llama/LLaMA/${file}`
       const dir = path.resolve(this.home, "models")
-      //await this.root.exec(`${python_path} -m wget --user-agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" ${url}`, dir)
-
       await this.root.down(url, path.resolve(dir, file), {
         "User-Agent": "Mozilla/5.0"
       })
-      /*
-      const task = `downloading ${file}`
-      const downloader = new Downloader({
-        url: `https://agi.gpt4.org/llama/LLaMA/${file}`,
-        directory: path.resolve(this.home, "models"),
-        onProgress: (percentage, chunk, remainingSize) => {
-          this.root.progress(task, percentage)
-        },
-      });
-      try {
-        await this.root.startProgress(task)
-        await downloader.download();
-      } catch (error) {
-        console.log(error);
-      }
-      this.root.progressBar.update(1);
-      term("\n")
-      */
     }
 
   }
