@@ -18,6 +18,7 @@ const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 const L = require("./llama")
 const A = require("./alpaca")
+const exists = s => new Promise(r=>fs.access(s, fs.constants.F_OK, e => r(!e)))
 class Dalai {
   constructor(home) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +159,8 @@ class Dalai {
       model: `models/${Model || "7B"}/ggml-model-q4_0.bin`,
     }
 
-    if (!fs.existsSync(path.resolve(this.home, Core, "models", Model))) {
+    let e = await exists(path.resolve(this.home, Core, "models", Model))
+    if (!e) {
       cb(`File does not exist: ${Model}. Try "dalai ${Core} get ${Model}" first.`)
       return
     }
@@ -198,8 +200,18 @@ class Dalai {
       })
     }
   }
-  async get(core, ...models) {
-    let res = await this.cores[core].get(...models)
+  async add(core, ...models) {
+    // first install
+    let engine = this.cores[core]
+    let e = await exists(path.resolve(engine.home));
+    if (e) {
+      // already exists, no need to install
+    } else {
+      await this.install(core)
+    }
+
+    // next add the models
+    let res = await this.cores[core].add(...models)
     return res
   }
   async installed() {
@@ -218,7 +230,8 @@ class Dalai {
 
       console.log({ modelFolders })
       for(let modelFolder of modelFolders) {
-        if (fs.existsSync(path.resolve(modelsPath, modelFolder, 'ggml-model-q4_0.bin'))) {
+        let e = await exists(path.resolve(modelsPath, modelFolder, 'ggml-model-q4_0.bin'))
+        if (e) {
           modelNames.push(`${core}.${modelFolder}`)
           console.log("exists", modelFolder)
         }
@@ -233,7 +246,6 @@ class Dalai {
     *
     **************************************************************************************************************/
     let engine = this.cores[core]
-    let exists = s => new Promise(r=>fs.access(s, fs.constants.F_OK, e => r(!e)))
     let e = await exists(path.resolve(engine.home));
     if (e) {
       console.log("try fetching", engine.home, engine.url)

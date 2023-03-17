@@ -10,11 +10,7 @@ Run LLaMA and Alpaca on your computer.
 
 ## JUST RUN THIS
 
-<img src="alpa.png" class='round'>
-
-or
-
-<img src="llam.png" class='round'>
+<img src="dalaicli.png" class='round'>
 
 ## TO GET
 
@@ -116,53 +112,36 @@ First install dalai:
 npm install -g dalai
 ```
 
-### Step 3. Install Engines
+### Step 3. Add models
 
 Currently supported engines are `llama` and `alpaca`.
 
-#### Install LLaMA
+#### Add alpaca models
 
-To install `llama`, run:
-
-```
-dalai llama install
-```
-
-#### Install Alpaca
-
-To install `alpaca`, run:
+Currently alpaca only has the 7B model:
 
 ```
-dalai alpaca install
+dalai alpaca add 7B
 ```
 
-### Step 4. Get Models
 
-#### Download LLaMA models
+#### Add llama models
 
 To download llama models, you can run:
 
 ```
-dalai llama get 7B
+dalai llama add 7B
 ```
 
 
 or to download multiple models:
 
 ```
-dalai llama get 7B 13B
-```
-
-#### Download Alpaca models
-
-Currently alpaca only has the 7B model:
-
-```
-dalai alpaca get 7B
+dalai llama add 7B 13B
 ```
 
 
-### Step 3. Run Web UI
+### Step 4. Run Web UI
 
 After everything has been installed, run the following command to launch the web UI server:
 
@@ -224,62 +203,40 @@ Install Node.js:
 
 After both have been installed, open powershell and type `python` to see if the application exists. And also type `node` to see if the application exists as well.
 
-Once you've checked that they both exist, try the `npx dalai llama` command again.
-
+Once you've checked that they both exist, try the `npm install -g llama` command again.
 
 ---
 
-
-### Step 3. Install Engines
+### Step 3. Add models
 
 Currently supported engines are `llama` and `alpaca`.
 
-#### Install LLaMA
+#### Add alpaca models
 
-To install `llama`, run:
-
-```
-dalai llama install
-```
-
-#### Install Alpaca
-
-To install `alpaca`, run:
+Currently alpaca only has the 7B model:
 
 ```
-dalai alpaca install
+dalai alpaca add 7B
 ```
 
----
 
-### Step 4. Get Models
-
-#### Download LLaMA models
+#### Add llama models
 
 To download llama models, you can run:
 
 ```
-dalai llama get 7B
+dalai llama add 7B
 ```
 
 
 or to download multiple models:
 
 ```
-dalai llama get 7B 13B
+dalai llama add 7B 13B
 ```
 
-#### Download Alpaca models
 
-Currently alpaca only has the 7B model:
-
-```
-dalai alpaca get 7B
-```
-
----
-
-### Step 5. Run Web UI
+### Step 4. Run Web UI
 
 After everything has been installed, run the following command to launch the web UI server:
 
@@ -288,7 +245,6 @@ dalai serve
 ```
 
 and open http://localhost:3000 in your browser. Have fun!
-
 
 ---
 
@@ -324,53 +280,38 @@ First install dalai:
 npm install -g dalai
 ```
 
-### Step 3. Install Engines
+---
+
+### Step 3. Add models
 
 Currently supported engines are `llama` and `alpaca`.
 
-#### Install LLaMA
+#### Add alpaca models
 
-To install `llama`, run:
-
-```
-dalai llama install
-```
-
-#### Install Alpaca
-
-To install `alpaca`, run:
+Currently alpaca only has the 7B model:
 
 ```
-dalai alpaca install
+dalai alpaca add 7B
 ```
 
-### Step 4. Get Models
 
-#### Download LLaMA models
+#### Add llama models
 
 To download llama models, you can run:
 
 ```
-dalai llama get 7B
+dalai llama add 7B
 ```
 
 
 or to download multiple models:
 
 ```
-dalai llama get 7B 13B
-```
-
-#### Download Alpaca models
-
-Currently alpaca only has the 7B model:
-
-```
-dalai alpaca get 7B
+dalai llama add 7B 13B
 ```
 
 
-### Step 3. Run Web UI
+### Step 4. Run Web UI
 
 After everything has been installed, run the following command to launch the web UI server:
 
@@ -381,63 +322,7 @@ dalai serve
 and open http://localhost:3000 in your browser. Have fun!
 
 
----
 
-
-# Commands
-
-## 1. install
-
-### LLaMA
-
-Install the core engine for the model
-
-```
-dalai llama install
-```
-
-### Alpaca
-
-Install the core engine for the model
-
-```
-dalai alpaca install
-```
-
-## 2. get
-
-Download the full LLaMA model and convert and compress them
-
-### LLaMA
-
-Download one model:
-
-```
-dalai llama get 7B
-```
-
-Download multiple models:
-
-```
-dalai llama get 7B 13B
-```
-
-### Alpaca
-
-Currently only 7B available:
-
-```
-dalai alpaca get 7B
-```
-
-
-## 3. serve
-
-Start a dalai server and an API endpoint (powered by socket.io)
-
-```
-dalai serve
-```
 
 
 ---
@@ -704,7 +589,10 @@ await dalai.install("7B", "13B")
 
 As of `dalai@0.3.0` the recommended way to use dalai is through `npm install -g` (not the `npx` method)
 
-The simplest way to make sure you have the correct version is running:
+To make sure you update to the latest, first find the latest version at https://www.npmjs.com/package/dalai
+
+
+Let's say the new version is `0.3.0`. Then you just need to run:
 
 ```
 npm install -g dalai@0.3.0    
