@@ -5,6 +5,7 @@ const Dalai = require("../../index");
 const app = express();
 const httpServer = http.Server(app);
 const dalai = new Dalai();
+var os = require("os-utils");
 const start = (port) => {
   dalai.http(httpServer);
   app.use(express.static(path.resolve(__dirname, "public")));
@@ -21,6 +22,30 @@ const start = (port) => {
   app.get("/index.js", (req, res) => {
     res.sendFile(path.resolve(__dirname, "views", "index.js"));
   });
+
+  // CPU
+  app.get("/sys/cpuUsage", (req, res) => {
+    os.cpuUsage(function (v) {
+      res.send(v);
+    });
+  });
+  app.get("/sys/cpuFree", (req, res) => {
+    os.cpuFree(function (v) {
+      res.send(v);
+    });
+  });
+
+  // OTHER STATS
+  app.get("/sys/cpuCount", (req, res) => {
+    res.send(os.cpuCount());
+  });
+  app.get("/sys/freemem", (req, res) => {
+    res.send(os.freemem());
+  });
+  app.get("/sys/totalmem", (req, res) => {
+    res.send(os.totalmem());
+  });
+
   httpServer.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
   });

@@ -2,7 +2,7 @@ var gen = 0;
 const config = {
   seed: -1,
   threads: 4,
-  n_predict: 10000,
+  n_predict: 6942069,
   model: "7B",
   top_k: 40,
   top_p: 0.9,
@@ -114,6 +114,7 @@ stopButton.addEventListener("click", (e) => {
   setTimeout(() => {
     isRunningModel = false;
     form.setAttribute("class", isRunningModel ? "running-model" : "");
+    input.style.height = "34px";
   }, 200);
 });
 

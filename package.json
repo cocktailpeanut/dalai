@@ -18,6 +18,7 @@
     "isomorphic-git": "^1.22.0",
     "node-pty": "^0.10.1",
     "nodejs-file-downloader": "^4.10.6",
+    "os-utils": "^0.0.14",
     "semver": "^7.3.8",
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1",
