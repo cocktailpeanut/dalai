@@ -32,17 +32,25 @@ Run LLaMA on your computer.
   - [Updating to latest](#updating-to-the-latest)
   - [Staying up to date](#staying-up-to-date)
 
-#### JUST RUN THIS:
+---
 
-<img src="terminal.png" class='round'>
+## JUST RUN THIS
 
-#### TO GET:
+<img src="alpa.png" class='round'>
 
-![dalai.gif](dalai.gif)
+or
+
+<img src="llam.png" class='round'>
+
+## TO GET
+
+Both alpaca and llama working on your computer!
+
+![alpaca.gif](alpaca.gif)
 
 ---
 
-1. Powered by [llama.cpp](https://github.com/ggerganov/llama.cpp) and [llama-dl CDN](https://github.com/shawwn/llama-dl)
+1. Powered by [llama.cpp](https://github.com/ggerganov/llama.cpp), [llama-dl CDN](https://github.com/shawwn/llama-dl), and [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp)
 2. Hackable web app included
 3. Ships with JavaScript API
 4. Ships with [Socket.io](https://socket.io/) API
@@ -65,6 +73,19 @@ Runs on most modern computers. Unless your computer is very very old, it should 
 
 ## 3. Disk Space Requirements
 
+### Alpaca
+
+Currently only the 7B model is available via [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp)
+
+#### 7B
+
+Alpaca comes fully quantized (compressed), and the only space you need for the 7B model is 4.21GB:
+
+![alpaca_spec.png](alpaca_spec.png)
+
+
+### LLaMA
+
 You need a lot of space for storing the models.
 
 You do NOT have to install all models, you can install one by one. Let's take a look at how much space each model takes up:
@@ -75,28 +96,28 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 >
 > You can optimize this if you delete the original models (which are much larger) after installation and keep only the quantized versions.
 
-### 7B
+#### 7B
 
 - Full: The model takes up 31.17GB
 - Quantized: 4.21GB
 
 ![7b.png](7b.png)
 
-### 13B
+#### 13B
 
 - Full: The model takes up 60.21GB
 - Quantized: 4.07GB * 2 = 8.14GB
 
 ![13b.png](13b.png)
 
-### 30B
+#### 30B
 
 - Full: The model takes up 150.48GB
 - Quantized: 5.09GB * 4 = 20.36GB
 
 ![30b.png](30b.png)
 
-### 65B
+#### 65B
 
 - Full: The model takes up 432.64GB
 - Quantized: 5.11GB * 8 = 40.88GB
@@ -115,32 +136,69 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 
 ### Step 2. Install Dalai
 
-Basic install (7B model only)
+First install dalai:
 
 ```
-npx dalai llama
+npm install -g dalai
 ```
 
-Or, install all models
+### Step 3. Install Engines
+
+Currently supported engines are `llama` and `alpaca`.
+
+#### Install LLaMA
+
+To install `llama`, run:
 
 ```
-npx dalai llama 7B 13B 30B 65B
+dalai llama install
 ```
 
-The install command :
+#### Install Alpaca
 
-1. Creates a folder named `dalai` under your home directory (`~`)
-2. Installs and builds the [llama.cpp](https://github.com/ggerganov/llama.cpp) project under `~/llama.cpp`
-3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/llama.cpp/models`
-4. Runs some tasks to convert the LLaMA models so they can be used
+To install `alpaca`, run:
+
+```
+dalai alpaca install
+```
+
+### Step 4. Get Models
+
+#### Download LLaMA models
+
+To download llama models, you can run:
+
+```
+dalai llama get 7B
+```
+
+
+or to download multiple models:
+
+```
+dalai llama get 7B 13B
+```
+
+#### Download Alpaca models
+
+Currently alpaca only has the 7B model:
+
+```
+dalai alpaca get 7B
+```
+
 
 ### Step 3. Run Web UI
+
+After everything has been installed, run the following command to launch the web UI server:
+
 ```
-npm start
+dalai serve
 ```
 
-After everything has been installed, open http://localhost:3000 in your browser. Have fun!
+and open http://localhost:3000 in your browser. Have fun!
 
+---
 
 ## Windows
 
@@ -152,8 +210,6 @@ Press the button below to visit the Visual Studio downloads page and download:
 
 <a href="https://visualstudio.microsoft.com/downloads/" class='btn'>Download Microsoft Visual Studio</a>
 
----
-
 **IMPORTANT!!!**
 
 When installing Visual Studio, make sure to check the 3 options as highlighted below:
@@ -164,65 +220,254 @@ When installing Visual Studio, make sure to check the 3 options as highlighted b
 
 ![vs.png](vs.png)
 
-### Step 2. Install Dalai
+---
 
-Basic install (7B model only)
+### Step 2.1. Install Dalai
 
-```
-npx dalai llama
-```
-
-Or, install all models
+First install dalai:
 
 ```
-npx dalai llama 7B 13B 30B 65B
+npm install -g dalai
 ```
 
-The install command :
+If this worked without any errors, go to step 3.
 
-1. Creates a folder named `dalai` under your home directory (`~`)
-2. Installs and builds the [llama.cpp](https://github.com/ggerganov/llama.cpp) project under `~/llama.cpp`
-3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/llama.cpp/models`
-4. Runs some tasks to convert the LLaMA models so they can be used
+Ohterwise try the troubleshoot below:
 
-### Step 3. Run Web UI
+---
+
+### Step 2.2. Troubleshoot (optional)
+
+In case above steps fail to install, try installing node.js and python separately.
+
+Install Python:
+
+<a href="https://www.python.org/ftp/python/3.10.10/python-3.10.10-embed-amd64.zip" class='btn'>Download Python</a>
+
+Install Node.js:
+
+<a href="https://nodejs.org/en/download/" class='btn'>Download Node.js</a>
+
+After both have been installed, open powershell and type `python` to see if the application exists. And also type `node` to see if the application exists as well.
+
+Once you've checked that they both exist, try the `npx dalai llama` command again.
+
+
+---
+
+
+### Step 3. Install Engines
+
+Currently supported engines are `llama` and `alpaca`.
+
+#### Install LLaMA
+
+To install `llama`, run:
+
 ```
-npm start
+dalai llama install
 ```
 
-After everything has been installed, open http://localhost:3000 in your browser. Have fun!
+#### Install Alpaca
+
+To install `alpaca`, run:
+
+```
+dalai alpaca install
+```
+
+---
+
+### Step 4. Get Models
+
+#### Download LLaMA models
+
+To download llama models, you can run:
+
+```
+dalai llama get 7B
+```
+
+
+or to download multiple models:
+
+```
+dalai llama get 7B 13B
+```
+
+#### Download Alpaca models
+
+Currently alpaca only has the 7B model:
+
+```
+dalai alpaca get 7B
+```
+
+---
+
+### Step 5. Run Web UI
+
+After everything has been installed, run the following command to launch the web UI server:
+
+```
+dalai serve
+```
+
+and open http://localhost:3000 in your browser. Have fun!
+
+
+---
+
 
 ## Linux
 
-### Step 1. Install
+### Step 1. Install Dependencies
 
-Basic install (7B model only)
+You need to make sure you have the correct version of Python and Node.js installed.
+
+#### Step 1.1. Python <= 3.10
+
+<a href="https://pimylifeup.com/installing-python-on-linux/" class='btn'>Download node.js</a>
+
+> Make sure the version is 3.10 or lower (not 3.11)
+Python must be 3.10 or below (pytorch and other libraries are not supported yet on the latest)
+
+
+
+#### Step 1.2. Node.js >= 18
+
+<a href="https://nodejs.org/en/download/package-manager/" class='btn'>Download node.js</a>
+
+> Make sure the version is 18 or higher
+
+
+
+### Step 2. Install Dalai
+
+First install dalai:
 
 ```
-npx dalai llama
+npm install -g dalai
 ```
 
-Or, install all models
+### Step 3. Install Engines
+
+Currently supported engines are `llama` and `alpaca`.
+
+#### Install LLaMA
+
+To install `llama`, run:
 
 ```
-npx dalai llama 7B 13B 30B 65B
+dalai llama install
 ```
 
-The install command :
+#### Install Alpaca
 
-1. Creates a folder named `dalai` under your home directory (`~`)
-2. Installs and builds the [llama.cpp](https://github.com/ggerganov/llama.cpp) project under `~/llama.cpp`
-3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/llama.cpp/models`
-4. Runs some tasks to convert the LLaMA models so they can be used
+To install `alpaca`, run:
 
-### Step 2. Run Web UI
 ```
-npm start
+dalai alpaca install
 ```
 
-After everything has been installed, open http://localhost:3000 in your browser. Have fun!
+### Step 4. Get Models
+
+#### Download LLaMA models
+
+To download llama models, you can run:
+
+```
+dalai llama get 7B
+```
+
+
+or to download multiple models:
+
+```
+dalai llama get 7B 13B
+```
+
+#### Download Alpaca models
+
+Currently alpaca only has the 7B model:
+
+```
+dalai alpaca get 7B
+```
+
+
+### Step 3. Run Web UI
+
+After everything has been installed, run the following command to launch the web UI server:
+
+```
+dalai serve
+```
+
+and open http://localhost:3000 in your browser. Have fun!
+
 
 ---
+
+
+# Commands
+
+## 1. install
+
+### LLaMA
+
+Install the core engine for the model
+
+```
+dalai llama install
+```
+
+### Alpaca
+
+Install the core engine for the model
+
+```
+dalai alpaca install
+```
+
+## 2. get
+
+Download the full LLaMA model and convert and compress them
+
+### LLaMA
+
+Download one model:
+
+```
+dalai llama get 7B
+```
+
+Download multiple models:
+
+```
+dalai llama get 7B 13B
+```
+
+### Alpaca
+
+Currently only 7B available:
+
+```
+dalai alpaca get 7B
+```
+
+
+## 3. serve
+
+Start a dalai server and an API endpoint (powered by socket.io)
+
+```
+dalai serve
+```
+
+
+---
+
 
 # API
 
@@ -286,7 +531,8 @@ dalai.request(req, callback)
 
 - `req`: a request object. made up of the following attributes:
   - `prompt`: **(required)** The prompt string
-  - `model`: **(required)** The model name to query ("7B", "13B", etc.)
+  - `model`: **(required)** The model type + model name to query. Takes the following form: `<model_type>.<model_name>`
+    - Example: `alpaca.7B`, `llama.13B`, ...
   - `url`: only needed if connecting to a remote dalai server
     - if unspecified, it uses the node.js API to directly run dalai locally
     - if specified (for example `ws://localhost:3000`) it looks for a socket.io endpoint at the URL and connects to it.
@@ -393,15 +639,18 @@ http.listen(3000, () => {
 })
 ```
 
-## 5. install()
+## 5. get()
 
 ### Syntax
 
 ```javascript
-await dalai.install(model1, model2, ...)
+await dalai.install(model_type, model_name1, model_name2, ...)
 ```
 
-- `models`: the model names to install ("7B"`, "13B", "30B", "65B", etc)
+- `model_type`: the name of the model. currently supports:
+  - "alpaca"
+  - "llama"
+- `model1`, `model2`, ...: the model names to install ("7B"`, "13B", "30B", "65B", etc)
 
 ### Examples
 
@@ -436,25 +685,56 @@ const models = await dalai.installed()
 console.log(models)     // prints ["7B", "13B"]
 ```
 
+<!--
+
 ---
+
+## 7. download()
+
+Download models.
+
+There are two download options:
+
+1. **LLaMA:** Download the original LLaMA model, convert it, and quantize (compress) it
+2. **LLaMA.zip:** Download the compressed version (generated from step 1 and published on HuggingFace)
+
+### Syntax
+
+```javascript
+await dalai.download(model1, model2, model3, ...)
+```
+
+- `models`: the model names to install. Can be: "7B"`, "13B", "30B", "65B", "7B.zip", "13B.zip", "30B.zip", "65B.zip"
+  - "7B", "13B", "30B", "65B": download the raw model, convert, and quantize
+  - "7B.zip", "13B.zip", "30B.zip", "65B.zip": download the quantized model (no need to waste time downloading huge files)
+
+### Examples
+
+Install the "7B" and "13B" models:
+
+
+```javascript
+const Dalai = require("dalai");
+const dalai = new Dalai()
+await dalai.install("7B", "13B")
+```
+
+-->
+
+---
+
 
 # FAQ
 
 ## Updating to the latest
 
-Dalai is a young project and will evolve quickly.
+As of `dalai@0.3.0` the recommended way to use dalai is through `npm install -g` (not the `npx` method)
 
-To update dalai, you will need to run the dalai command with a version number specified (You only need to do this once when you update).
-
-For example, let's say you've been using `dalai@0.1.0` but a new version `dalai@0.2.0` came out.
-
-The simplest way to update is to just run the dalai server:
+The simplest way to make sure you have the correct version is running:
 
 ```
-npx dalai@0.2.0 serve
+npm install -g dalai@0.3.0    
 ```
-
-Once you run the command it will ask you if you want to update. Confirm, and it will now install `0.2.0`, and from that point on you don't need to specify the version. You can just run `npx dalai serve` and the new version will be executed from that point on.
 
 
 ## Staying up to date
