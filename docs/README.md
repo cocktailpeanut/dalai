@@ -1,4 +1,4 @@
-# Dalai
+# Dalai with ChatGPT UI
 
 Run LLaMA on your computer.
 
@@ -7,6 +7,30 @@ Run LLaMA on your computer.
 <a href="https://discord.gg/XahBUrbVwz" class='inverse btn'><i class="fa-brands fa-discord"></i> Discord</a>
 
 ---
+
+## Table of Contents
+- [Intro](https://github.com/ItsPi3141/dalai#intro)
+  - [Cross platform](https://github.com/ItsPi3141/dalai#1-cross-platform)
+  - [System requirements](https://github.com/ItsPi3141/dalai#2-system-requirements)
+  - [Disk space requirements](https://github.com/ItsPi3141/dalai#3-disk-space-requirements)
+    - [7B model](https://github.com/ItsPi3141/dalai#7b)
+    - [13B model](https://github.com/ItsPi3141/dalai#13b)
+    - [30B model](https://github.com/ItsPi3141/dalai#30b)
+    - [65B model](https://github.com/ItsPi3141/dalai#65b)
+- [**Quickstart**](https://github.com/ItsPi3141/dalai#65b)
+  - [MacOS](https://github.com/ItsPi3141/dalai#mac)
+  - [Windows](https://github.com/ItsPi3141/dalai#windows)
+  - [Linux](https://github.com/ItsPi3141/dalai#linux)
+- [API](https://github.com/ItsPi3141/dalai#api)
+  - [constructor()](https://github.com/ItsPi3141/dalai#1-constructor)
+  - [request()](https://github.com/ItsPi3141/dalai#2-request)
+  - [serve()](https://github.com/ItsPi3141/dalai#3-serve)
+  - [http()](https://github.com/ItsPi3141/dalai#4-http)
+  - [install()](https://github.com/ItsPi3141/dalai#5-install)
+  - [installed()](https://github.com/ItsPi3141/dalai#6-installed)
+- [FAQ](https://github.com/ItsPi3141/dalai#faq)
+  - [Updating to latest](https://github.com/ItsPi3141/dalai#updating-to-the-latest)
+  - [Staying up to date](https://github.com/ItsPi3141/dalai#staying-up-to-date)
 
 #### JUST RUN THIS:
 
@@ -111,6 +135,9 @@ The install command :
 4. Runs some tasks to convert the LLaMA models so they can be used
 
 ### Step 3. Run Web UI
+```
+npm start
+```
 
 After everything has been installed, open http://localhost:3000 in your browser. Have fun!
 
@@ -153,20 +180,21 @@ npx dalai llama 7B 13B 30B 65B
 
 The install command :
 
-1. Creates a folder named `dalai` under your home directory (`~`)
+1. Creates a folder named `dalai` under your Documents folder directory (`D:\Documents`). If folder doesn't exist, it will go to your home folder (`%USERPROFILE%`)
 2. Installs and builds the [llama.cpp](https://github.com/ggerganov/llama.cpp) project under `~/llama.cpp`
 3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/llama.cpp/models`
 4. Runs some tasks to convert the LLaMA models so they can be used
 
 ### Step 3. Run Web UI
+```
+npm start
+```
 
 After everything has been installed, open http://localhost:3000 in your browser. Have fun!
 
 ## Linux
 
 ### Step 1. Install
-
-After everything has been installed, open http://localhost:3000 in your browser. Have fun!
 
 Basic install (7B model only)
 
@@ -188,6 +216,9 @@ The install command :
 4. Runs some tasks to convert the LLaMA models so they can be used
 
 ### Step 2. Run Web UI
+```
+npm start
+```
 
 After everything has been installed, open http://localhost:3000 in your browser. Have fun!
 
