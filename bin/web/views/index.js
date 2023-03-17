@@ -174,7 +174,7 @@ socket.on("result", async ({ request, response, isRunning }) => {
           responses[id] = responses[id].replace("\n", "");
         }
 
-        responses[id] = responses[id].replaceAll(/\n\x1B\[29;200H./g, "");
+        responses[id] = responses[id].replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
 
         responses[id] = responses[id].replaceAll("ΓÇÖ", "'"); //apostrophe
         responses[id] = responses[id].replaceAll("ΓÇ£", '"'); //left quote

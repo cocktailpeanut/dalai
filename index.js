@@ -486,8 +486,20 @@ class Dalai {
           resolve(false);
         }
       });
+      // ptyProcess.write(`${cmd}\r`);
+      // ptyProcess.write("exit\r");
+      if (platform == "win32") {
+        ptyProcess.write(
+          "[System.Console]::OutputEncoding = [System.Console]::InputEncoding = [System.Text.Encoding]::UTF8\r"
+        );
+      }
       ptyProcess.write(`${cmd}\r`);
-      ptyProcess.write("exit\r");
+
+      if (platform == "win32") {
+        ptyProcess.write("exit $LASTEXITCODE\r");
+      } else {
+        ptyProcess.write("exit $?\r");
+      }
     });
   }
   async quantize(model) {
