@@ -3,7 +3,7 @@ const config = {
   seed: -1,
   threads: 4,
   n_predict: 10000,
-  model: "30B",
+  model: "7B",
   top_k: 40,
   top_p: 0.9,
   temp: 0.8,
@@ -71,9 +71,10 @@ const loading = (on) => {
     document.querySelector(".loading").classList.add("hidden");
   }
 };
-document.querySelector("form").addEventListener("input", (e) => {
+document.querySelector(".form-header").addEventListener("input", (e) => {
   if (e.target.tagName === "SELECT") {
     config[e.target.name] = config.models[e.target.selectedIndex];
+    console.log(config.models[e.target.selectedIndex]);
   } else {
     config[e.target.name] = e.target.value;
   }
@@ -82,11 +83,13 @@ form.addEventListener("submit", (e) => {
   e.preventDefault();
   e.stopPropagation();
   if (input.value) {
-    config.prompt = input.value.replaceAll("\n", "\\n").replaceAll('"', '\\"');
+    config.prompt = input.value
+      .replaceAll("\n", "\\n")
+      .replaceAll('"', '\\\\\\""');
     socket.emit("request", config);
     loading(config.prompt);
     input.value = "";
-    isRunningModel = !isRunningModel;
+    isRunningModel = true;
     form.setAttribute("class", isRunningModel ? "running-model" : "");
     gen++;
   }
@@ -109,7 +112,7 @@ stopButton.addEventListener("click", (e) => {
     method: "stop",
   });
   setTimeout(() => {
-    isRunningModel = !isRunningModel;
+    isRunningModel = false;
     form.setAttribute("class", isRunningModel ? "running-model" : "");
   }, 200);
 });
@@ -157,8 +160,10 @@ socket.on("result", async ({ request, response, isRunning }) => {
         response = response.replaceAll(/>/g, "&gt;");
         console.log(response);
         if (response.includes("[end of text]")) {
-          isRunningModel = false;
-          form.setAttribute("class", isRunningModel ? "running-model" : "");
+          setTimeout(() => {
+            isRunningModel = false;
+            form.setAttribute("class", isRunningModel ? "running-model" : "");
+          }, 200);
         }
         responses[id] = responses[id] + response;
 
