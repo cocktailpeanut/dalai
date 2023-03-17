@@ -71,11 +71,11 @@ npx dalai install 7B 13B
     for(let model of models) {
       await this.download(model)
       const outputFile = path.resolve(this.home, 'models', model, 'ggml-model-f16.bin')
-      if (fs.existsSync(outputFile)) {
-        console.log(`Skip conversion, file already exists: ${outputFile}`)
-      } else {
+      // if (fs.existsSync(outputFile)) {
+      //   console.log(`Skip conversion, file already exists: ${outputFile}`)
+      // } else {
         await this.root.exec(`${python_path} convert-pth-to-ggml.py models/${model}/ 1`, this.home)
-      }
+      // }
       await this.quantize(model)
     }
   }
