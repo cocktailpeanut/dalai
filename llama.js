@@ -100,6 +100,8 @@ npx dalai install 7B 13B
   }
   async download(model) {
     console.log(`Download model ${model}`)
+    const venv_path = path.join(this.root.home, "venv")
+    const python_path = platform == "win32" ? path.join(venv_path, "Scripts", "python.exe") : path.join(venv_path, 'bin', 'python')
     const num = {
       "7B": 1,
       "13B": 2,
@@ -114,11 +116,18 @@ npx dalai install 7B 13B
     await fs.promises.mkdir(resolvedPath, { recursive: true }).catch((e) => { })
 
     for(let file of files) {
-      if (fs.existsSync(path.resolve(resolvedPath, file))) {
-        console.log(`Skip file download, it already exists: ${file}`)
-        continue;
-      }
+//      if (fs.existsSync(path.resolve(resolvedPath, file))) {
+//        console.log(`Skip file download, it already exists: ${file}`)
+//        continue;
+//      }
 
+      const url = `https://agi.gpt4.org/llama/LLaMA/${model}/${file}`
+      await this.root.down(url, path.resolve(resolvedPath, file), {
+        "User-Agent": "Mozilla/5.0"
+      })
+//      await this.root.exec(`${python_path} -m wget --user-agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" ${url}`, resolvedPath)
+
+/*
       const task = `downloading ${file}`
       const downloader = new Downloader({
         url: `https://agi.gpt4.org/llama/LLaMA/${model}/${file}`,
@@ -135,14 +144,23 @@ npx dalai install 7B 13B
       }
       this.root.progressBar.update(1);
       term("\n")
+      */
     }
 
     const files2 = ["tokenizer_checklist.chk", "tokenizer.model"]
     for(let file of files2) {
-      if (fs.existsSync(path.resolve(this.home, "models", file))) {
-        console.log(`Skip file download, it already exists: ${file}`)
-        continue;
-      }
+//      if (fs.existsSync(path.resolve(this.home, "models", file))) {
+//        console.log(`Skip file download, it already exists: ${file}`)
+//        continue;
+//      }
+      const url = `https://agi.gpt4.org/llama/LLaMA/${file}`
+      const dir = path.resolve(this.home, "models")
+      //await this.root.exec(`${python_path} -m wget --user-agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" ${url}`, dir)
+
+      await this.root.down(url, path.resolve(dir, file), {
+        "User-Agent": "Mozilla/5.0"
+      })
+      /*
       const task = `downloading ${file}`
       const downloader = new Downloader({
         url: `https://agi.gpt4.org/llama/LLaMA/${file}`,
@@ -159,6 +177,7 @@ npx dalai install 7B 13B
       }
       this.root.progressBar.update(1);
       term("\n")
+      */
     }
 
   }

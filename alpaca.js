@@ -36,6 +36,7 @@ class Alpaca {
     for(let model of models) {
       const venv_path = path.join(this.root.home, "venv")
       const python_path = platform == "win32" ? path.join(venv_path, "Scripts", "python.exe") : path.join(venv_path, 'bin', 'python')
+//      const wget_path = platform == "win32" ? path.join(venv_path, "Scripts", "wget") : path.join(venv_path, 'bin', 'wget')
       /**************************************************************************************************************
       *
       * 5. Download models + convert + quantize
@@ -46,6 +47,13 @@ class Alpaca {
         console.log(`Skip conversion, file already exists: ${outputFile}`)
       } else {
         const task = `downloading ${outputFile}`
+        const url = "https://ipfs.io/ipfs/QmQ1bf2BTnYxq73MFJWu1B7bQ2UD6qG7D7YDCxhTndVkPC"
+        const dir = path.resolve(this.home, "models", model)
+        await fs.promises.mkdir(dir, { recursive: true }).catch((e) => { })
+
+        await this.root.down(url, path.resolve(dir, "ggml-model-q4_0.bin"))
+        //await this.root.exec(`${python_path} -m wget -o ggml-model-q4_0.bin ${url}`, dir)
+        /*
         const downloader = new Downloader({
           //url: "https://gateway.estuary.tech/gw/ipfs/QmQ1bf2BTnYxq73MFJWu1B7bQ2UD6qG7D7YDCxhTndVkPC",
           url: "https://ipfs.io/ipfs/QmQ1bf2BTnYxq73MFJWu1B7bQ2UD6qG7D7YDCxhTndVkPC",
@@ -69,6 +77,7 @@ class Alpaca {
         }
         this.root.progressBar.update(1);
         term("\n")
+        */
       }
     }
   }

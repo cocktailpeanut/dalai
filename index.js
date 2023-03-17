@@ -2,6 +2,7 @@ const os = require('os');
 const pty = require('node-pty');
 const git = require('isomorphic-git');
 const http = require('isomorphic-git/http/node');
+const Http = require("http")
 const path = require('path');
 const fs = require("fs");
 const tar = require('tar');
@@ -12,6 +13,7 @@ const term = require( 'terminal-kit' ).terminal;
 const Downloader = require("nodejs-file-downloader");
 const semver = require('semver');
 const _7z = require('7zip-min');
+const axios = require('axios')
 const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 const L = require("./llama")
@@ -45,6 +47,34 @@ class Dalai {
       llama: new L(this),
       alpaca: new A(this),
     }
+  }
+  down(url, dest, headers) {
+    return new Promise((resolve, reject) => {
+      const task = path.basename(dest)
+      this.startProgress(task)
+      axios({
+        url,
+        method: 'GET',
+        responseType: 'stream',
+        maxContentLength: Infinity,
+        headers,
+        onDownloadProgress: progressEvent => {
+          const progress = (progressEvent.loaded / progressEvent.total) * 100;
+          this.progress(task, progress)
+        }
+
+      }).then(response => {
+        const writer = fs.createWriteStream(dest);
+        response.data.pipe(writer);
+        writer.on('finish', () => {
+          this.progressBar.update(1);
+          term("\n")
+          resolve()
+        });
+      }).catch(error => {
+        reject(error)
+      });
+    })
   }
   async python () {
     // install self-contained python => only for windows for now
@@ -302,6 +332,7 @@ class Dalai {
       return
     }
     success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy`)
+    //success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy wget`)
     if (!success) {
       throw new Error("dependency installation failed")
       return
