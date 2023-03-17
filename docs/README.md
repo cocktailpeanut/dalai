@@ -10,7 +10,7 @@ Run LLaMA and Alpaca on your computer.
 
 ## JUST RUN THIS
 
-<img src="dalaicli.png" class='round'>
+<img src="npx.png" class='round'>
 
 ## TO GET
 
@@ -104,15 +104,7 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 
 <a href="https://nodejs.org/en/download/" class='btn'>Install Node.js</a>
 
-### Step 2. Install Dalai
-
-First install dalai:
-
-```
-npm install -g dalai
-```
-
-### Step 3. Add models
+### Step 2. Install models
 
 Currently supported engines are `llama` and `alpaca`.
 
@@ -121,7 +113,7 @@ Currently supported engines are `llama` and `alpaca`.
 Currently alpaca only has the 7B model:
 
 ```
-dalai alpaca add 7B
+npx dalai alpaca install 7B
 ```
 
 
@@ -130,14 +122,14 @@ dalai alpaca add 7B
 To download llama models, you can run:
 
 ```
-dalai llama add 7B
+npx dalai llama install 7B
 ```
 
 
 or to download multiple models:
 
 ```
-dalai llama add 7B 13B
+npx dalai llama install 7B 13B
 ```
 
 
@@ -146,7 +138,7 @@ dalai llama add 7B 13B
 After everything has been installed, run the following command to launch the web UI server:
 
 ```
-dalai serve
+npx dalai serve
 ```
 
 and open http://localhost:3000 in your browser. Have fun!
@@ -175,23 +167,39 @@ When installing Visual Studio, make sure to check the 3 options as highlighted b
 
 ---
 
-### Step 2.1. Install Dalai
+### Step 2.1. Install models
 
-First install dalai:
+Currently supported engines are `llama` and `alpaca`.
+
+#### Install alpaca
+
+Currently alpaca only has the 7B model:
 
 ```
-npm install -g dalai
+npx dalai alpaca install 7B
 ```
 
-If this worked without any errors, go to step 3.
 
-Ohterwise try the troubleshoot below:
+#### Add llama models
+
+To download llama models, you can run:
+
+```
+npx dalai llama install 7B
+```
+
+
+or to download multiple models:
+
+```
+npx dalai llama install 7B 13B
+```
 
 ---
 
 ### Step 2.2. Troubleshoot (optional)
 
-In case above steps fail to install, try installing node.js and python separately.
+In case above steps fail, try installing node.js and python separately.
 
 Install Python:
 
@@ -203,40 +211,10 @@ Install Node.js:
 
 After both have been installed, open powershell and type `python` to see if the application exists. And also type `node` to see if the application exists as well.
 
-Once you've checked that they both exist, try the `npm install -g llama` command again.
-
----
-
-### Step 3. Add models
-
-Currently supported engines are `llama` and `alpaca`.
-
-#### Add alpaca models
-
-Currently alpaca only has the 7B model:
-
-```
-dalai alpaca add 7B
-```
+Once you've checked that they both exist, try again.
 
 
-#### Add llama models
-
-To download llama models, you can run:
-
-```
-dalai llama add 7B
-```
-
-
-or to download multiple models:
-
-```
-dalai llama add 7B 13B
-```
-
-
-### Step 4. Run Web UI
+### Step 3. Run Web UI
 
 After everything has been installed, run the following command to launch the web UI server:
 
@@ -263,7 +241,6 @@ You need to make sure you have the correct version of Python and Node.js install
 Python must be 3.10 or below (pytorch and other libraries are not supported yet on the latest)
 
 
-
 #### Step 1.2. Node.js >= 18
 
 <a href="https://nodejs.org/en/download/package-manager/" class='btn'>Download node.js</a>
@@ -272,17 +249,9 @@ Python must be 3.10 or below (pytorch and other libraries are not supported yet 
 
 
 
-### Step 2. Install Dalai
-
-First install dalai:
-
-```
-npm install -g dalai
-```
-
 ---
 
-### Step 3. Add models
+### Step 2. Install models
 
 Currently supported engines are `llama` and `alpaca`.
 
@@ -291,7 +260,7 @@ Currently supported engines are `llama` and `alpaca`.
 Currently alpaca only has the 7B model:
 
 ```
-dalai alpaca add 7B
+npx dalai alpaca install 7B
 ```
 
 
@@ -300,14 +269,14 @@ dalai alpaca add 7B
 To download llama models, you can run:
 
 ```
-dalai llama add 7B
+npx dalai llama install 7B
 ```
 
 
 or to download multiple models:
 
 ```
-dalai llama add 7B 13B
+npx dalai llama install 7B 13B
 ```
 
 
@@ -316,7 +285,7 @@ dalai llama add 7B 13B
 After everything has been installed, run the following command to launch the web UI server:
 
 ```
-dalai serve
+npx dalai serve
 ```
 
 and open http://localhost:3000 in your browser. Have fun!
@@ -498,7 +467,7 @@ http.listen(3000, () => {
 })
 ```
 
-## 5. get()
+## 5. install()
 
 ### Syntax
 
@@ -513,13 +482,21 @@ await dalai.install(model_type, model_name1, model_name2, ...)
 
 ### Examples
 
-Install the "7B" and "13B" models:
+Install Llama "7B" and "13B" models:
 
 
 ```javascript
 const Dalai = require("dalai");
 const dalai = new Dalai()
-await dalai.install("7B", "13B")
+await dalai.install("llama", "7B", "13B")
+```
+
+Install alpaca 7B model:
+
+```javascript
+const Dalai = require("dalai");
+const dalai = new Dalai()
+await dalai.install("alpaca", "7B")
 ```
 
 ---
@@ -587,15 +564,12 @@ await dalai.install("7B", "13B")
 
 ## Updating to the latest
 
-As of `dalai@0.3.0` the recommended way to use dalai is through `npm install -g` (not the `npx` method)
-
 To make sure you update to the latest, first find the latest version at https://www.npmjs.com/package/dalai
 
-
-Let's say the new version is `0.3.0`. Then you just need to run:
+Let's say the latest version is `0.3.0`. To update the dalai version, run:
 
 ```
-npm install -g dalai@0.3.0    
+npx dalai@0.3.0 setup
 ```
 
 

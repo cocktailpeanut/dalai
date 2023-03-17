@@ -200,14 +200,14 @@ class Dalai {
       })
     }
   }
-  async add(core, ...models) {
+  async install(core, ...models) {
     // first install
     let engine = this.cores[core]
     let e = await exists(path.resolve(engine.home));
     if (e) {
       // already exists, no need to install
     } else {
-      await this.install(core)
+      await this.add(core)
     }
 
     // next add the models
@@ -239,7 +239,7 @@ class Dalai {
     }
     return modelNames
   }
-  async install (core) {
+  async add (core) {
     /**************************************************************************************************************
     *
     * 2. Download Core
@@ -247,11 +247,16 @@ class Dalai {
     **************************************************************************************************************/
     let engine = this.cores[core]
     let e = await exists(path.resolve(engine.home));
+    console.log("mkdir", path.resolve(engine.home))
+    await fs.promises.mkdir(path.resolve(engine.home), { recursive: true }).catch((e) => {
+      console.log("ERROR" ,e)
+    })
     if (e) {
       console.log("try fetching", engine.home, engine.url)
       await git.fetch({ fs, http, dir: engine.home, url: engine.url })
     } else {
       console.log("try cloning", engine.home, engine.url)
+//      await fs.promises.mkdir(engine.home, { recursive: true }).catch((e) => { })
       await git.clone({ fs, http, dir: engine.home, url: engine.url })
     }
     console.log("next", core, engine.make);
