@@ -64,6 +64,7 @@ class Dalai {
       const task = `downloading ${file}`
       const downloader = new Downloader({
         url: `https://agi.gpt4.org/llama/LLaMA/${model}/${file}`,
+        maxAttempts: 10,
         directory: path.resolve(this.home, "models", model),
         onProgress: (percentage, chunk, remainingSize) => {
           this.progress(task, percentage)
