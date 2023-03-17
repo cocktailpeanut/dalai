@@ -175,9 +175,9 @@ class Dalai {
 
     let chunks = []
     for(let key in o) {
-      chunks.push(`--${key} ${o[key]}`)
+      chunks.push(`--${key} ${o[key].toString().replaceAll('"', '\\"')}`)
     }
-    chunks.push(`-p "${req.prompt}"`)
+    chunks.push(`-p "${req.prompt.replaceAll('"', '\\"')}"`)
 
     const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "llama") : path.resolve(this.home, Core, "main")
     if (req.full) {
