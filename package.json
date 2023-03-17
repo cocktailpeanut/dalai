@@ -1,6 +1,6 @@
 {
   "name": "dalai",
-  "version": "0.2.20",
+  "version": "0.2.21",
   "description": "",
   "main": "index.js",
   "author": "cocktailpeanut",
@@ -13,7 +13,7 @@
     "start": "./dalai serve",
     "just:run": "wrap () { yarn && yarn dalai:llama $1 && yarn start; }; wrap",
     "just:fix": "npx prettier --write .",
-    "postinstall": "node ./bin/cli setup"
+    "postinstall": "node setup"
   },
   "dependencies": {
     "7zip-min": "^1.4.4",
