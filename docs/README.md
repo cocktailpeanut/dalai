@@ -180,7 +180,7 @@ npx dalai llama 7B 13B 30B 65B
 
 The install command :
 
-1. Creates a folder named `dalai` under your Documents folder directory (`D:\Documents`). If folder doesn't exist, it will go to your home folder (`%USERPROFILE%`)
+1. Creates a folder named `dalai` under your home directory (`~`)
 2. Installs and builds the [llama.cpp](https://github.com/ggerganov/llama.cpp) project under `~/llama.cpp`
 3. Downloads all the requested models from the [llama-dl CDN](https://github.com/shawwn/llama-dl) to `~/llama.cpp/models`
 4. Runs some tasks to convert the LLaMA models so they can be used
