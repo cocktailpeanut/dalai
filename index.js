@@ -19,6 +19,7 @@ const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 const L = require("./llama")
 const A = require("./alpaca")
 const exists = s => new Promise(r=>fs.access(s, fs.constants.F_OK, e => r(!e)))
+const escapeDoubleQuotes = (platform, arg) => platform === 'win32' ? arg.replace(/"/g, '`"') : arg.replace(/"/g, '\\"')
 class Dalai {
   constructor(home) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -175,9 +176,11 @@ class Dalai {
 
     let chunks = []
     for(let key in o) {
-      chunks.push(`--${key} ${o[key].toString().replaceAll('"', '\\"')}`)
+      chunks.push(`--${key} ${escapeDoubleQuotes(platform, o[key].toString())}`)
     }
-    chunks.push(`-p "${req.prompt.replaceAll('"', '\\"')}"`)
+    const prompt = `"${escapeDoubleQuotes(platform, req.prompt)}"`
+
+    chunks.push(`-p ${prompt}`)
 
     const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "llama") : path.resolve(this.home, Core, "main")
     if (req.full) {
