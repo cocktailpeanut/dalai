@@ -2,7 +2,6 @@ const os = require("os");
 const pty = require("node-pty");
 const git = require("isomorphic-git");
 const http = require("isomorphic-git/http/node");
-const Http = require("http");
 const path = require("path");
 const fs = require("fs");
 const tar = require("tar");
@@ -13,11 +12,8 @@ const term = require("terminal-kit").terminal;
 const Downloader = require("nodejs-file-downloader");
 const semver = require("semver");
 const _7z = require("7zip-min");
-const axios = require("axios");
 const platform = os.platform();
 const shell = platform === "win32" ? "powershell.exe" : "bash";
-const L = require("./llama");
-const A = require("./alpaca");
 class Dalai {
   constructor(home) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,34 +106,28 @@ class Dalai {
       term("\n");
     }
   }
-  down(url, dest, headers) {
-    return new Promise((resolve, reject) => {
-      const task = path.basename(dest);
-      this.startProgress(task);
-      axios({
-        url,
-        method: "GET",
-        responseType: "stream",
-        maxContentLength: Infinity,
-        headers,
-        onDownloadProgress: (progressEvent) => {
-          const progress = (progressEvent.loaded / progressEvent.total) * 100;
-          this.progress(task, progress);
-        },
-      })
-        .then((response) => {
-          const writer = fs.createWriteStream(dest);
-          response.data.pipe(writer);
-          writer.on("finish", () => {
-            this.progressBar.update(1);
-            term("\n");
-            resolve();
-          });
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
+  async installed() {
+    const modelsPath = path.resolve(this.home, "models");
+    console.log("modelsPath", modelsPath);
+    const modelFolders = (
+      await fs.promises.readdir(modelsPath, { withFileTypes: true })
+    )
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name);
+
+    console.log({ modelFolders });
+    const modelNames = [];
+    for (let modelFolder of modelFolders) {
+      if (
+        fs.existsSync(
+          path.resolve(modelsPath, modelFolder, "ggml-model-q4_0.bin")
+        )
+      ) {
+        modelNames.push(modelFolder);
+        console.log("exists", modelFolder);
+      }
+    }
+    return modelNames;
   }
   async python() {
     // install self-contained python => only for windows for now
@@ -340,20 +330,23 @@ class Dalai {
         return;
       }
     }
-    success = await this.exec(
-      `${pip_path} install --upgrade pip setuptools wheel`
-    );
-    if (!success) {
-      throw new Error("pip setuptools wheel upgrade failed");
-      return;
-    }
-    success = await this.exec(
-      `${pip_path} install torch torchvision torchaudio sentencepiece numpy`
-    );
-    //success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy wget`)
-    if (!success) {
-      throw new Error("dependency installation failed");
-      return;
+    for (let model of models) {
+      await this.download(model);
+      const outputFile = path.resolve(
+        this.home,
+        "models",
+        model,
+        "ggml-model-f16.bin"
+      );
+      if (fs.existsSync(outputFile)) {
+        console.log(`Skip conversion, file already exists: ${outputFile}`);
+      } else {
+        await this.exec(
+          `${python_path} convert-pth-to-ggml.py models/${model}/ 1`,
+          this.home
+        );
+      }
+      await this.quantize(model);
     }
   }
   serve(port) {
