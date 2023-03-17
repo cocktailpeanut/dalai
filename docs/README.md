@@ -219,7 +219,7 @@ Once you've checked that they both exist, try again.
 After everything has been installed, run the following command to launch the web UI server:
 
 ```
-dalai serve
+npx dalai serve
 ```
 
 and open http://localhost:3000 in your browser. Have fun!
