@@ -1,10 +1,13 @@
 {
   "name": "dalai",
-  "version": "0.2.19",
+  "version": "0.2.20",
   "description": "",
   "main": "index.js",
   "author": "cocktailpeanut",
   "license": "MIT",
+  "engines" : {
+    "node" : ">=18.0.0"
+  },
   "scripts": {
     "dalai:llama": "./dalai llama",
     "start": "./dalai serve",
