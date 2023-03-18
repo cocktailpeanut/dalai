@@ -562,6 +562,25 @@ await dalai.install("7B", "13B")
 
 # FAQ
 
+## Using a different home folder
+
+By default Dalai uses your home directory to store the entire repository (`~/dalai`). However sometimes you may want to store the archive elsewhere.
+
+In this case you can call all CLI methods using the `--home` flag:
+
+### 1. Installing models to a custom path
+
+```
+npx dalai llama install 7B --home ~/test_dir
+```
+
+### 2. Serving from the custom path
+
+```
+npx dalai serve --home ~/test_dir
+```
+
+
 ## Updating to the latest
 
 To make sure you update to the latest, first find the latest version at https://www.npmjs.com/package/dalai

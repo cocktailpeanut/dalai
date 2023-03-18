@@ -4,8 +4,8 @@ const path = require('path')
 const Dalai = require("../../index")
 const app = express()
 const httpServer = http.Server(app);
-const dalai = new Dalai()
-const start = (port) => {
+const start = (port, home) => {
+  const dalai = new Dalai(home)
   dalai.http(httpServer)
   app.use(express.static(path.resolve(__dirname, 'public')))
   app.use(express.json());

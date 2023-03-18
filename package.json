@@ -1,12 +1,12 @@
 {
   "name": "dalai",
-  "version": "0.2.21",
+  "version": "0.2.23",
   "description": "",
   "main": "index.js",
   "author": "cocktailpeanut",
   "license": "MIT",
-  "engines" : {
-    "node" : ">=18.0.0"
+  "engines": {
+    "node": ">=18.0.0"
   },
   "scripts": {
     "dalai:llama": "./dalai llama",
@@ -27,7 +27,8 @@
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1",
     "tar": "^6.1.13",
-    "terminal-kit": "^3.0.0"
+    "terminal-kit": "^3.0.0",
+    "yargs": "^17.7.1"
   },
   "devDependencies": {
     "prettier": "^2.8.4"

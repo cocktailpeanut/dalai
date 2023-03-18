@@ -208,11 +208,11 @@ class Dalai {
     // first install
     let engine = this.cores[core]
     let e = await exists(path.resolve(engine.home));
-    if (e) {
-      // already exists, no need to install
-    } else {
+//    if (e) {
+//      // already exists, no need to install
+//    } else {
       await this.add(core)
-    }
+//    }
 
     // next add the models
     let res = await this.cores[core].add(...models)
@@ -361,7 +361,7 @@ class Dalai {
 
 
   }
-  serve(port) {
+  serve(port, options) {
     const httpServer = createServer();
     const io = new Server(httpServer)
     io.on("connection", (socket) => {
