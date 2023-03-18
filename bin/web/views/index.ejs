@@ -180,7 +180,9 @@ form.addEventListener('submit', (e) => {
   e.stopPropagation()
   if (input.textContent) {
     config.prompt = input.textContent
+    config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
     socket.emit('request', config)
+    config.id = null
     loading(config.prompt)
     input.textContent = "";
   }
@@ -226,7 +228,7 @@ socket.on('result', async ({ request, response }) => {
   } else {
     if (response == "\n\n<end>") {
     } else {
-      const id = await sha256(request.prompt) 
+      const id = request.id
       let existing = document.querySelector(`[data-id='${id}']`)
       if (existing) {
         existing.textContent = existing.textContent + response

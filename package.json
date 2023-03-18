@@ -1,6 +1,6 @@
 {
   "name": "dalai",
-  "version": "0.2.23",
+  "version": "0.2.26",
   "description": "",
   "main": "index.js",
   "author": "cocktailpeanut",
@@ -16,7 +16,6 @@
     "postinstall": "node setup"
   },
   "dependencies": {
-    "7zip-min": "^1.4.4",
     "axios": "^1.3.4",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
