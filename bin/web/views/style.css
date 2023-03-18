@@ -221,6 +221,7 @@ body.llama #feed-placeholder-llama {
   box-sizing: border-box;
   padding: 0;
   margin-bottom: 160px;
+  padding: 0 25px;
 }
 #messages > li {
   box-sizing: border-box;
@@ -254,14 +255,15 @@ li {
   padding: 10px;
   box-sizing: border-box;
   background: none;
-  opacity: 1;
+  opacity: 0;
+  pointer-events: none;
 }
 .loading svg {
   animation: spin 1s linear infinite;
 }
-.hidden {
-  opacity: 0 !important;
-  pointer-events: none !important;
+/* .hidden */
+form.running-model .loading {
+  opacity: 1;
 }
 
 .input-container {
@@ -298,6 +300,7 @@ li {
   width: 200px;
   background-color: var(--background-alt);
   height: 100vh;
+  overflow: hidden scroll;
 }
 input[type="text"],
 select {

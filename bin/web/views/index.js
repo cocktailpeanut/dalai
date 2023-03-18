@@ -6,7 +6,7 @@ const config = {
   model: "7B",
   top_k: 40,
   top_p: 0.9,
-  temp: 0.95,
+  temp: 0.9,
   repeat_last_n: 64,
   repeat_penalty: 1.3,
   debug: false,
