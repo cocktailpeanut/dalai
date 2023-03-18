@@ -107,11 +107,14 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 
 ## Mac
 
-### Step 1. Install Node.js >=18
+### Step 1. Install node.js >= 18
+
+If your mac doesn't have node.js installed yet, make sure to install node.js >= 10
 
 <a href="https://nodejs.org/en/download/" class='btn'>Install Node.js</a>
 
-### Step 2. Install models
+
+### Step 2.1. Install models
 
 Currently supported engines are `llama` and `alpaca`.
 
@@ -139,8 +142,36 @@ or to download multiple models:
 npx dalai llama install 7B 13B
 ```
 
+Now go to step 3.
 
-### Step 4. Run Web UI
+### Step 2.2. Troubleshoot
+
+Normally you don't need this step, but if running the commands above don't do anything and immediately end, it means something went wrong because some of the required modules are not installed on your system.
+
+In that case, try the following steps:
+
+#### 1. Install homebrew
+
+In case homebrew is not installed on your computer, install it by running:
+
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+> Or you can find the same instruction on the homebrew hompage: https://brew.sh/
+
+#### 2. Install dependencies
+
+Once homebrew is installed, install these dependencies:
+
+```
+brew install cmake
+brew install pkg-config
+```
+
+Now try running the `npx dalai` commands again.
+
+### Step 3. Run Web UI
 
 After everything has been installed, run the following command to launch the web UI server:
 
