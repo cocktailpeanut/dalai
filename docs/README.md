@@ -169,11 +169,17 @@ When installing Visual Studio, make sure to check the 3 options as highlighted b
 
 ### Step 2.1. Install models
 
+> **IMPORTANT**
+>
+> On Windows, make sure to run all commands in **cmd**.
+>
+> DO NOT run in **powershell**. Powershell has unnecessarily strict permissions and makes the script fail silently.
+
 Currently supported engines are `llama` and `alpaca`.
 
 #### Install alpaca
 
-Currently alpaca only has the 7B model:
+Currently alpaca only has the 7B model. Open your `cmd` application and enter:
 
 ```
 npx dalai alpaca install 7B
@@ -182,7 +188,7 @@ npx dalai alpaca install 7B
 
 #### Add llama models
 
-To download llama models, you can run:
+To download llama models. Open your `cmd` application and enter:
 
 ```
 npx dalai llama install 7B
@@ -216,7 +222,7 @@ Once you've checked that they both exist, try again.
 
 ### Step 3. Run Web UI
 
-After everything has been installed, run the following command to launch the web UI server:
+After everything has been installed, run the following command to launch the web UI server (Make sure to run in `cmd` and not powershell!):
 
 ```
 npx dalai serve
