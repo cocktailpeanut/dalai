@@ -107,7 +107,7 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 
 ## Mac
 
-### Step 1. Install node.js
+### Step 1. Install Node.js >=18
 
 <a href="https://nodejs.org/en/download/" class='btn'>Install Node.js</a>
 
@@ -212,13 +212,13 @@ npx dalai llama install 7B 13B
 
 ### Step 2.2. Troubleshoot (optional)
 
-In case above steps fail, try installing node.js and python separately.
+In case above steps fail, try installing Node.js and Python separately.
 
 Install Python:
 
 <a href="https://www.python.org/ftp/python/3.10.10/python-3.10.10-embed-amd64.zip" class='btn'>Download Python</a>
 
-Install Node.js:
+Install Node.js >= 18:
 
 <a href="https://nodejs.org/en/download/" class='btn'>Download Node.js</a>
 
