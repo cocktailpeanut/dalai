@@ -1,6 +1,6 @@
 {
   "name": "dalai",
-  "version": "0.2.0",
+  "version": "0.2.19",
   "description": "",
   "main": "index.js",
   "author": "cocktailpeanut",
@@ -9,10 +9,12 @@
     "dalai:llama": "./dalai llama",
     "start": "npx dalai serve",
     "just:run": "wrap () { yarn && yarn dalai:llama $1 && yarn start; }; wrap",
-    "just:fix": "npx prettier --write ."
+    "just:fix": "npx prettier --write .",
+    "postinstall": "node ./bin/cli setup"
   },
   "dependencies": {
     "7zip-min": "^1.4.4",
+    "axios": "^1.3.4",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
     "isomorphic-git": "^1.22.0",

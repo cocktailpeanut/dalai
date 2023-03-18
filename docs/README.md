@@ -1,6 +1,6 @@
-# Dalai with ChatGPT UI
+# Dalai
 
-Run LLaMA on your computer.
+Run LLaMA and Alpaca on your computer.
 
 <a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> Github</a>
 <a href="https://twitter.com/cocktailpeanut" class='inverse btn'><i class="fa-brands fa-twitter"></i> Twitter</a>
@@ -9,6 +9,7 @@ Run LLaMA on your computer.
 ---
 
 ## Table of Contents
+
 - [Intro](#intro)
   - [Cross platform](#1-cross-platform)
   - [System requirements](#2-system-requirements)
@@ -36,11 +37,7 @@ Run LLaMA on your computer.
 
 ## JUST RUN THIS
 
-<img src="alpa.png" class='round'>
-
-or
-
-<img src="llam.png" class='round'>
+<img src="npx.png" class='round'>
 
 ## TO GET
 
@@ -83,7 +80,6 @@ Alpaca comes fully quantized (compressed), and the only space you need for the 7
 
 ![alpaca_spec.png](alpaca_spec.png)
 
-
 ### LLaMA
 
 You need a lot of space for storing the models.
@@ -106,21 +102,21 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 #### 13B
 
 - Full: The model takes up 60.21GB
-- Quantized: 4.07GB * 2 = 8.14GB
+- Quantized: 4.07GB \* 2 = 8.14GB
 
 ![13b.png](13b.png)
 
 #### 30B
 
 - Full: The model takes up 150.48GB
-- Quantized: 5.09GB * 4 = 20.36GB
+- Quantized: 5.09GB \* 4 = 20.36GB
 
 ![30b.png](30b.png)
 
 #### 65B
 
 - Full: The model takes up 432.64GB
-- Quantized: 5.11GB * 8 = 40.88GB
+- Quantized: 5.11GB \* 8 = 40.88GB
 
 ![65b.png](65b.png)
 
@@ -134,66 +130,38 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 
 <a href="https://nodejs.org/en/download/" class='btn'>Install Node.js</a>
 
-### Step 2. Install Dalai
-
-First install dalai:
-
-```
-npm install -g dalai
-```
-
-### Step 3. Install Engines
+### Step 2. Install models
 
 Currently supported engines are `llama` and `alpaca`.
 
-#### Install LLaMA
-
-To install `llama`, run:
-
-```
-dalai llama install
-```
-
-#### Install Alpaca
-
-To install `alpaca`, run:
-
-```
-dalai alpaca install
-```
-
-### Step 4. Get Models
-
-#### Download LLaMA models
-
-To download llama models, you can run:
-
-```
-dalai llama get 7B
-```
-
-
-or to download multiple models:
-
-```
-dalai llama get 7B 13B
-```
-
-#### Download Alpaca models
+#### Add alpaca models
 
 Currently alpaca only has the 7B model:
 
 ```
-dalai alpaca get 7B
+npx dalai alpaca install 7B
 ```
 
+#### Add llama models
 
-### Step 3. Run Web UI
+To download llama models, you can run:
+
+```
+npx dalai llama install 7B
+```
+
+or to download multiple models:
+
+```
+npx dalai llama install 7B 13B
+```
+
+### Step 4. Run Web UI
 
 After everything has been installed, run the following command to launch the web UI server:
 
 ```
-dalai serve
+npx dalai serve
 ```
 
 and open http://localhost:3000 in your browser. Have fun!
@@ -222,23 +190,37 @@ When installing Visual Studio, make sure to check the 3 options as highlighted b
 
 ---
 
-### Step 2.1. Install Dalai
+### Step 2.1. Install models
 
-First install dalai:
+Currently supported engines are `llama` and `alpaca`.
+
+#### Install alpaca
+
+Currently alpaca only has the 7B model:
 
 ```
-npm install -g dalai
+npx dalai alpaca install 7B
 ```
 
-If this worked without any errors, go to step 3.
+#### Add llama models
 
-Ohterwise try the troubleshoot below:
+To download llama models, you can run:
+
+```
+npx dalai llama install 7B
+```
+
+or to download multiple models:
+
+```
+npx dalai llama install 7B 13B
+```
 
 ---
 
 ### Step 2.2. Troubleshoot (optional)
 
-In case above steps fail to install, try installing node.js and python separately.
+In case above steps fail, try installing node.js and python separately.
 
 Install Python:
 
@@ -250,62 +232,9 @@ Install Node.js:
 
 After both have been installed, open powershell and type `python` to see if the application exists. And also type `node` to see if the application exists as well.
 
-Once you've checked that they both exist, try the `npx dalai llama` command again.
+Once you've checked that they both exist, try again.
 
-
----
-
-
-### Step 3. Install Engines
-
-Currently supported engines are `llama` and `alpaca`.
-
-#### Install LLaMA
-
-To install `llama`, run:
-
-```
-dalai llama install
-```
-
-#### Install Alpaca
-
-To install `alpaca`, run:
-
-```
-dalai alpaca install
-```
-
----
-
-### Step 4. Get Models
-
-#### Download LLaMA models
-
-To download llama models, you can run:
-
-```
-dalai llama get 7B
-```
-
-
-or to download multiple models:
-
-```
-dalai llama get 7B 13B
-```
-
-#### Download Alpaca models
-
-Currently alpaca only has the 7B model:
-
-```
-dalai alpaca get 7B
-```
-
----
-
-### Step 5. Run Web UI
+### Step 3. Run Web UI
 
 After everything has been installed, run the following command to launch the web UI server:
 
@@ -315,9 +244,7 @@ dalai serve
 
 and open http://localhost:3000 in your browser. Have fun!
 
-
 ---
-
 
 ## Linux
 
@@ -330,9 +257,7 @@ You need to make sure you have the correct version of Python and Node.js install
 <a href="https://pimylifeup.com/installing-python-on-linux/" class='btn'>Download node.js</a>
 
 > Make sure the version is 3.10 or lower (not 3.11)
-Python must be 3.10 or below (pytorch and other libraries are not supported yet on the latest)
-
-
+> Python must be 3.10 or below (pytorch and other libraries are not supported yet on the latest)
 
 #### Step 1.2. Node.js >= 18
 
@@ -340,134 +265,45 @@ Python must be 3.10 or below (pytorch and other libraries are not supported yet 
 
 > Make sure the version is 18 or higher
 
+---
 
-
-### Step 2. Install Dalai
-
-First install dalai:
-
-```
-npm install -g dalai
-```
-
-### Step 3. Install Engines
+### Step 2. Install models
 
 Currently supported engines are `llama` and `alpaca`.
 
-#### Install LLaMA
-
-To install `llama`, run:
-
-```
-dalai llama install
-```
-
-#### Install Alpaca
-
-To install `alpaca`, run:
-
-```
-dalai alpaca install
-```
-
-### Step 4. Get Models
-
-#### Download LLaMA models
-
-To download llama models, you can run:
-
-```
-dalai llama get 7B
-```
-
-
-or to download multiple models:
-
-```
-dalai llama get 7B 13B
-```
-
-#### Download Alpaca models
+#### Add alpaca models
 
 Currently alpaca only has the 7B model:
 
 ```
-dalai alpaca get 7B
+npx dalai alpaca install 7B
 ```
 
+#### Add llama models
 
-### Step 3. Run Web UI
+To download llama models, you can run:
+
+```
+npx dalai llama install 7B
+```
+
+or to download multiple models:
+
+```
+npx dalai llama install 7B 13B
+```
+
+### Step 4. Run Web UI
 
 After everything has been installed, run the following command to launch the web UI server:
 
 ```
-dalai serve
+npx dalai serve
 ```
 
 and open http://localhost:3000 in your browser. Have fun!
 
-
 ---
-
-
-# Commands
-
-## 1. install
-
-### LLaMA
-
-Install the core engine for the model
-
-```
-dalai llama install
-```
-
-### Alpaca
-
-Install the core engine for the model
-
-```
-dalai alpaca install
-```
-
-## 2. get
-
-Download the full LLaMA model and convert and compress them
-
-### LLaMA
-
-Download one model:
-
-```
-dalai llama get 7B
-```
-
-Download multiple models:
-
-```
-dalai llama get 7B 13B
-```
-
-### Alpaca
-
-Currently only 7B available:
-
-```
-dalai alpaca get 7B
-```
-
-
-## 3. serve
-
-Start a dalai server and an API endpoint (powered by socket.io)
-
-```
-dalai serve
-```
-
-
----
-
 
 # API
 
@@ -476,7 +312,7 @@ Dalai is also an NPM package:
 1. programmatically install
 2. locally make requests to the model
 3. run a dalai server (powered by socket.io)
-3. programmatically make requests to a remote dalai server (via socket.io)
+4. programmatically make requests to a remote dalai server (via socket.io)
 
 Dalai is an NPM package. You can install it using:
 
@@ -491,7 +327,7 @@ npm install dalai
 ### Syntax
 
 ```javascript
-const dalai = new Dalai(home)
+const dalai = new Dalai(home);
 ```
 
 - `home`: (optional) manually specify the [llama.cpp](https://github.com/ggerganov/llama.cpp) folder
@@ -504,19 +340,18 @@ However, often you may already have a `llama.cpp` repository somewhere else on y
 
 #### Basic
 
-Creates a workspace  at `~/llama.cpp` 
+Creates a workspace at `~/llama.cpp`
 
 ```javascript
-const dalai = new Dalai()
+const dalai = new Dalai();
 ```
 
 #### Custom path
 
 Manually set the `llama.cpp` path:
 
-
 ```javascript
-const dalai = new Dalai("/Documents/llama.cpp")
+const dalai = new Dalai("/Documents/llama.cpp");
 ```
 
 ---
@@ -526,7 +361,7 @@ const dalai = new Dalai("/Documents/llama.cpp")
 ### Syntax
 
 ```javascript
-dalai.request(req, callback)
+dalai.request(req, callback);
 ```
 
 - `req`: a request object. made up of the following attributes:
@@ -555,13 +390,16 @@ dalai.request(req, callback)
 Using node.js, you just need to initialize a Dalai object with `new Dalai()` and then use it.
 
 ```javascript
-const Dalai = require('dalai')
-new Dalai().request({
-  model: "7B",
-  prompt: "The following is a conversation between a boy and a girl:",
-}, (token) => {
-  process.stdout.write(token)
-})
+const Dalai = require("dalai");
+new Dalai().request(
+  {
+    model: "7B",
+    prompt: "The following is a conversation between a boy and a girl:",
+  },
+  (token) => {
+    process.stdout.write(token);
+  }
+);
 ```
 
 #### 2. Non node.js (socket.io)
@@ -574,8 +412,8 @@ First you need to run a Dalai socket server:
 
 ```javascript
 // server.js
-const Dalai = require('dalai')
-new Dalai().serve(3000)     // port 3000
+const Dalai = require("dalai");
+new Dalai().serve(3000); // port 3000
 ```
 
 ##### Step 2. connect to the server
@@ -583,14 +421,17 @@ new Dalai().serve(3000)     // port 3000
 Then once the server is running, simply make requests to it by passing the `ws://localhost:3000` socket url when initializing the Dalai object:
 
 ```javascript
-const Dalai = require("dalai")
-new Dalai().request({
-  url: "ws://localhost:3000",
-  model: "7B",
-  prompt: "The following is a conversation between a boy and a girl:",
-}, (token) => {
-  console.log("token", token)
-})
+const Dalai = require("dalai");
+new Dalai().request(
+  {
+    url: "ws://localhost:3000",
+    model: "7B",
+    prompt: "The following is a conversation between a boy and a girl:",
+  },
+  (token) => {
+    console.log("token", token);
+  }
+);
 ```
 
 ---
@@ -602,14 +443,14 @@ new Dalai().request({
 Starts a socket.io server at `port`
 
 ```javascript
-dalai.serve(port)
+dalai.serve(port);
 ```
 
 ### Examples
 
 ```javascript
-const Dalai = require("dalai")
-new Dalai().serve(3000)
+const Dalai = require("dalai");
+new Dalai().serve(3000);
 ```
 
 ---
@@ -621,7 +462,7 @@ new Dalai().serve(3000)
 connect with an existing `http` instance (The `http` npm package)
 
 ```javascript
-dalai.http(http)
+dalai.http(http);
 ```
 
 - `http`: The [http](https://nodejs.org/api/http.html) object
@@ -631,15 +472,15 @@ dalai.http(http)
 This is useful when you're trying to plug dalai into an existing node.js web app
 
 ```javascript
-const app = require('express')();
-const http = require('http').Server(app);
-dalai.http(http)
+const app = require("express")();
+const http = require("http").Server(app);
+dalai.http(http);
 http.listen(3000, () => {
-  console.log("server started")
-})
+  console.log("server started");
+});
 ```
 
-## 5. get()
+## 5. install()
 
 ### Syntax
 
@@ -654,13 +495,20 @@ await dalai.install(model_type, model_name1, model_name2, ...)
 
 ### Examples
 
-Install the "7B" and "13B" models:
-
+Install Llama "7B" and "13B" models:
 
 ```javascript
 const Dalai = require("dalai");
-const dalai = new Dalai()
-await dalai.install("7B", "13B")
+const dalai = new Dalai();
+await dalai.install("llama", "7B", "13B");
+```
+
+Install alpaca 7B model:
+
+```javascript
+const Dalai = require("dalai");
+const dalai = new Dalai();
+await dalai.install("alpaca", "7B");
 ```
 
 ---
@@ -672,17 +520,16 @@ returns the array of installed models
 ### Syntax
 
 ```javascript
-const models = await dalai.installed()
+const models = await dalai.installed();
 ```
 
 ### Examples
 
-
 ```javascript
 const Dalai = require("dalai");
-const dalai = new Dalai()
-const models = await dalai.installed()
-console.log(models)     // prints ["7B", "13B"]
+const dalai = new Dalai();
+const models = await dalai.installed();
+console.log(models); // prints ["7B", "13B"]
 ```
 
 <!--
@@ -723,19 +570,17 @@ await dalai.install("7B", "13B")
 
 ---
 
-
 # FAQ
 
 ## Updating to the latest
 
-As of `dalai@0.3.0` the recommended way to use dalai is through `npm install -g` (not the `npx` method)
+To make sure you update to the latest, first find the latest version at https://www.npmjs.com/package/dalai
 
-The simplest way to make sure you have the correct version is running:
+Let's say the latest version is `0.3.0`. To update the dalai version, run:
 
 ```
-npm install -g dalai@0.3.0    
+npx dalai@0.3.0 setup
 ```
-
 
 ## Staying up to date
 
@@ -744,6 +589,5 @@ Have questions or feedback? Follow the project through the following outlets:
 <a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> Github</a>
 <a href="https://twitter.com/cocktailpeanut" class='inverse btn'><i class="fa-brands fa-twitter"></i> Twitter</a>
 <a href="https://discord.gg/XahBUrbVwz" class='inverse btn'><i class="fa-brands fa-discord"></i> Discord</a>
-
 
 ---

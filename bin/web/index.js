@@ -11,10 +11,11 @@ const start = (port) => {
   app.use(express.static(path.resolve(__dirname, "public")));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  app.set("view engine", "ejs");
-  app.set("views", path.resolve(__dirname, "views"));
+  // app.set("view engine", "ejs");
+  // app.set("views", path.resolve(__dirname, "views"));
   app.get("/", (req, res) => {
-    res.render("index");
+    // res.render("index");
+    res.sendFile(path.resolve(__dirname, "views", "index.html"));
   });
   app.get("/style.css", (req, res) => {
     res.sendFile(path.resolve(__dirname, "views", "style.css"));

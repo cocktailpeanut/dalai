@@ -4,4 +4,3 @@ venv
 node_modules
 llama.cpp
 package-lock.json
-yarn.lock

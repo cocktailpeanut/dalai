@@ -6,9 +6,10 @@ const config = {
   model: "7B",
   top_k: 40,
   top_p: 0.9,
-  temp: 0.8,
+  temp: 0.95,
   repeat_last_n: 64,
   repeat_penalty: 1.3,
+  debug: false,
   models: [],
 };
 const socket = io();
@@ -27,6 +28,7 @@ input.addEventListener("keydown", () => {
 
 const renderHeader = (config) => {
   const fields = [
+    { key: "debug", type: "checkbox" },
     "n_predict",
     "repeat_last_n",
     "repeat_penalty",
@@ -36,19 +38,39 @@ const renderHeader = (config) => {
     "seed",
   ]
     .map((key) => {
-      return `<div class='kv'>
+      if (typeof key === "string") {
+        return `
+<div class='kv'>
 <label>${key}</label>
-<input name="${key}" type='text' placeholder="${key}" value="${
-        config[key] || ""
-      }">
+<input 
+  name="${key}" 
+  type='text' 
+  placeholder="${key}" 
+  value="${config[key] || ""}"
+>
 </div>`;
+      } else {
+        if (key.type === "checkbox") {
+          return `
+<div class='kv'>
+  <label>${key.key}</label>
+  <label class="switch">
+    <input name="${key.key}" type='checkbox' ${
+            config[key.key] ? "checked" : ""
+          }>
+    <span class="slider round"></span>
+  </label>
+</div>`;
+        }
+      }
     })
     .join("");
 
+  config.model = config.models[0];
   const models = config.models
-    .map((model) => {
-      return `<option value="7B" ${
-        config.model === model ? "selected" : ""
+    .map((model, i) => {
+      return `<option value="${model}" ${
+        i === 0 ? "selected" : ""
       }>${model}</option>`;
     })
     .join("");
@@ -75,6 +97,8 @@ document.querySelector(".form-header").addEventListener("input", (e) => {
   if (e.target.tagName === "SELECT") {
     config[e.target.name] = config.models[e.target.selectedIndex];
     console.log(config.models[e.target.selectedIndex]);
+  } else if (e.target.type === "checkbox") {
+    config[e.target.name] = e.target.checked;
   } else {
     config[e.target.name] = e.target.value;
   }
@@ -138,17 +162,40 @@ socket.emit("request", {
   method: "installed",
 });
 var responses = [];
+
+function setHomepage() {
+  if (
+    document.getElementById("model").value.toLowerCase().startsWith("alpaca")
+  ) {
+    document.body.classList.remove("llama");
+    document.body.classList.add("alpaca");
+  } else if (
+    document.getElementById("model").value.toLowerCase().startsWith("llama")
+  ) {
+    document.body.classList.remove("alpaca");
+    document.body.classList.add("llama");
+  }
+}
+
 socket.on("result", async ({ request, response, isRunning }) => {
   loading(false);
   if (request.method === "installed") {
     if (response == "\n\n<end>") {
       document.querySelector(".form-header").innerHTML = renderHeader(config);
+      setHomepage();
+      document.getElementById("model").addEventListener("change", () => {
+        if (document.body.classList.length != 0) {
+          setHomepage();
+        }
+      });
     } else {
       config.models.push(response);
     }
   } else {
     if (response == "\n\n<end>") {
     } else {
+      document.body.classList.remove("llama");
+      document.body.classList.remove("alpaca");
       isRunningModel = true;
       form.setAttribute("class", isRunningModel ? "running-model" : "");
       const id = (await sha256(request.prompt)) + gen;
@@ -186,6 +233,7 @@ socket.on("result", async ({ request, response, isRunning }) => {
         responses[id] = responses[id].replaceAll("ΓÇö", ","); //comma, could also be ampersand (not sure)
         responses[id] = responses[id].replaceAll("ΓÇï", ";"); //semicolon
         responses[id] = responses[id].replaceAll("┬ú", "$"); //dollar sign
+        responses[id] = responses[id].replaceAll("Æs", "'s"); //apostrophe s
 
         responses[id] = responses[id].replaceAll("&quot;", '"'); //quote
 
@@ -218,9 +266,19 @@ socket.on("result", async ({ request, response, isRunning }) => {
   }
 });
 
-document.querySelectorAll("#feed-placeholder button.card").forEach((e) => {
-  e.addEventListener("click", () => {
-    let text = e.innerText.replace('"', "").replace('" →', "");
-    input.value = text;
+document
+  .querySelectorAll("#feed-placeholder-llama button.card")
+  .forEach((e) => {
+    e.addEventListener("click", () => {
+      let text = e.innerText.replace('"', "").replace('" →', "");
+      input.value = text;
+    });
   });
-});
+document
+  .querySelectorAll("#feed-placeholder-alpaca button.card")
+  .forEach((e) => {
+    e.addEventListener("click", () => {
+      let text = e.innerText.replace('"', "").replace('" →', "");
+      input.value = text;
+    });
+  });

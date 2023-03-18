@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>Llama CPP | Dalai LLaMA</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,7 +11,7 @@
       <!-- end of left header -->
       <div id="feed">
         <ul id="messages">
-          <div id="feed-placeholder">
+          <div id="feed-placeholder-llama">
             <h1 class="logo">LlamaCPP</h1>
             <div class="columns">
               <!--  -->
@@ -103,9 +104,110 @@
                 </div>
                 <div class="card">Not finedtuned for question answering</div>
               </div>
-              <!--  -->
             </div>
           </div>
+
+          <!-- end of placeholder llama -->
+
+          <div id="feed-placeholder-alpaca">
+            <h1 class="logo">AlpacaCPP</h1>
+            <div class="columns">
+              <!--  -->
+              <div class="column">
+                <svg
+                  stroke="currentColor"
+                  fill="none"
+                  stroke-width="1.5"
+                  viewBox="0 0 24 24"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  height="1.5em"
+                  width="1.5em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <h3>Examples</h3>
+                <button class="card">
+                  "Can you explain quantum computing in simple terms?" →
+                </button>
+                <button class="card">
+                  "Do you have any creative ideas for a 10 year old’s birthday?"
+                  →
+                </button>
+                <button class="card">
+                  "How do you make an HTTP request in Javascript?" →
+                </button>
+              </div>
+
+              <div class="column">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  height="1.5em"
+                  width="1.5em"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+                  ></path>
+                </svg>
+                <h3>Capabilities</h3>
+                <div class="card">
+                  Trained on 20 languages, mostly those with Latin or Cyrillic
+                  alphabets
+                </div>
+                <div class="card">
+                  Can answer questions naturally, try to use "you" rather than
+                  "I"
+                </div>
+                <div class="card">Will not deny your prompts</div>
+              </div>
+
+              <div class="column">
+                <svg
+                  stroke="currentColor"
+                  fill="none"
+                  stroke-width="1.5"
+                  viewBox="0 0 24 24"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  height="1.5em"
+                  width="1.5em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                  ></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <h3>Limitations</h3>
+                <div class="card">
+                  May occasionally generate incorrect information
+                </div>
+                <div class="card">
+                  Occasionally generates a random gibberish of symbols
+                </div>
+                <div class="card">
+                  Does not always provide information that is up to date
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- end of placeholder alpaca -->
         </ul>
         <div id="bottom"></div>
         <form id="form" action="">
