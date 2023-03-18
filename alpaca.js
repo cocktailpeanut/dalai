@@ -32,6 +32,9 @@ class Alpaca {
     }
   }
   async add (...models) {
+    models = models.map((m) => {
+      return m.toUpperCase()
+    })
     for(let model of models) {
       const venv_path = path.join(this.root.home, "venv")
       const python_path = platform == "win32" ? path.join(venv_path, "Scripts", "python.exe") : path.join(venv_path, 'bin', 'python')

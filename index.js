@@ -152,7 +152,8 @@ class Dalai {
     }
 
 
-    const [Core, Model] = req.model.split(".")
+    let [Core, Model] = req.model.split(".")
+    Model = Model.toUpperCase()
 
     console.log( { Core, Model } )
 

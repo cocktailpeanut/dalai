@@ -34,6 +34,9 @@ class LLaMA {
   }
   async add (...models) {
     if (models.length === 0) models = ["7B"]
+    models = models.map((m) => {
+      return m.toUpperCase()
+    })
     for(let model of models) {
       if (!["7B", "13B",  "30B", "65B"].includes(model)) {
         console.log(`##########################################################
