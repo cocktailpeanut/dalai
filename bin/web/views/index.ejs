@@ -179,7 +179,7 @@ form.addEventListener('submit', (e) => {
   e.preventDefault();
   e.stopPropagation()
   if (input.textContent) {
-    config.prompt = input.textContent.replaceAll("\n", "\\n").replaceAll('"', '\\\\\\""');
+    config.prompt = input.textContent.replaceAll("\n", "\\n");
     config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
     socket.emit('request', config)
     config.id = null
@@ -234,7 +234,6 @@ socket.on('result', async ({ request, response }) => {
         existing.textContent = existing.textContent + response
         existing.textContent = existing.textContent.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
         existing.textContent = existing.textContent.replaceAll("\\n", "\n");
-        existing.textContent = existing.textContent.replaceAll('\\"', '"');
       } else {
         say(response, id)
       }
