@@ -3,7 +3,7 @@
 <title>Dalai LLaMA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  body { margin: 0; padding: 0px; color: rgba(0,0,0,0.8); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  body, pre { margin: 0; padding: 0px; color: rgba(0,0,0,0.8); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
   .input-field {
   /*
     border: 2px solid rgba(0,0,0,0.2);
@@ -105,7 +105,7 @@
     <div class='info'>TIP: shift+enter for multiple lines</div>
   </div>
 </form>
-<div class='loading hidden'></div>
+<pre class='loading hidden'></pre>
 <ul id="messages"></ul>
 <script src="/socket.io.min.js"></script>
 <script>
@@ -179,7 +179,8 @@ form.addEventListener('submit', (e) => {
   e.preventDefault();
   e.stopPropagation()
   if (input.textContent) {
-    config.prompt = input.textContent.replaceAll("\n", "\\n");
+    //config.prompt = input.textContent.replaceAll("\n", "\\n");
+    config.prompt = input.textContent
     config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
     socket.emit('request', config)
     config.id = null
@@ -233,7 +234,7 @@ socket.on('result', async ({ request, response }) => {
       if (existing) {
         existing.textContent = existing.textContent + response
         existing.textContent = existing.textContent.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
-        existing.textContent = existing.textContent.replaceAll("\\n", "\n");
+        //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
       } else {
         say(response, id)
       }

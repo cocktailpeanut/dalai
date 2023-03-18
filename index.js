@@ -1,5 +1,6 @@
 const os = require('os');
-const pty = require('node-pty');
+//const pty = require('node-pty');
+const pty = require('@cdktf/node-pty-prebuilt-multiarch');
 const git = require('isomorphic-git');
 const http = require('isomorphic-git/http/node');
 const Http = require("http")
@@ -19,7 +20,8 @@ const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 const L = require("./llama")
 const A = require("./alpaca")
 const exists = s => new Promise(r=>fs.access(s, fs.constants.F_OK, e => r(!e)))
-const escapeDoubleQuotes = (platform, arg) => platform === 'win32' ? arg.replace(/"/g, '`"') : arg.replace(/"/g, '\\"')
+const escapeNewLine = (platform, arg) => platform === 'win32' ? arg.replaceAll(/\n/g, "\\n").replaceAll(/\r/g, "\\r") : arg
+const escapeDoubleQuotes = (platform, arg) => platform === 'win32' ? arg.replaceAll(/"/g, '`"') : arg.replaceAll(/"/g, '\\"')
 class Dalai {
   constructor(home) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -183,7 +185,8 @@ class Dalai {
     for(let key in o) {
       chunks.push(`--${key} ${escapeDoubleQuotes(platform, o[key].toString())}`)
     }
-    const prompt = `"${escapeDoubleQuotes(platform, req.prompt)}"`
+    const escaped = escapeNewLine(platform, req.prompt)
+    const prompt = `"${escapeDoubleQuotes(platform, escaped)}"`
 
     chunks.push(`-p ${prompt}`)
 
