@@ -248,7 +248,7 @@ You need to make sure you have the correct version of Python and Node.js install
 
 #### Step 1.1. Python <= 3.10
 
-<a href="https://pimylifeup.com/installing-python-on-linux/" class='btn'>Download node.js</a>
+<a href="https://pimylifeup.com/installing-python-on-linux/" class='btn'>Download Python</a>
 
 > Make sure the version is 3.10 or lower (not 3.11)
 Python must be 3.10 or below (pytorch and other libraries are not supported yet on the latest)
