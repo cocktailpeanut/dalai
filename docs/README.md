@@ -169,7 +169,15 @@ brew install cmake
 brew install pkg-config
 ```
 
-Now try running the `npx dalai` commands again.
+#### 3. Update NPM
+
+Just to make sure we cover every vector, let's update NPM as well:
+
+```
+npm install -g npm@latest
+```
+
+Now go back to step 2.1 and try running the `npx dalai` commands again.
 
 ### Step 3. Run Web UI
 
