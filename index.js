@@ -1,6 +1,6 @@
 const os = require('os');
-//const pty = require('node-pty');
-const pty = require('@cdktf/node-pty-prebuilt-multiarch');
+const pty = require('node-pty');
+//const pty = require('@cdktf/node-pty-prebuilt-multiarch');
 const git = require('isomorphic-git');
 const http = require('isomorphic-git/http/node');
 const Http = require("http")
@@ -314,8 +314,8 @@ class Dalai {
     if (platform === "win32") {
       await this.python() 
     }
-    const root_python_paths = (platform === "win32" ? [path.resolve(this.home, "python", "python.exe")] : ["python3", "python"])
-    const root_pip_paths = (platform === "win32" ? [path.resolve(this.home, "python", "python -m pip")] : ["pip3", "pip"])
+    const root_python_paths = (platform === "win32" ? ["python3", "python", path.resolve(this.home, "python", "python.exe")] : ["python3", "python"])
+    const root_pip_paths = (platform === "win32" ? ["pip3", "pip", path.resolve(this.home, "python", "python -m pip")] : ["pip3", "pip"])
 
     // 3.2. Build tools
     if (platform === "linux") {
@@ -323,13 +323,19 @@ class Dalai {
       success = await this.exec("apt-get install build-essential python3-venv -y")
       if (!success) {
         // fefdora
-        await this.exec("dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y")
+        success = await this.exec("dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y")
       }
     } else {
       // for win32 / darwin
       for(let root_pip_path of root_pip_paths) {
         success = await this.exec(`${root_pip_path} install --user virtualenv`)
-        if (success) break;
+        if (success) {
+          break;
+        }
+        success = await this.exec(`${root_pip_path} install virtualenv`)
+        if (success) {
+          break;
+        }
       }
       if (!success) {
         throw new Error("cannot install virtualenv")
@@ -412,30 +418,36 @@ class Dalai {
   }
   exec(cmd, cwd, cb) {
     return new Promise((resolve, reject) => {
-      const config = Object.assign({}, this.config)
-      if (cwd) {
-        config.cwd = path.resolve(cwd)
+      try {
+        const config = Object.assign({}, this.config)
+        if (cwd) {
+          config.cwd = path.resolve(cwd)
+        }
+        console.log(`exec: ${cmd} in ${config.cwd}`)
+        const ptyProcess = pty.spawn(shell, [], config)
+        ptyProcess.onData((data) => {
+          if (cb) {
+            cb(data)
+          } else {
+            process.stdout.write(data);
+          }
+        });
+        ptyProcess.onExit((res) => {
+          console.log("# EXIT", res)
+          if (res.exitCode === 0) {
+            // successful
+            resolve(true)
+          } else {
+            // something went wrong
+            resolve(false)
+          }
+        });
+        ptyProcess.write(`${cmd}\r`)
+        ptyProcess.write("exit\r")
+      } catch (e) {
+        console.log("caught error", e)
+        ptyProcess.write("exit\r")
       }
-      console.log(`exec: ${cmd} in ${config.cwd}`)
-      const ptyProcess = pty.spawn(shell, [], config)
-      ptyProcess.onData((data) => {
-        if (cb) {
-          cb(data)
-        } else {
-          process.stdout.write(data);
-        }
-      });
-      ptyProcess.onExit((res) => {
-        if (res.exitCode === 0) {
-          // successful
-          resolve(true)
-        } else {
-          // something went wrong
-          resolve(false)
-        }
-      });
-      ptyProcess.write(`${cmd}\r`)
-      ptyProcess.write("exit\r")
     })
   }
   progress(task, percent) {

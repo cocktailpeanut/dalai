@@ -35,6 +35,7 @@ class Alpaca {
     models = models.map((m) => {
       return m.toUpperCase()
     })
+    console.log("alpaca.add", models)
     for(let model of models) {
       const venv_path = path.join(this.root.home, "venv")
       const python_path = platform == "win32" ? path.join(venv_path, "Scripts", "python.exe") : path.join(venv_path, 'bin', 'python')
@@ -50,7 +51,11 @@ class Alpaca {
         const task = `downloading ${outputFile}`
         const url = "https://ipfs.io/ipfs/QmQ1bf2BTnYxq73MFJWu1B7bQ2UD6qG7D7YDCxhTndVkPC"
         const dir = path.resolve(this.home, "models", model)
-        await fs.promises.mkdir(dir, { recursive: true }).catch((e) => { })
+        console.log("dir", dir)
+        await fs.promises.mkdir(dir, { recursive: true }).catch((e) => {
+          console.log("mkdir", e)
+        })
+        console.log("down", url)
         await this.root.down(url, path.resolve(dir, "ggml-model-q4_0.bin"))
       }
     }
