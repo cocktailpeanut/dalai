@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "dalai:llama": "./dalai llama",
-    "start": "npx dalai serve",
+    "start": "node bin/cli.js serve",
     "just:run": "wrap () { yarn && yarn dalai:llama $1 && yarn start; }; wrap",
     "just:fix": "npx prettier --write .",
     "postinstall": "node ./bin/cli setup"

@@ -67,7 +67,11 @@ class Alpaca {
       } else {
         const task = `downloading ${outputFile}`;
         const url =
-          "https://ipfs.io/ipfs/QmQ1bf2BTnYxq73MFJWu1B7bQ2UD6qG7D7YDCxhTndVkPC";
+          "https://gateway.estuary.tech/gw/ipfs/QmQ1bf2BTnYxq73MFJWu1B7bQ2UD6qG7D7YDCxhTndVkPC";
+        // const url =
+        //   "https://ipfs.io/ipfs/QmQ1bf2BTnYxq73MFJWu1B7bQ2UD6qG7D7YDCxhTndVkPC";
+        // const url =
+        //   "https://cloudflare-ipfs.com/ipfs/QmQ1bf2BTnYxq73MFJWu1B7bQ2UD6qG7D7YDCxhTndVkPC";
         const dir = path.resolve(this.home, "models", model);
         await fs.promises.mkdir(dir, { recursive: true }).catch((e) => {});
         await this.root.down(url, path.resolve(dir, "ggml-model-q4_0.bin"));
