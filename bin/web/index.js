@@ -15,7 +15,7 @@ const start = (port, home) => {
   app.set('views', path.resolve(__dirname, "views"))
   app.get("/", (req, res) => {
     res.render("index", {
-      threads: oc.cpus().length
+      threads: os.cpus().length
     })
   })
   httpServer.listen(port, () => {
