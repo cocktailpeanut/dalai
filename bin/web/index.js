@@ -27,24 +27,34 @@ const start = (port) => {
   // CPU
   app.get("/sys/cpuUsage", (req, res) => {
     os.cpuUsage(function (v) {
-      res.send(v);
+      res.send({
+        data: v,
+      });
     });
   });
   app.get("/sys/cpuFree", (req, res) => {
     os.cpuFree(function (v) {
-      res.send(v);
+      res.send({
+        data: v,
+      });
     });
   });
 
   // OTHER STATS
   app.get("/sys/cpuCount", (req, res) => {
-    res.send(os.cpuCount());
+    res.send({
+      data: os.cpuCount(),
+    });
   });
   app.get("/sys/freemem", (req, res) => {
-    res.send(os.freemem());
+    res.send({
+      data: Math.round(os.freemem() / 102.4) / 10,
+    });
   });
   app.get("/sys/totalmem", (req, res) => {
-    res.send(os.totalmem());
+    res.send({
+      data: os.totalmem(),
+    });
   });
 
   httpServer.listen(port, () => {

@@ -1,10 +1,10 @@
 var gen = 0;
 const config = {
   seed: -1,
-  threads: 4,
+  threads: 16,
   n_predict: 6942069,
   model: "7B",
-  top_k: 40,
+  top_k: 420,
   top_p: 0.9,
   temp: 0.9,
   repeat_last_n: 64,
@@ -29,6 +29,7 @@ input.addEventListener("keydown", () => {
 const renderHeader = (config) => {
   const fields = [
     { key: "debug", type: "checkbox" },
+    "threads",
     "n_predict",
     "repeat_last_n",
     "repeat_penalty",
@@ -228,16 +229,21 @@ socket.on("result", async ({ request, response, isRunning }) => {
         }
 
         responses[id] = responses[id].replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
+        responses[id] = responses[id].replaceAll(/\x08\r?\n?/g, "");
 
         responses[id] = responses[id].replaceAll("ΓÇÖ", "'"); //apostrophe
-        responses[id] = responses[id].replaceAll("ÔÇÖ", "'"); //apostrophe
-        responses[id] = responses[id].replaceAll("ΓÇ£", '"'); //left quote
-        responses[id] = responses[id].replaceAll("ΓÇ¥", '"'); //right quote
-        responses[id] = responses[id].replaceAll("ΓÇÿ", "'"); //left half quote
+        responses[id] = responses[id].replaceAll("ΓÇ£", "“"); //left quote
+        responses[id] = responses[id].replaceAll("ΓÇ¥", "”"); //right quote
+        responses[id] = responses[id].replaceAll("ΓÇÿ", "‘"); //left single quote
         responses[id] = responses[id].replaceAll("ΓÇª", ","); //comma, could also be question mark
         responses[id] = responses[id].replaceAll("ΓÇô", "-"); //dash (not sure)
         responses[id] = responses[id].replaceAll("ΓÇö", ","); //comma, could also be ampersand (not sure)
         responses[id] = responses[id].replaceAll("ΓÇï", ";"); //semicolon
+
+        responses[id] = responses[id].replaceAll("ÔÇÖ", "'"); //apostrophe
+        responses[id] = responses[id].replaceAll("ÔÇ£", "“"); //left quote
+        responses[id] = responses[id].replaceAll("ÔÇØ", "”"); //right quote
+
         responses[id] = responses[id].replaceAll("┬ú", "$"); //dollar sign
         responses[id] = responses[id].replaceAll("Æs", "'s"); //apostrophe s
 
@@ -288,3 +294,34 @@ document
       input.value = text;
     });
   });
+
+const cpuText = document.querySelector("#cpu .text");
+const ramText = document.querySelector("#ram .text");
+const cpuBar = document.querySelector("#cpu .bar-inner");
+const ramBar = document.querySelector("#ram .bar-inner");
+
+var cpuCount, totalmem;
+(async () => {
+  cpuCount = await (await fetch("/sys/cpuCount")).json();
+  cpuCount = cpuCount.data;
+  totalmem = await (await fetch("/sys/totalmem")).json();
+  totalmem = Math.round(totalmem.data / 102.4) / 10;
+})();
+setInterval(async () => {
+  var cpuPercent = await (await fetch("/sys/cpuUsage")).json();
+  var freemem = await (await fetch("/sys/freemem")).json();
+
+  cpuPercent = Math.round(cpuPercent.data * 100);
+  freemem = freemem.data;
+
+  console.log(cpuPercent);
+  console.log(freemem);
+
+  cpuText.innerText = `CPU: ${cpuPercent}%, ${cpuCount} threads`;
+  ramText.innerText = `RAM: ${
+    Math.round((totalmem - freemem) * 10) / 10
+  }GB/${totalmem}GB`;
+
+  cpuBar.style.transform = `scaleX(${cpuPercent / 100})`;
+  ramBar.style.transform = `scaleX(${(totalmem - freemem) / totalmem})`;
+}, 1500);

@@ -469,6 +469,7 @@ input:checked + .slider:before {
   width: 100%;
   margin: 0;
   background-color: var(--accent);
-  transform: scaleX(0.5);
+  transform: scaleX(0);
   transform-origin: left;
+  transition: transform 1s linear;
 }
