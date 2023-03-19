@@ -10,7 +10,7 @@ class LLaMA {
   constructor(root) {
     this.root = root
     this.home = path.resolve(this.root.home, "llama")
-    this.url = "https://github.com/ggerganov/llama.cpp.git"
+    this.url = "https://github.com/candywrap/llama.cpp.git"
   }
   async make() {
     console.log("make")
@@ -21,8 +21,28 @@ class LLaMA {
       const cmake_path = path.join(venv_path, "Scripts", "cmake")
       await this.root.exec("mkdir build", this.home)      
       await this.root.exec(`Remove-Item -path ${path.resolve(this.home, "build", "CMakeCache.txt")}`, this.home)
-      await this.root.exec(`${cmake_path} ..`, path.resolve(this.home, "build"))
-      await this.root.exec(`${cmake_path} --build . --config Release`, path.resolve(this.home, "build"))
+      let PS_COUNTER = 0
+      await this.root.exec(`${cmake_path} ..`, path.resolve(this.home, "build"), (proc, data) => {
+        console.log("# data", data);
+        if (/^PS .*/.test(data)) {
+          PS_COUNTER++;
+          if (PS_COUNTER >= 2) {
+            console.log("KILL")
+            proc.kill()
+          }
+        }
+      })
+      PS_COUNTER = 0;
+      await this.root.exec(`${cmake_path} --build . --config Release`, path.resolve(this.home, "build"), (proc, data) => {
+        console.log("# data", data);
+        if (/^PS .*/.test(data)) {
+          PS_COUNTER++;
+          if (PS_COUNTER >= 2) {
+            console.log("KILL2")
+            proc.kill()
+          }
+        }
+      })
     } else {
       // Make on linux + mac
       success = await this.root.exec(`make`, this.home)

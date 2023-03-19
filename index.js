@@ -199,7 +199,7 @@ class Dalai {
       let started = req.debug
       let ended = false
       let writeEnd = !req.skip_end
-      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (msg) => {
+      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (proc, msg) => {
         if (endpattern.test(msg)) ended = true
         if (started && !ended) {
           cb(msg)
@@ -367,14 +367,20 @@ class Dalai {
     }
     success = await this.exec(`${pip_path} install --upgrade pip setuptools wheel`)
     if (!success) {
-      throw new Error("pip setuptools wheel upgrade failed")
-      return
+      success = await this.exec(`${pip_path} install --user --upgrade pip setuptools wheel`)
+      if (!success) {
+        throw new Error("pip setuptools wheel upgrade failed")
+        return  
+      }
     }
     success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy`)
     //success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy wget`)
     if (!success) {
-      throw new Error("dependency installation failed")
-      return
+      success = await this.exec(`${pip_path} install --user torch torchvision torchaudio sentencepiece numpy`)
+      if (!success) {
+        throw new Error("dependency installation failed")
+        return  
+      }
     }
 
 
@@ -427,7 +433,7 @@ class Dalai {
         const ptyProcess = pty.spawn(shell, [], config)
         ptyProcess.onData((data) => {
           if (cb) {
-            cb(data)
+            cb(ptyProcess, data)
           } else {
             process.stdout.write(data);
           }
@@ -446,7 +452,8 @@ class Dalai {
         ptyProcess.write("exit\r")
       } catch (e) {
         console.log("caught error", e)
-        ptyProcess.write("exit\r")
+        ptyProcess.kill()
+        // ptyProcess.write("exit\r")
       }
     })
   }
