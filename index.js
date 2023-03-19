@@ -154,7 +154,6 @@ class Dalai {
       return
     }
 
-    console.log("query", req)
     let [Core, Model] = req.model.split(".")
     Model = Model.toUpperCase()
 

@@ -1,8 +1,14 @@
-import { CheckBox } from '@mui/icons-material';
-import { Box, Button, Select, TextField, Grid } from '@mui/material';
+import {
+  Box,
+  Button,
+  TextField,
+  Grid,
+  FormControlLabel,
+  Checkbox,
+} from '@mui/material';
 import React from 'react';
 import { useForm, type SubmitHandler, Controller } from 'react-hook-form';
-import { Container } from '@mui/system';
+import { type IConfig } from '../../App';
 
 interface IFormInput {
   seed: number;
@@ -14,30 +20,33 @@ interface IFormInput {
   repeat_last_n: number;
   repeat_penalty: number;
   debug: boolean;
-  models: string[];
-  model: string;
 }
 
-const Parameters = () => {
+const Parameters = ({
+  setConfig,
+  config,
+}: {
+  setConfig: React.Dispatch<React.SetStateAction<IConfig>>;
+  config: IConfig;
+}) => {
   const { control, handleSubmit } = useForm({
     defaultValues: {
-      seed: -1,
-      threads: 4,
-      n_predict: 200,
-      top_k: 40,
-      top_p: 0.9,
-      temp: 0.1,
-      repeat_last_n: 64,
-      repeat_penalty: 1.3,
-      debug: false,
-      models: [],
-      model: 'alpaca.7B',
+      seed: config.seed,
+      threads: config.threads,
+      n_predict: config.n_predict,
+      top_k: config.top_k,
+      top_p: config.top_p,
+      temp: config.temp,
+      repeat_last_n: config.repeat_last_n,
+      repeat_penalty: config.repeat_penalty,
+      debug: config.debug,
     },
   });
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
-    console.log(data);
+    setConfig((previous: IConfig) => ({ ...previous, ...data }));
   };
   return (
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <Box component="form" onSubmit={handleSubmit(onSubmit)} alignItems="center">
       <Grid
         container
@@ -57,7 +66,6 @@ const Parameters = () => {
             name="n_predict"
             control={control}
             render={({ field }) => {
-              console.log(field.value);
               return (
                 <TextField
                   value={field.value}
@@ -72,7 +80,6 @@ const Parameters = () => {
             name="repeat_last_n"
             control={control}
             render={({ field }) => {
-              console.log(field.value);
               return (
                 <TextField
                   value={field.value}
@@ -87,7 +94,6 @@ const Parameters = () => {
             name="repeat_penalty"
             control={control}
             render={({ field }) => {
-              console.log(field.value);
               return (
                 <TextField
                   value={field.value}
@@ -102,7 +108,6 @@ const Parameters = () => {
             name="top_k"
             control={control}
             render={({ field }) => {
-              console.log(field.value);
               return (
                 <TextField
                   value={field.value}
@@ -117,7 +122,6 @@ const Parameters = () => {
             name="top_p"
             control={control}
             render={({ field }) => {
-              console.log(field.value);
               return (
                 <TextField
                   value={field.value}
@@ -132,7 +136,6 @@ const Parameters = () => {
             name="temp"
             control={control}
             render={({ field }) => {
-              console.log(field.value);
               return (
                 <TextField
                   value={field.value}
@@ -147,7 +150,6 @@ const Parameters = () => {
             name="seed"
             control={control}
             render={({ field }) => {
-              console.log(field.value);
               return (
                 <TextField
                   value={field.value}
@@ -161,7 +163,14 @@ const Parameters = () => {
           <Controller
             name="debug"
             control={control}
-            render={({ field }) => <CheckBox {...field} />}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Checkbox checked={field.value} onChange={field.onChange} />
+                }
+                label={field.name}
+              />
+            )}
           />
           <Button variant="outlined" type="submit">
             Save

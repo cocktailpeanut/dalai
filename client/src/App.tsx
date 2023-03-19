@@ -72,27 +72,39 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+export interface IConfig {
+  seed: number;
+  threads: number;
+  n_predict: number;
+  top_k: number;
+  top_p: number;
+  temp: number;
+  repeat_last_n: number;
+  repeat_penalty: number;
+  debug: boolean;
+  models: string[];
+  model: string;
+  prompt?: string;
+  id?: string | null;
+}
+
+export const ConfigContext = React.createContext<IConfig>({
+  seed: -1,
+  threads: 4,
+  n_predict: 200,
+  top_k: 40,
+  top_p: 0.9,
+  temp: 0.1,
+  repeat_last_n: 64,
+  repeat_penalty: 1.3,
+  debug: false,
+  models: [],
+  model: 'alpaca.7B',
+});
+
 function App() {
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
   const [loading, setLoading] = useState<boolean>(false);
-  const createId = () => {
-    return nanoid();
-  };
-  interface IConfig {
-    seed: number;
-    threads: number;
-    n_predict: number;
-    top_k: number;
-    top_p: number;
-    temp: number;
-    repeat_last_n: number;
-    repeat_penalty: number;
-    debug: boolean;
-    models: string[];
-    model: string;
-    prompt?: string;
-    id?: string | null;
-  }
   const [config, setConfig] = useState<IConfig>({
     seed: -1,
     threads: 4,
@@ -104,9 +116,22 @@ function App() {
     repeat_penalty: 1.3,
     debug: false,
     models: [],
-    model: 'alpaca.7B',
+    model: '',
   });
-  const model = 'alpaca.7B';
+  const [model, setModel] = useState<string>('');
+  const createId = () => {
+    return nanoid();
+  };
+
+  useEffect(() => {
+    setConfig((previous) => ({ ...previous, model }));
+  }, [model]);
+
+  useEffect(() => {
+    if (isConnected) {
+      setModel(config?.models[0] || '');
+    }
+  }, [isConnected, config]);
   interface Response {
     id: string;
     textContent: string;
@@ -115,7 +140,6 @@ function App() {
   const [responses, setResponses] = useState<Response[]>([]);
 
   const [question, setQuestion] = useState<string>('');
-  const [ids, setId] = useState<string>('');
 
   useEffect(() => {
     function onConnect() {
@@ -149,16 +173,16 @@ function App() {
       };
       response: string;
     }) => {
-      setLoading(false);
       if (request.method === 'installed') {
         if (response === '\n\n<end>') {
           // document.querySelector(".form-header").innerHTML = renderHeader(config)
         } else {
-          // setConfig((previous: any) => ({...previous, models: [response]}) )
+          setConfig((previous: any) => ({ ...previous, models: [response] }));
+          setModel(config?.models[0] || '');
         }
       } else {
         if (response === '\n\n<end>') {
-          //
+          setLoading(false);
         } else {
           const id = request.id;
           const existing = responses.findIndex((r) => r.id === id);
@@ -193,9 +217,7 @@ function App() {
   );
 
   useEffect(() => {
-    console.log(config);
     if (config.id) {
-      console.log('emitting request');
       socket.emit('request', config);
       setConfig((previous: any) => ({ ...previous, prompt: '', id: null }));
       setQuestion('');
@@ -203,7 +225,6 @@ function App() {
   }, [config]);
 
   const emitQuestion = (question: string, id: string) => {
-    console.log(id);
     setConfig((previous) => ({ ...previous, prompt: question, id }));
     setResponses((previous) =>
       previous
@@ -217,88 +238,79 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <SearchAppBar
-        question={question}
-        setQuestion={setQuestion}
-        emitQuestion={emitQuestion}
-      />
-
-      <Container maxWidth="xl">
-        <Box my={4} justifyContent="center">
-          <Parameters />
-          <Typography variant="h5" component="h2" gutterBottom>
-            {isConnected ? 'Connected' : 'Disconnected'}
-          </Typography>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              width: '100%',
-            }}
-          >
-            <Search>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ 'aria-label': 'search2' }}
-                value={question}
-                multiline
-                onChange={(e) => {
-                  setQuestion(e.target.value);
-                }}
-              />
-            </Search>
-            <Button
-              sx={{ ml: 2 }}
-              variant="contained"
-              disabled={question.length <= 0}
-              onClick={() => {
-                emitQuestion(question, createId());
-              }}
-            >
-              ASK
-            </Button>
-          </Box>
-        </Box>
-
-        {responses.map((r) => {
-          return (
-            <Paper
-              key={r.id}
-              elevation={2}
+      <ConfigContext.Provider value={config}>
+        <CssBaseline />
+        <SearchAppBar
+          config={config}
+          model={model}
+          setModel={setModel}
+          isConnected={isConnected}
+        />
+        <Container maxWidth="xl">
+          <Box my={4} justifyContent="center">
+            <Parameters config={config} setConfig={setConfig} />
+            <Box
               sx={{
-                my: 2,
-                p: 1,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                width: '100%',
               }}
             >
-              <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
-                <Chip label={` ID: ${r.id}`} />
-                <Chip label={` PROMPT: ${r.prompt}`} color="error" />
-                <Divider
-                  sx={{
-                    my: 2,
+              <Search>
+                <SearchIconWrapper>
+                  <SearchIcon />
+                </SearchIconWrapper>
+                <StyledInputBase
+                  placeholder="Search…"
+                  inputProps={{ 'aria-label': 'search2' }}
+                  value={question}
+                  multiline
+                  onChange={(e) => {
+                    setQuestion(e.target.value);
                   }}
                 />
-                <Typography variant="body1" component="h2" gutterBottom>
-                  {r.textContent}
-                </Typography>
-              </Box>
-            </Paper>
-          );
-        })}
-        {/* <Paper elevation={6} variant="outlined">
-      <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          {' '}
-          This is a sheet of paper.{' '}
-        </Typography>
-    </Box>
-    </Paper> */}
-      </Container>
+              </Search>
+              <Button
+                sx={{ ml: 2 }}
+                variant="contained"
+                disabled={question.length <= 0 || !isConnected || loading}
+                onClick={() => {
+                  emitQuestion(question, createId());
+                }}
+              >
+                ASK
+              </Button>
+            </Box>
+          </Box>
+
+          {responses.reverse().map((r) => {
+            return (
+              <Paper
+                key={r.id}
+                elevation={2}
+                sx={{
+                  my: 2,
+                  p: 1,
+                }}
+              >
+                <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
+                  <Chip label={` ID: ${r.id}`} />
+                  <Chip label={` PROMPT: ${r.prompt}`} color="error" />
+                  <Divider
+                    sx={{
+                      my: 2,
+                    }}
+                  />
+                  <Typography variant="body1" component="h2" gutterBottom>
+                    {r.textContent}
+                  </Typography>
+                </Box>
+              </Paper>
+            );
+          })}
+        </Container>
+      </ConfigContext.Provider>
     </ThemeProvider>
   );
 }

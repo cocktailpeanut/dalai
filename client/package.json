@@ -1,7 +1,9 @@
 {
-  "name": "client",
-  "version": "0.1.0",
-  "private": true,
+  "name": "client-dalai",
+  "version": "1.0.0",
+  "author": "luluhoc",
+  "license": "MIT",
+  "private": false,
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",

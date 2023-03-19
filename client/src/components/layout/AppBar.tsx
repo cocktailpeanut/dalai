@@ -1,92 +1,60 @@
 import * as React from 'react';
-import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import InputBase from '@mui/material/InputBase';
-import MenuIcon from '@mui/icons-material/Menu';
-import SearchIcon from '@mui/icons-material/Search';
-import { Button } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { nanoid } from 'nanoid';
-import Parameters from '../forms/Parameters.form';
-
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(1),
-    width: 'auto',
-  },
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      width: '12ch',
-      '&:focus': {
-        width: '20ch',
-      },
-    },
-  },
-}));
+import { type IConfig } from '../../App';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
 export default function SearchAppBar({
-  question,
-  setQuestion,
-  emitQuestion,
+  config,
+  model,
+  setModel,
+  isConnected,
 }: {
-  question: string;
-  setQuestion: React.Dispatch<React.SetStateAction<string>>;
-  emitQuestion: (question: string, id: string) => void;
+  config: IConfig;
+  model: string;
+  setModel: (model: string) => void;
+  isConnected: boolean;
 }) {
-  const createId = () => {
-    return nanoid();
-  };
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
           <Typography
-            variant="h6"
+            variant="h5"
             noWrap
             component="div"
-            sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
+            sx={{ flexGrow: 1, display: { sm: 'block' }, fontWeight: 'bold' }}
           >
-            MUI
+            Dalai
           </Typography>
+          <FiberManualRecordIcon
+            sx={{ mr: 1, color: isConnected ? '#7CFC00' : '#FF0000' }}
+          />
+          <Box sx={{ minWidth: 120 }}>
+            <FormControl fullWidth>
+              <InputLabel id="model">Models</InputLabel>
+              <Select
+                labelId="model"
+                size="small"
+                id="model"
+                value={model}
+                label="Model"
+                onChange={(e) => {
+                  setModel(e.target.value);
+                }}
+              >
+                {config?.models?.map((model) => (
+                  <MenuItem key={nanoid()} value={model}>
+                    {model}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
         </Toolbar>
       </AppBar>
     </Box>
