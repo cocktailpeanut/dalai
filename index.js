@@ -260,6 +260,10 @@ class Dalai {
       let modelFolders = await fs.promises.readdir(path.resolve(corePath, "models"))
       for(let modelFolder of modelFolders) {
         let modelPath = path.resolve(corePath, "models", modelFolder)
+        const isDir = fs.lstatSync(modelPath).isDirectory() 
+        if (!isDir) {
+          continue
+        }
         let modelFiles = await fs.promises.readdir(modelPath)
         for(let modelFile of modelFiles) {
           if (modelFile.startsWith("ggml-model-") && modelFile.endsWith(".bin")) {
