@@ -1,5 +1,6 @@
 const os = require("os");
-const pty = require("node-pty");
+// const pty = require("node-pty");
+const pty = require("@cdktf/node-pty-prebuilt-multiarch");
 const git = require("isomorphic-git");
 const http = require("isomorphic-git/http/node");
 const Http = require("http");
@@ -36,6 +37,7 @@ class Dalai {
     //  Otherwise if you want to customize the path you can just pass in the "home" attribute to manually set it.
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    var home = require("./installpath.json").home;
     this.home = home ? path.resolve(home) : path.resolve(os.homedir(), "dalai");
     try {
       console.log("mkdir", this.home);
