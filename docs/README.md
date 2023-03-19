@@ -46,7 +46,7 @@ According to [a llama.cpp discussion thread](https://github.com/ggerganov/llama.
 - 7B => ~4 GB
 - 13B => ~8 GB
 - 30B => ~16 GB
-- 64 => ~32 GB
+- 65 => ~32 GB
 
 ## 3. Disk Space Requirements
 
@@ -63,7 +63,7 @@ Alpaca comes fully quantized (compressed), and the only space you need for the 7
 
 ### LLaMA
 
-You need a lot of space for storing the models.
+You need a lot of space for storing the models. **The model name must be one of: 7B, 13B, 30B, and 65B.**
 
 You do NOT have to install all models, you can install one by one. Let's take a look at how much space each model takes up:
 
