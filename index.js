@@ -162,7 +162,7 @@ class Dalai {
 
     let o = {
       seed: req.seed || -1,
-      threads: req.threads || 8,
+      threads: req.threads || os.cpus().length,
       n_predict: req.n_predict || 128,
       model: `models/${Model || "7B"}/ggml-model-q4_0.bin`,
     }
