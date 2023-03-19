@@ -251,7 +251,7 @@ class Dalai {
     // Find all models that start with ggml-model- and end with .bin
     // Return a list of objects with core, model, and file
     let models = []
-    for(let core of Object.keys(this.cores)) {
+    for(let core of Object.values(["alpaca", "llama"])) {
       let corePath = path.resolve(this.home, core)
       let e = await exists(corePath)
       if (!e) {
