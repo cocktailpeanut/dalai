@@ -320,10 +320,14 @@ class Dalai {
     // 3.2. Build tools
     if (platform === "linux") {
       // ubuntu debian
-      success = await this.exec("apt-get install build-essential python3-venv -y")
+      success = await this.exec("sudo apt-get install build-essential python3-venv -y")
       if (!success) {
         // fefdora
-        success = await this.exec("dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y")
+        success = await this.exec("sudo dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y")
+        if (!success) {
+          // Arch Linux
+          success = await this.exec("sudo pacman -S base-devel linux-headers python-virtualenv --noconfirm")
+        }
       }
     } else {
       // for win32 / darwin
