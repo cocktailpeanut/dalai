@@ -303,7 +303,7 @@ Python must be 3.10 or below (pytorch and other libraries are not supported yet 
 
 ---
 
-### Step 2. Install models
+### Step 2.1. Install models
 
 Currently supported engines are `llama` and `alpaca`.
 
@@ -331,8 +331,24 @@ or to download multiple models:
 npx dalai llama install 7B 13B
 ```
 
+### Step 2.2. Troubleshoot
 
-### Step 4. Run Web UI
+In case the model install silently fails or hangs forever, try the following command, and try running the npx command again:
+
+On ubuntu/debian/etc.:
+
+```
+sueo apt-get install build-essential python3-venv -y
+```
+
+On fedora/etc.:
+
+```
+dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y
+```
+
+
+### Step 3. Run Web UI
 
 After everything has been installed, run the following command to launch the web UI server:
 

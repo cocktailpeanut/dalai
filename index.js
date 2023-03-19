@@ -267,13 +267,18 @@ class Dalai {
     await fs.promises.mkdir(path.resolve(engine.home), { recursive: true }).catch((e) => {
       console.log("ERROR" ,e)
     })
-    if (e) {
+
+    try {
       console.log("try fetching", engine.home, engine.url)
-      await git.fetch({ fs, http, dir: engine.home, url: engine.url })
-    } else {
-      console.log("try cloning", engine.home, engine.url)
-//      await fs.promises.mkdir(engine.home, { recursive: true }).catch((e) => { })
-      await git.clone({ fs, http, dir: engine.home, url: engine.url })
+      await git.pull({ fs, http, dir: engine.home, url: engine.url })
+    } catch (e) {
+      console.log("[E] Pull", e)
+      try {
+        console.log("try cloning", engine.home, engine.url)
+        await git.clone({ fs, http, dir: engine.home, url: engine.url })
+      } catch (e2) {
+        console.log("[E] Clone", e2)
+      }
     }
     console.log("next", core, engine.make);
     /**************************************************************************************************************
