@@ -41,12 +41,14 @@ Dalai runs on all of the following operating systems:
 
 Runs on most modern computers. Unless your computer is very very old, it should work.
 
-According to [a llama.cpp discussion thread](https://github.com/ggerganov/llama.cpp/issues/13), here are the memory requirements:
 
-- 7B => ~4 GB
-- 13B => ~8 GB
-- 30B => ~16 GB
-- 64 => ~32 GB
+| model | original size | quantized size (4-bit) |
+|-------|---------------|------------------------|
+| 7B    | 13 GB         | 3.9 GB                 |
+| 13B   | 24 GB         | 7.8 GB                 |
+| 30B   | 60 GB         | 19.5 GB                |
+| 65B   | 120 GB        | 38.5 GB                |
+
 
 ## 3. Disk Space Requirements
 
