@@ -154,7 +154,7 @@ class Dalai {
       return
     }
 
-
+    console.log("query", req)
     let [Core, Model] = req.model.split(".")
     Model = Model.toUpperCase()
 
@@ -183,6 +183,7 @@ class Dalai {
 
     let chunks = []
     for(let key in o) {
+      console.log(key, o[key])
       chunks.push(`--${key} ${escapeDoubleQuotes(platform, o[key].toString())}`)
     }
     const escaped = escapeNewLine(platform, req.prompt)
@@ -381,7 +382,11 @@ class Dalai {
   }
   serve(port, options) {
     const httpServer = createServer();
-    const io = new Server(httpServer)
+    const io = new Server(httpServer, {
+      cors: {
+        origin: "http://localhost:3000"
+      }
+    })
     io.on("connection", (socket) => {
       socket.on('request', async (req) => {
         await this.query(req, (str) => {
@@ -392,7 +397,11 @@ class Dalai {
     httpServer.listen(port)
   }
   http(httpServer) {
-    const io = new Server(httpServer)
+    const io = new Server(httpServer, {
+      cors: {
+        origin: "http://localhost:3000"
+      }
+    })
     io.on("connection", (socket) => {
       socket.on('request', async (req) => {
         await this.query(req, (str) => {
