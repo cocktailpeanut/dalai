@@ -149,7 +149,7 @@ class Dalai {
     if (req.method === "installed") {
       // let models = await this.installed()
       for(let model of models) {
-        cb(model)
+        cb(`${model.core}.${model.model}`)
       }
       cb('\n\n<end>')
       return
