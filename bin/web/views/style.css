@@ -24,6 +24,7 @@
   --primary-text-alt: #ececf1;
   --secondary-text: #ffffff80;
   --background: #343541;
+  --background-mid: #2c2d30;
   --background-alt: #202123;
   --surface: #444654;
   --surface-alt: #565869;
@@ -221,7 +222,6 @@ body.llama #feed-placeholder-llama {
   box-sizing: border-box;
   padding: 0;
   margin-bottom: 160px;
-  padding: 0 25px;
 }
 #messages > li {
   box-sizing: border-box;
@@ -356,6 +356,7 @@ option {
   flex-wrap: wrap;
   width: 160px;
   padding: 10px 20px;
+  padding-bottom: 200px;
 }
 .kv {
   display: block;
@@ -424,4 +425,50 @@ input:checked + .slider:before {
 }
 .slider.round:before {
   border-radius: 50%;
+}
+
+#resources {
+  position: fixed;
+  width: 192px;
+  height: 150px;
+  background-color: var(--background-mid);
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: left;
+}
+.resource-item {
+  flex: 1 1 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+.resource-item:not(:first-child) {
+  border-top: 1px #fff1 solid;
+}
+.resource-item * {
+  margin: 0 25px;
+  line-height: 14px;
+}
+.resource-item .text {
+  padding: 5px 0;
+}
+.bar {
+  width: 142px;
+  height: 10px;
+  border-radius: 69px;
+  background-color: var(--surface-alt);
+  overflow: hidden;
+}
+.bar-inner {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  background-color: var(--accent);
+  transform: scaleX(0.5);
+  transform-origin: left;
 }

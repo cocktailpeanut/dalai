@@ -181,13 +181,18 @@ socket.on("result", async ({ request, response, isRunning }) => {
   loading(false);
   if (request.method === "installed") {
     if (response == "\n\n<end>") {
-      document.querySelector(".form-header").innerHTML = renderHeader(config);
-      setHomepage();
-      document.getElementById("model").addEventListener("change", () => {
-        if (document.body.classList.length != 0) {
-          setHomepage();
-        }
-      });
+      if (!document.querySelector(".form-header .config-container")) {
+        var header = document.createElement("div");
+        document.querySelector(".form-header").prepend(header);
+        header.outerHTML = renderHeader(config);
+        // document.querySelector(".form-header").innerHTML = renderHeader(config);
+        setHomepage();
+        document.getElementById("model").addEventListener("change", () => {
+          if (document.body.classList.length != 0) {
+            setHomepage();
+          }
+        });
+      }
     } else {
       config.models.push(response);
     }
@@ -225,6 +230,7 @@ socket.on("result", async ({ request, response, isRunning }) => {
         responses[id] = responses[id].replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
 
         responses[id] = responses[id].replaceAll("ΓÇÖ", "'"); //apostrophe
+        responses[id] = responses[id].replaceAll("ÔÇÖ", "'"); //apostrophe
         responses[id] = responses[id].replaceAll("ΓÇ£", '"'); //left quote
         responses[id] = responses[id].replaceAll("ΓÇ¥", '"'); //right quote
         responses[id] = responses[id].replaceAll("ΓÇÿ", "'"); //left half quote
