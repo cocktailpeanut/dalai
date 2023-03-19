@@ -36,5 +36,5 @@ ECHO   "home": "%DALAIPATHESCAPED%">> %CONFIGFILE%
 ECHO ^}>> %CONFIGFILE%
 
 :SERVE
+START /B CMD /C START http://localhost:42069
 node bin/cli.js serve 42069
-START /B CMD /C start "http://localhost:42069"
