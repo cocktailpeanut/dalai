@@ -111,7 +111,7 @@
 <script>
 const config = {
   seed: -1,
-  threads: 4,
+  threads: <%= threads %>,
   n_predict: 200,
   top_k: 40,
   top_p: 0.9,
@@ -126,7 +126,7 @@ const form = document.getElementById('form');
 const input = document.querySelector('#input');
 const model = document.querySelector('#model');
 const renderHeader = (config) => {
-  const fields = [{ key: "debug", type: "checkbox" }, "n_predict", "repeat_last_n", "repeat_penalty", "top_k", "top_p", "temp", "seed"].map((key) => {
+  const fields = [{ key: "debug", type: "checkbox" }, "n_predict", "repeat_last_n", "repeat_penalty", "top_k", "top_p", "temp", "seed", "threads"].map((key) => {
     if (typeof key === "string") {
       return `<div class='kv'>
 <label>${key}</label>
