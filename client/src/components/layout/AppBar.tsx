@@ -3,9 +3,16 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import {
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  Switch,
+} from '@mui/material';
 import { nanoid } from 'nanoid';
-import { type IConfig } from '../../App';
+import { ThemeContext, type IConfig } from '../../App';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
 export default function SearchAppBar({
@@ -19,6 +26,7 @@ export default function SearchAppBar({
   setModel: (model: string) => void;
   isConnected: boolean;
 }) {
+  const { dark, toggleTheme } = React.useContext(ThemeContext);
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -31,6 +39,17 @@ export default function SearchAppBar({
           >
             Dalai
           </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={dark}
+                onChange={() => {
+                  toggleTheme(!dark);
+                }}
+              />
+            }
+            label="Dark"
+          />
           <FiberManualRecordIcon
             sx={{ mr: 1, color: isConnected ? '#7CFC00' : '#FF0000' }}
           />

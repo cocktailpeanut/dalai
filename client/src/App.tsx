@@ -20,15 +20,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import { nanoid } from 'nanoid';
 import Parameters from './components/forms/Parameters.form';
 
-const theme = createTheme({
-  palette: {
-    mode: 'dark',
-    background: {
-      default: '#000',
-    },
-  },
-});
-
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
   borderRadius: theme.shape.borderRadius,
@@ -57,6 +48,7 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: 'inherit',
   width: '100%',
+  border: '1px solid #000',
   '& .MuiInputBase-input': {
     padding: theme.spacing(1, 1, 1, 0),
     // vertical padding + font size from searchIcon
@@ -102,9 +94,45 @@ export const ConfigContext = React.createContext<IConfig>({
   model: 'alpaca.7B',
 });
 
+export const ThemeContext = React.createContext<{
+  dark: boolean;
+  toggleTheme: React.Dispatch<React.SetStateAction<boolean>>;
+}>({
+  dark: true,
+  toggleTheme: () => {},
+});
+
+const themeDark = createTheme({
+  palette: {
+    mode: 'dark',
+    background: {
+      default: '#000',
+    },
+  },
+});
+
+const themeLight = createTheme({
+  palette: {},
+});
+
 function App() {
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const [dark, toggleTheme] = useState(
+    localStorage.getItem('theme-dark') === 'true'
+  );
+  const [muiTheme, setMuiTheme] = React.useState(themeDark);
+  useEffect(() => {
+    const theme = localStorage.getItem('theme-dark') === 'true';
+    setMuiTheme(theme ? themeDark : themeLight);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('theme-dark', dark.toString());
+    setMuiTheme(dark ? themeDark : themeLight);
+  }, [dark]);
+
   const [config, setConfig] = useState<IConfig>({
     seed: -1,
     threads: 4,
@@ -237,79 +265,86 @@ function App() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={muiTheme}>
       <ConfigContext.Provider value={config}>
-        <CssBaseline />
-        <SearchAppBar
-          config={config}
-          model={model}
-          setModel={setModel}
-          isConnected={isConnected}
-        />
-        <Container maxWidth="xl">
-          <Box my={4} justifyContent="center">
-            <Parameters config={config} setConfig={setConfig} />
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                width: '100%',
-              }}
-            >
-              <Search>
-                <SearchIconWrapper>
-                  <SearchIcon />
-                </SearchIconWrapper>
-                <StyledInputBase
-                  placeholder="Search…"
-                  inputProps={{ 'aria-label': 'search2' }}
-                  value={question}
-                  multiline
-                  onChange={(e) => {
-                    setQuestion(e.target.value);
-                  }}
-                />
-              </Search>
-              <Button
-                sx={{ ml: 2 }}
-                variant="contained"
-                disabled={question.length <= 0 || !isConnected || loading}
-                onClick={() => {
-                  emitQuestion(question, createId());
-                }}
-              >
-                ASK
-              </Button>
-            </Box>
-          </Box>
-
-          {responses.reverse().map((r) => {
-            return (
-              <Paper
-                key={r.id}
-                elevation={2}
+        <ThemeContext.Provider
+          value={{
+            dark,
+            toggleTheme,
+          }}
+        >
+          <CssBaseline />
+          <SearchAppBar
+            config={config}
+            model={model}
+            setModel={setModel}
+            isConnected={isConnected}
+          />
+          <Container maxWidth="xl">
+            <Box my={4} justifyContent="center">
+              <Parameters config={config} setConfig={setConfig} />
+              <Box
                 sx={{
-                  my: 2,
-                  p: 1,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  width: '100%',
                 }}
               >
-                <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
-                  <Chip label={` ID: ${r.id}`} />
-                  <Chip label={` PROMPT: ${r.prompt}`} color="error" />
-                  <Divider
-                    sx={{
-                      my: 2,
+                <Search>
+                  <SearchIconWrapper>
+                    <SearchIcon />
+                  </SearchIconWrapper>
+                  <StyledInputBase
+                    placeholder="Ask me anything..."
+                    inputProps={{ 'aria-label': 'search2' }}
+                    value={question}
+                    multiline
+                    onChange={(e) => {
+                      setQuestion(e.target.value);
                     }}
                   />
-                  <Typography variant="body1" component="h2" gutterBottom>
-                    {r.textContent}
-                  </Typography>
-                </Box>
-              </Paper>
-            );
-          })}
-        </Container>
+                </Search>
+                <Button
+                  sx={{ ml: 2 }}
+                  variant="contained"
+                  disabled={question.length <= 0 || !isConnected || loading}
+                  onClick={() => {
+                    emitQuestion(question, createId());
+                  }}
+                >
+                  ASK
+                </Button>
+              </Box>
+            </Box>
+
+            {responses.reverse().map((r) => {
+              return (
+                <Paper
+                  key={r.id}
+                  elevation={2}
+                  sx={{
+                    my: 2,
+                    p: 1,
+                  }}
+                >
+                  <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
+                    <Chip label={` ID: ${r.id}`} />
+                    <Chip label={` PROMPT: ${r.prompt}`} color="error" />
+                    <Divider
+                      sx={{
+                        my: 2,
+                      }}
+                    />
+                    <Typography variant="body1" component="h2" gutterBottom>
+                      {r.textContent}
+                    </Typography>
+                  </Box>
+                </Paper>
+              );
+            })}
+          </Container>
+        </ThemeContext.Provider>
       </ConfigContext.Provider>
     </ThemeProvider>
   );
