@@ -191,7 +191,7 @@ class Dalai {
 
     chunks.push(`-p ${prompt}`)
 
-    const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "llama") : path.resolve(this.home, Core, "main")
+    const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "main") : path.resolve(this.home, Core, "main")
     if (req.full) {
       await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, cb)
     } else {
@@ -448,7 +448,6 @@ class Dalai {
           }
         });
         ptyProcess.onExit((res) => {
-          console.log("# EXIT", res)
           if (res.exitCode === 0) {
             // successful
             resolve(true)
