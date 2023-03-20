@@ -1,6 +1,6 @@
 const os = require("os");
-// const pty = require("node-pty");
-const pty = require("@cdktf/node-pty-prebuilt-multiarch");
+const pty = require("node-pty");
+//const pty = require('@cdktf/node-pty-prebuilt-multiarch');
 const git = require("isomorphic-git");
 const http = require("isomorphic-git/http/node");
 const Http = require("http");
@@ -13,14 +13,23 @@ const { io } = require("socket.io-client");
 const term = require("terminal-kit").terminal;
 const Downloader = require("nodejs-file-downloader");
 const semver = require("semver");
-const _7z = require("7zip-min");
+//const _7z = require('7zip-min');
 const axios = require("axios");
 const platform = os.platform();
 const shell = platform === "win32" ? "powershell.exe" : "bash";
 const L = require("./llama");
 const A = require("./alpaca");
+const TorrentDownloader = require("./torrent");
 const exists = (s) =>
   new Promise((r) => fs.access(s, fs.constants.F_OK, (e) => r(!e)));
+const escapeNewLine = (platform, arg) =>
+  platform === "win32"
+    ? arg.replaceAll(/\n/g, "\\n").replaceAll(/\r/g, "\\r")
+    : arg;
+const escapeDoubleQuotes = (platform, arg) =>
+  platform === "win32"
+    ? arg.replaceAll(/"/g, '`"')
+    : arg.replaceAll(/"/g, '\\"');
 class Dalai {
   constructor(home) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,7 +46,9 @@ class Dalai {
     //  Otherwise if you want to customize the path you can just pass in the "home" attribute to manually set it.
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    var home = require("./installpath.json").home;
+    try {
+      home = require("./installpath.json").home;
+    } catch {}
     this.home = home ? path.resolve(home) : path.resolve(os.homedir(), "dalai");
     try {
       console.log("mkdir", this.home);
@@ -45,7 +56,7 @@ class Dalai {
     } catch (e) {
       console.log("E", e);
     }
-
+    this.torrent = new TorrentDownloader();
     this.config = {
       name: "xterm-color",
       cols: 200,
@@ -116,47 +127,34 @@ class Dalai {
     console.log("cleaning up temp files");
     await fs.promises.rm(path.resolve(this.home, filename));
   }
-  async mingw() {
-    const mingw =
-      "https://github.com/niXman/mingw-builds-binaries/releases/download/12.2.0-rt_v10-rev2/x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z";
-    const downloader = new Downloader({
-      url: mingw,
-      directory: this.home,
-      onProgress: (percentage, chunk, remainingSize) => {
-        this.progress("download mingw", percentage);
-      },
-    });
-    try {
-      await this.startProgress("download mingw");
-      await downloader.download();
-    } catch (error) {
-      console.log(error);
-    }
-    this.progressBar.update(1);
-    await new Promise((resolve, reject) => {
-      _7z.unpack(
-        path.resolve(
-          this.home,
-          "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"
-        ),
-        this.home,
-        (err) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        }
-      );
-    });
-    console.log("cleaning up temp files");
-    await fs.promises.rm(
-      path.resolve(
-        this.home,
-        "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"
-      )
-    );
-  }
+  //  async mingw() {
+  //    const mingw = "https://github.com/niXman/mingw-builds-binaries/releases/download/12.2.0-rt_v10-rev2/x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"
+  //    const downloader = new Downloader({
+  //      url: mingw,
+  //      directory: this.home,
+  //      onProgress: (percentage, chunk, remainingSize) => {
+  //        this.progress("download mingw", percentage)
+  //      },
+  //    });
+  //    try {
+  //      await this.startProgress("download mingw")
+  //      await downloader.download();
+  //    } catch (error) {
+  //      console.log(error);
+  //    }
+  //    this.progressBar.update(1);
+  //    await new Promise((resolve, reject) => {
+  //      _7z.unpack(path.resolve(this.home, "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"), this.home, (err) => {
+  //        if (err) {
+  //          reject(err)
+  //        } else {
+  //          resolve()
+  //        }
+  //      })
+  //    })
+  //    console.log("cleaning up temp files")
+  //    await fs.promises.rm(path.resolve(this.home, "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"))
+  //  }
   async query(req, cb) {
     console.log(`> query:`, req);
     if (req.method === "installed") {
@@ -177,7 +175,8 @@ class Dalai {
       return;
     }
 
-    const [Core, Model] = req.model.split(".");
+    let [Core, Model] = req.model.split(".");
+    Model = Model.toUpperCase();
 
     console.log({ Core, Model });
 
@@ -206,13 +205,18 @@ class Dalai {
 
     let chunks = [];
     for (let key in o) {
-      chunks.push(`--${key} ${o[key]}`);
+      chunks.push(
+        `--${key} ${escapeDoubleQuotes(platform, o[key].toString())}`
+      );
     }
-    chunks.push(`-p "${req.prompt}"`);
+    const escaped = escapeNewLine(platform, req.prompt);
+    const prompt = `"${escapeDoubleQuotes(platform, escaped)}"`;
+
+    chunks.push(`-p ${prompt}`);
 
     const main_bin_path =
       platform === "win32"
-        ? path.resolve(this.home, Core, "build", "Release", "llama")
+        ? path.resolve(this.home, Core, "build", "Release", "main")
         : path.resolve(this.home, Core, "main");
     if (req.full) {
       await this.exec(
@@ -229,7 +233,7 @@ class Dalai {
       await this.exec(
         `${main_bin_path} ${chunks.join(" ")}`,
         this.cores[Core].home,
-        (msg) => {
+        (proc, msg) => {
           if (endpattern.test(msg)) ended = true;
           if (started && !ended) {
             cb(msg);
@@ -243,14 +247,19 @@ class Dalai {
     }
   }
   async install(core, ...models) {
+    const venv_path = path.join(this.home, "venv");
+    let ve = await exists(venv_path);
+    if (!ve) {
+      await this.setup();
+    }
     // first install
     let engine = this.cores[core];
     let e = await exists(path.resolve(engine.home));
-    if (e) {
-      // already exists, no need to install
-    } else {
-      await this.add(core);
-    }
+    //    if (e) {
+    //      // already exists, no need to install
+    //    } else {
+    await this.add(core);
+    //    }
 
     // next add the models
     let res = await this.cores[core].add(...models);
@@ -298,13 +307,18 @@ class Dalai {
       .catch((e) => {
         console.log("ERROR", e);
       });
-    if (e) {
+
+    try {
       console.log("try fetching", engine.home, engine.url);
-      await git.fetch({ fs, http, dir: engine.home, url: engine.url });
-    } else {
-      console.log("try cloning", engine.home, engine.url);
-      //      await fs.promises.mkdir(engine.home, { recursive: true }).catch((e) => { })
-      await git.clone({ fs, http, dir: engine.home, url: engine.url });
+      await git.pull({ fs, http, dir: engine.home, url: engine.url });
+    } catch (e) {
+      console.log("[E] Pull", e);
+      try {
+        console.log("try cloning", engine.home, engine.url);
+        await git.clone({ fs, http, dir: engine.home, url: engine.url });
+      } catch (e2) {
+        console.log("[E] Clone", e2);
+      }
     }
     console.log("next", core, engine.make);
     /**************************************************************************************************************
@@ -346,11 +360,11 @@ class Dalai {
     }
     const root_python_paths =
       platform === "win32"
-        ? [path.resolve(this.home, "python", "python.exe")]
+        ? ["python3", "python", path.resolve(this.home, "python", "python.exe")]
         : ["python3", "python"];
     const root_pip_paths =
       platform === "win32"
-        ? [path.resolve(this.home, "python", "python -m pip")]
+        ? ["pip3", "pip", path.resolve(this.home, "python", "python -m pip")]
         : ["pip3", "pip"];
 
     // 3.2. Build tools
@@ -361,7 +375,7 @@ class Dalai {
       );
       if (!success) {
         // fefdora
-        await this.exec(
+        success = await this.exec(
           "dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y"
         );
       }
@@ -369,7 +383,13 @@ class Dalai {
       // for win32 / darwin
       for (let root_pip_path of root_pip_paths) {
         success = await this.exec(`${root_pip_path} install --user virtualenv`);
-        if (success) break;
+        if (success) {
+          break;
+        }
+        success = await this.exec(`${root_pip_path} install virtualenv`);
+        if (success) {
+          break;
+        }
       }
       if (!success) {
         throw new Error("cannot install virtualenv");
@@ -379,13 +399,16 @@ class Dalai {
     // 3.3. virtualenv
     const venv_path = path.join(this.home, "venv");
     for (let root_python_path of root_python_paths) {
-      success = await this.exec(`${root_python_path} -m venv ${venv_path}`);
-      if (success) break;
+      console.log("trying with", root_python_path);
+      let code = await this.exec(`${root_python_path} -m venv ${venv_path}`);
+      console.log({ code });
     }
+    /*
     if (!success) {
-      throw new Error("cannot execute python3 or python");
-      return;
+      throw new Error("cannot execute python3 or python")
+      return
     }
+    */
 
     // 3.4. Python libraries
     const pip_path =
@@ -408,19 +431,29 @@ class Dalai {
       `${pip_path} install --upgrade pip setuptools wheel`
     );
     if (!success) {
-      throw new Error("pip setuptools wheel upgrade failed");
-      return;
+      success = await this.exec(
+        `${pip_path} install --user --upgrade pip setuptools wheel`
+      );
+      if (!success) {
+        throw new Error("pip setuptools wheel upgrade failed");
+        return;
+      }
     }
     success = await this.exec(
       `${pip_path} install torch torchvision torchaudio sentencepiece numpy`
     );
     //success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy wget`)
     if (!success) {
-      throw new Error("dependency installation failed");
-      return;
+      success = await this.exec(
+        `${pip_path} install --user torch torchvision torchaudio sentencepiece numpy`
+      );
+      if (!success) {
+        throw new Error("dependency installation failed");
+        return;
+      }
     }
   }
-  serve(port) {
+  serve(port, options) {
     const httpServer = createServer();
     const io = new Server(httpServer);
     io.on("connection", (socket) => {
@@ -459,31 +492,37 @@ class Dalai {
   }
   exec(cmd, cwd, cb) {
     return new Promise((resolve, reject) => {
-      const config = Object.assign({}, this.config);
-      if (cwd) {
-        config.cwd = path.resolve(cwd);
+      try {
+        const config = Object.assign({}, this.config);
+        if (cwd) {
+          config.cwd = path.resolve(cwd);
+        }
+        console.log(`exec: ${cmd} in ${config.cwd}`);
+        const ptyProcess = pty.spawn(shell, [], config);
+        this._runningShell = ptyProcess;
+        ptyProcess.onData((data) => {
+          if (cb) {
+            cb(ptyProcess, data);
+          } else {
+            process.stdout.write(data);
+          }
+        });
+        ptyProcess.onExit((res) => {
+          if (res.exitCode === 0) {
+            // successful
+            resolve(true);
+          } else {
+            // something went wrong
+            resolve(false);
+          }
+        });
+        ptyProcess.write(`${cmd}\r`);
+        ptyProcess.write("exit\r");
+      } catch (e) {
+        console.log("caught error", e);
+        ptyProcess.kill();
+        // ptyProcess.write("exit\r")
       }
-      console.log(`exec: ${cmd} in ${config.cwd}`);
-      const ptyProcess = pty.spawn(shell, [], config);
-      this._runningShell = ptyProcess;
-      ptyProcess.onData((data) => {
-        if (cb) {
-          cb(data);
-        } else {
-          process.stdout.write(data);
-        }
-      });
-      ptyProcess.onExit((res) => {
-        if (res.exitCode === 0) {
-          // successful
-          resolve(true);
-        } else {
-          // something went wrong
-          resolve(false);
-        }
-      });
-      ptyProcess.write(`${cmd}\r`);
-      ptyProcess.write("exit\r");
     });
   }
   progress(task, percent) {

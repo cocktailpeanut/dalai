@@ -2,7 +2,7 @@
 
 Run LLaMA and Alpaca on your computer.
 
-<a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> Github</a>
+<a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> GitHub</a>
 <a href="https://twitter.com/cocktailpeanut" class='inverse btn'><i class="fa-brands fa-twitter"></i> Twitter</a>
 <a href="https://discord.gg/XahBUrbVwz" class='inverse btn'><i class="fa-brands fa-discord"></i> Discord</a>
 
@@ -64,25 +64,38 @@ Dalai runs on all of the following operating systems:
 2. Mac
 3. Windows
 
-## 2. System Requirements
+## 2. Memory Requirements
 
 Runs on most modern computers. Unless your computer is very very old, it should work.
+
+Here are the RAM requirements:
+
+- 7B => ~5.6 GB
+- 13B => ~9 GB
+- 30B => ~20 GB
+- 65B => ~40 GB
 
 ## 3. Disk Space Requirements
 
 ### Alpaca
 
-Currently only the 7B model is available via [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp)
+Currently 7B and 13B models are available via [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp)
 
 #### 7B
 
 Alpaca comes fully quantized (compressed), and the only space you need for the 7B model is 4.21GB:
 
-![alpaca_spec.png](alpaca_spec.png)
+![alpaca_7b.png](alpaca_7b.png)
+
+#### 13B
+
+Alpaca comes fully quantized (compressed), and the only space you need for the 13B model is 8.14GB:
+
+![alpaca_13b.png](alpaca_13b.png)
 
 ### LLaMA
 
-You need a lot of space for storing the models.
+You need a lot of space for storing the models. **The model name must be one of: 7B, 13B, 30B, and 65B.**
 
 You do NOT have to install all models, you can install one by one. Let's take a look at how much space each model takes up:
 
@@ -126,11 +139,13 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 
 ## Mac
 
-### Step 1. Install node.js
+### Step 1. Install node.js >= 18
+
+If your mac doesn't have node.js installed yet, make sure to install node.js >= 10
 
 <a href="https://nodejs.org/en/download/" class='btn'>Install Node.js</a>
 
-### Step 2. Install models
+### Step 2.1. Install models
 
 Currently supported engines are `llama` and `alpaca`.
 
@@ -156,7 +171,44 @@ or to download multiple models:
 npx dalai llama install 7B 13B
 ```
 
-### Step 4. Run Web UI
+Now go to step 3.
+
+### Step 2.2. Troubleshoot
+
+Normally you don't need this step, but if running the commands above don't do anything and immediately end, it means something went wrong because some of the required modules are not installed on your system.
+
+In that case, try the following steps:
+
+#### 1. Install homebrew
+
+In case homebrew is not installed on your computer, install it by running:
+
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+> Or you can find the same instruction on the homebrew hompage: https://brew.sh/
+
+#### 2. Install dependencies
+
+Once homebrew is installed, install these dependencies:
+
+```
+brew install cmake
+brew install pkg-config
+```
+
+#### 3. Update NPM
+
+Just to make sure we cover every vector, let's update NPM as well:
+
+```
+npm install -g npm@latest
+```
+
+Now go back to step 2.1 and try running the `npx dalai` commands again.
+
+### Step 3. Run Web UI
 
 After everything has been installed, run the following command to launch the web UI server:
 
@@ -192,11 +244,17 @@ When installing Visual Studio, make sure to check the 3 options as highlighted b
 
 ### Step 2.1. Install models
 
+> **IMPORTANT**
+>
+> On Windows, make sure to run all commands in **cmd**.
+>
+> DO NOT run in **powershell**. Powershell has unnecessarily strict permissions and makes the script fail silently.
+
 Currently supported engines are `llama` and `alpaca`.
 
 #### Install alpaca
 
-Currently alpaca only has the 7B model:
+Currently alpaca only has the 7B model. Open your `cmd` application and enter:
 
 ```
 npx dalai alpaca install 7B
@@ -204,7 +262,7 @@ npx dalai alpaca install 7B
 
 #### Add llama models
 
-To download llama models, you can run:
+To download llama models. Open your `cmd` application and enter:
 
 ```
 npx dalai llama install 7B
@@ -220,13 +278,13 @@ npx dalai llama install 7B 13B
 
 ### Step 2.2. Troubleshoot (optional)
 
-In case above steps fail, try installing node.js and python separately.
+In case above steps fail, try installing Node.js and Python separately.
 
 Install Python:
 
 <a href="https://www.python.org/ftp/python/3.10.10/python-3.10.10-embed-amd64.zip" class='btn'>Download Python</a>
 
-Install Node.js:
+Install Node.js >= 18:
 
 <a href="https://nodejs.org/en/download/" class='btn'>Download Node.js</a>
 
@@ -236,10 +294,10 @@ Once you've checked that they both exist, try again.
 
 ### Step 3. Run Web UI
 
-After everything has been installed, run the following command to launch the web UI server:
+After everything has been installed, run the following command to launch the web UI server (Make sure to run in `cmd` and not powershell!):
 
 ```
-dalai serve
+npx dalai serve
 ```
 
 and open http://localhost:3000 in your browser. Have fun!
@@ -254,7 +312,7 @@ You need to make sure you have the correct version of Python and Node.js install
 
 #### Step 1.1. Python <= 3.10
 
-<a href="https://pimylifeup.com/installing-python-on-linux/" class='btn'>Download node.js</a>
+<a href="https://pimylifeup.com/installing-python-on-linux/" class='btn'>Download Python</a>
 
 > Make sure the version is 3.10 or lower (not 3.11)
 > Python must be 3.10 or below (pytorch and other libraries are not supported yet on the latest)
@@ -267,7 +325,7 @@ You need to make sure you have the correct version of Python and Node.js install
 
 ---
 
-### Step 2. Install models
+### Step 2.1. Install models
 
 Currently supported engines are `llama` and `alpaca`.
 
@@ -293,7 +351,23 @@ or to download multiple models:
 npx dalai llama install 7B 13B
 ```
 
-### Step 4. Run Web UI
+### Step 2.2. Troubleshoot
+
+In case the model install silently fails or hangs forever, try the following command, and try running the npx command again:
+
+On ubuntu/debian/etc.:
+
+```
+sudo apt-get install build-essential python3-venv -y
+```
+
+On fedora/etc.:
+
+```
+dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y
+```
+
+### Step 3. Run Web UI
 
 After everything has been installed, run the following command to launch the web UI server:
 
@@ -572,6 +646,24 @@ await dalai.install("7B", "13B")
 
 # FAQ
 
+## Using a different home folder
+
+By default Dalai uses your home directory to store the entire repository (`~/dalai`). However sometimes you may want to store the archive elsewhere.
+
+In this case you can call all CLI methods using the `--home` flag:
+
+### 1. Installing models to a custom path
+
+```
+npx dalai llama install 7B --home ~/test_dir
+```
+
+### 2. Serving from the custom path
+
+```
+npx dalai serve --home ~/test_dir
+```
+
 ## Updating to the latest
 
 To make sure you update to the latest, first find the latest version at https://www.npmjs.com/package/dalai
@@ -586,7 +678,7 @@ npx dalai@0.3.0 setup
 
 Have questions or feedback? Follow the project through the following outlets:
 
-<a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> Github</a>
+<a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> GitHub</a>
 <a href="https://twitter.com/cocktailpeanut" class='inverse btn'><i class="fa-brands fa-twitter"></i> Twitter</a>
 <a href="https://discord.gg/XahBUrbVwz" class='inverse btn'><i class="fa-brands fa-discord"></i> Discord</a>
 

@@ -1,20 +1,21 @@
 {
   "name": "dalai",
-  "version": "0.2.19",
+  "version": "0.2.50",
   "description": "",
   "main": "index.js",
   "author": "cocktailpeanut",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
-    "dalai:llama": "./dalai llama",
+    "dalai:llama": "node bin/cli.js llama",
     "start": "node bin/cli.js serve",
     "just:run": "wrap () { yarn && yarn dalai:llama $1 && yarn start; }; wrap",
     "just:fix": "npx prettier --write .",
     "postinstall": "node ./bin/cli setup"
   },
   "dependencies": {
-    "@cdktf/node-pty-prebuilt-multiarch": "^0.10.1-pre.10",
-    "7zip-min": "^1.4.4",
     "axios": "^1.3.4",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
@@ -26,7 +27,9 @@
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1",
     "tar": "^6.1.13",
-    "terminal-kit": "^3.0.0"
+    "terminal-kit": "^3.0.0",
+    "webtorrent": "1.9.7",
+    "yargs": "^17.7.1"
   },
   "devDependencies": {
     "prettier": "^2.8.4"
