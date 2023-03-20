@@ -16,12 +16,9 @@ const semver = require('semver');
 //const _7z = require('7zip-min');
 const axios = require('axios')
 const platform = os.platform()
-const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 const L = require("./llama")
 const A = require("./alpaca")
 const exists = s => new Promise(r=>fs.access(s, fs.constants.F_OK, e => r(!e)))
-const escapeNewLine = (platform, arg) => platform === 'win32' ? arg.replaceAll(/\n/g, "\\n").replaceAll(/\r/g, "\\r") : arg
-const escapeDoubleQuotes = (platform, arg) => platform === 'win32' ? arg.replaceAll(/"/g, '`"') : arg.replaceAll(/"/g, '\\"')
 class Dalai {
   constructor(home) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -181,25 +178,23 @@ class Dalai {
     if (req.repeat_penalty) o.repeat_penalty = req.repeat_penalty
     if (typeof req.interactive !== "undefined") o.interactive = req.interactive
 
-    let chunks = []
+    let args = []
     for(let key in o) {
-      chunks.push(`--${key} ${escapeDoubleQuotes(platform, o[key].toString())}`)
+      args.push(`--${key}`, o[key].toString())
     }
-    const escaped = escapeNewLine(platform, req.prompt)
-    const prompt = `"${escapeDoubleQuotes(platform, escaped)}"`
 
-    chunks.push(`-p ${prompt}`)
+    args.push("-p", req.prompt)
 
     const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "llama") : path.resolve(this.home, Core, "main")
     if (req.full) {
-      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, cb)
+      await this.exec(main_bin_path, args, this.cores[Core].home, cb)
     } else {
       const startpattern = /.*sampling parameters:.*/g
       const endpattern = /.*mem per token.*/g
       let started = req.debug
       let ended = false
       let writeEnd = !req.skip_end
-      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (proc, msg) => {
+      await this.exec(main_bin_path, args, this.cores[Core].home, (proc, msg) => {
         if (endpattern.test(msg)) ended = true
         if (started && !ended) {
           cb(msg)
@@ -325,19 +320,19 @@ class Dalai {
     // 3.2. Build tools
     if (platform === "linux") {
       // ubuntu debian
-      success = await this.exec("apt-get install build-essential python3-venv -y")
+      success = await this.exec("apt-get", ["install", "build-essential", "python3-venv", "-y"])
       if (!success) {
         // fefdora
-        success = await this.exec("dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y")
+        success = await this.exec("dnf", ["install", "make", "automake", "gcc", "gcc-c++", "kernel-devel", "python3-virtualenv", "-y"])
       }
     } else {
       // for win32 / darwin
       for(let root_pip_path of root_pip_paths) {
-        success = await this.exec(`${root_pip_path} install --user virtualenv`)
+        success = await this.exec(root_pip_path, ["install", "--user", "virtualenv"])
         if (success) {
           break;
         }
-        success = await this.exec(`${root_pip_path} install virtualenv`)
+        success = await this.exec(root_pip_path, ["install", "virtualenv"])
         if (success) {
           break;
         }
@@ -351,7 +346,7 @@ class Dalai {
     // 3.3. virtualenv
     const venv_path = path.join(this.home, "venv")
     for(let root_python_path of root_python_paths) {
-      success = await this.exec(`${root_python_path} -m venv ${venv_path}`)
+      success = await this.exec(root_python_path, ["-m", "venv", venv_path])
       if (success) break;
     }
     if (!success) {
@@ -364,24 +359,24 @@ class Dalai {
     const python_path = platform == "win32" ? path.join(venv_path, "Scripts", "python.exe") : path.join(venv_path, 'bin', 'python')
     // cmake (only on windows. the rest platforms use make)
     if (platform === "win32") {
-      success = await this.exec(`${pip_path} install cmake`)
+      success = await this.exec(pip_path, ["install", "cmake"])
       if (!success) {
         throw new Error("cmake installation failed")
         return
       }
     }
-    success = await this.exec(`${pip_path} install --upgrade pip setuptools wheel`)
+    success = await this.exec(pip_path, ["install", "--upgrade", "pip", "setuptools", "wheel"])
     if (!success) {
-      success = await this.exec(`${pip_path} install --user --upgrade pip setuptools wheel`)
+      success = await this.exec(pip_path, ["install", "--user", "--upgrade", "pip", "setuptools", "wheel"])
       if (!success) {
         throw new Error("pip setuptools wheel upgrade failed")
         return  
       }
     }
-    success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy`)
+    success = await this.exec(pip_path, ["install", "torch", "torchvision", "torchaudio", "sentencepiece", "numpy"])
     //success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy wget`)
     if (!success) {
-      success = await this.exec(`${pip_path} install --user torch torchvision torchaudio sentencepiece numpy`)
+      success = await this.exec(pip_path, ["install", "--user", "torch", "torchvision", "torchaudio", "sentencepiece", "numpy"])
       if (!success) {
         throw new Error("dependency installation failed")
         return  
@@ -427,15 +422,15 @@ class Dalai {
       throw e
     });
   }
-  exec(cmd, cwd, cb) {
+  exec(cmd, args, cwd, cb) {
     return new Promise((resolve, reject) => {
       try {
         const config = Object.assign({}, this.config)
         if (cwd) {
           config.cwd = path.resolve(cwd)
         }
-        console.log(`exec: ${cmd} in ${config.cwd}`)
-        const ptyProcess = pty.spawn(shell, [], config)
+        console.log(`exec: ${cmd} ${args.join(" ")} in ${config.cwd}`)
+        const ptyProcess = pty.spawn(cmd, args, config)
         ptyProcess.onData((data) => {
           if (cb) {
             cb(ptyProcess, data)
