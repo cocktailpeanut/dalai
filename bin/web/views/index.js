@@ -249,6 +249,8 @@ socket.on("result", async ({ request, response, isRunning }) => {
 
         responses[id] = responses[id].replaceAll("&quot;", '"'); //quote
 
+        responses[id] = responses[id].replaceAll("\\t", "  "); //tab chracters
+
         responses[id] = responses[id].replaceAll("\\n", "\n"); //convert line breaks back
         responses[id] = responses[id].replaceAll('\\"', '"'); //convert quotes back
 

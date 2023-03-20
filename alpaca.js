@@ -11,6 +11,7 @@ class Alpaca {
     this.root = root;
     this.home = path.resolve(this.root.home, "alpaca");
     this.url = "https://github.com/cocktailpeanut/alpaca.cpp.git";
+    // this.url = "https://github.com/matbee-eth/alpaca.cpp";
   }
   async make() {
     let success;
