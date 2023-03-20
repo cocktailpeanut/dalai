@@ -2,7 +2,7 @@
 
 Run LLaMA and Alpaca on your computer.
 
-<a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> Github</a>
+<a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> GitHub</a>
 <a href="https://twitter.com/cocktailpeanut" class='inverse btn'><i class="fa-brands fa-twitter"></i> Twitter</a>
 <a href="https://discord.gg/XahBUrbVwz" class='inverse btn'><i class="fa-brands fa-discord"></i> Discord</a>
 
@@ -10,7 +10,7 @@ Run LLaMA and Alpaca on your computer.
 
 ## JUST RUN THIS
 
-<img src="npx.png" class='round'>
+<img src="npx2.png" class='round'>
 
 ## TO GET
 
@@ -46,24 +46,30 @@ According to [a llama.cpp discussion thread](https://github.com/ggerganov/llama.
 - 7B => ~4 GB
 - 13B => ~8 GB
 - 30B => ~16 GB
-- 64 => ~32 GB
+- 65 => ~32 GB
 
 ## 3. Disk Space Requirements
 
 ### Alpaca
 
-Currently only the 7B model is available via [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp)
+Currently 7B and 13B models are available via [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp)
 
 #### 7B
 
 Alpaca comes fully quantized (compressed), and the only space you need for the 7B model is 4.21GB:
 
-![alpaca_spec.png](alpaca_spec.png)
+![alpaca_7b.png](alpaca_7b.png)
+
+#### 13B
+
+Alpaca comes fully quantized (compressed), and the only space you need for the 13B model is 8.14GB:
+
+![alpaca_13b.png](alpaca_13b.png)
 
 
 ### LLaMA
 
-You need a lot of space for storing the models.
+You need a lot of space for storing the models. **The model name must be one of: 7B, 13B, 30B, and 65B.**
 
 You do NOT have to install all models, you can install one by one. Let's take a look at how much space each model takes up:
 
@@ -303,7 +309,7 @@ Python must be 3.10 or below (pytorch and other libraries are not supported yet 
 
 ---
 
-### Step 2. Install models
+### Step 2.1. Install models
 
 Currently supported engines are `llama` and `alpaca`.
 
@@ -331,8 +337,24 @@ or to download multiple models:
 npx dalai llama install 7B 13B
 ```
 
+### Step 2.2. Troubleshoot
 
-### Step 4. Run Web UI
+In case the model install silently fails or hangs forever, try the following command, and try running the npx command again:
+
+On ubuntu/debian/etc.:
+
+```
+sueo apt-get install build-essential python3-venv -y
+```
+
+On fedora/etc.:
+
+```
+dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y
+```
+
+
+### Step 3. Run Web UI
 
 After everything has been installed, run the following command to launch the web UI server:
 
@@ -648,7 +670,7 @@ npx dalai@0.3.0 setup
 
 Have questions or feedback? Follow the project through the following outlets:
 
-<a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> Github</a>
+<a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> GitHub</a>
 <a href="https://twitter.com/cocktailpeanut" class='inverse btn'><i class="fa-brands fa-twitter"></i> Twitter</a>
 <a href="https://discord.gg/XahBUrbVwz" class='inverse btn'><i class="fa-brands fa-discord"></i> Discord</a>
 

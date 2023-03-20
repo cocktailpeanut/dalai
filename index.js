@@ -19,6 +19,7 @@ const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 const L = require("./llama")
 const A = require("./alpaca")
+const TorrentDownloader = require("./torrent")
 const exists = s => new Promise(r=>fs.access(s, fs.constants.F_OK, e => r(!e)))
 const escapeNewLine = (platform, arg) => platform === 'win32' ? arg.replaceAll(/\n/g, "\\n").replaceAll(/\r/g, "\\r") : arg
 const escapeDoubleQuotes = (platform, arg) => platform === 'win32' ? arg.replaceAll(/"/g, '`"') : arg.replaceAll(/"/g, '\\"')
@@ -45,7 +46,7 @@ class Dalai {
     } catch (e) {
       console.log("E", e)
     }
-
+    this.torrent = new TorrentDownloader()
     this.config = {
       name: 'xterm-color',
       cols: 200,
@@ -190,7 +191,7 @@ class Dalai {
 
     chunks.push(`-p ${prompt}`)
 
-    const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "llama") : path.resolve(this.home, Core, "main")
+    const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "main") : path.resolve(this.home, Core, "main")
     if (req.full) {
       await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, cb)
     } else {
@@ -199,7 +200,7 @@ class Dalai {
       let started = req.debug
       let ended = false
       let writeEnd = !req.skip_end
-      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (msg) => {
+      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (proc, msg) => {
         if (endpattern.test(msg)) ended = true
         if (started && !ended) {
           cb(msg)
@@ -267,13 +268,18 @@ class Dalai {
     await fs.promises.mkdir(path.resolve(engine.home), { recursive: true }).catch((e) => {
       console.log("ERROR" ,e)
     })
-    if (e) {
+
+    try {
       console.log("try fetching", engine.home, engine.url)
-      await git.fetch({ fs, http, dir: engine.home, url: engine.url })
-    } else {
-      console.log("try cloning", engine.home, engine.url)
-//      await fs.promises.mkdir(engine.home, { recursive: true }).catch((e) => { })
-      await git.clone({ fs, http, dir: engine.home, url: engine.url })
+      await git.pull({ fs, http, dir: engine.home, url: engine.url })
+    } catch (e) {
+      console.log("[E] Pull", e)
+      try {
+        console.log("try cloning", engine.home, engine.url)
+        await git.clone({ fs, http, dir: engine.home, url: engine.url })
+      } catch (e2) {
+        console.log("[E] Clone", e2)
+      }
     }
     console.log("next", core, engine.make);
     /**************************************************************************************************************
@@ -346,13 +352,16 @@ class Dalai {
     // 3.3. virtualenv
     const venv_path = path.join(this.home, "venv")
     for(let root_python_path of root_python_paths) {
-      success = await this.exec(`${root_python_path} -m venv ${venv_path}`)
-      if (success) break;
+      console.log("trying with", root_python_path)
+      let code = await this.exec(`${root_python_path} -m venv ${venv_path}`)
+      console.log({ code })
     }
+    /*
     if (!success) {
       throw new Error("cannot execute python3 or python")
       return
     }
+    */
 
     // 3.4. Python libraries
     const pip_path = platform === "win32" ? path.join(venv_path, "Scripts", "pip.exe") : path.join(venv_path, "bin", "pip")
@@ -367,14 +376,20 @@ class Dalai {
     }
     success = await this.exec(`${pip_path} install --upgrade pip setuptools wheel`)
     if (!success) {
-      throw new Error("pip setuptools wheel upgrade failed")
-      return
+      success = await this.exec(`${pip_path} install --user --upgrade pip setuptools wheel`)
+      if (!success) {
+        throw new Error("pip setuptools wheel upgrade failed")
+        return  
+      }
     }
     success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy`)
     //success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy wget`)
     if (!success) {
-      throw new Error("dependency installation failed")
-      return
+      success = await this.exec(`${pip_path} install --user torch torchvision torchaudio sentencepiece numpy`)
+      if (!success) {
+        throw new Error("dependency installation failed")
+        return  
+      }
     }
 
 
@@ -435,13 +450,12 @@ class Dalai {
         const ptyProcess = pty.spawn(shell, [], config)
         ptyProcess.onData((data) => {
           if (cb) {
-            cb(data)
+            cb(ptyProcess, data)
           } else {
             process.stdout.write(data);
           }
         });
         ptyProcess.onExit((res) => {
-          console.log("# EXIT", res)
           if (res.exitCode === 0) {
             // successful
             resolve(true)
@@ -454,7 +468,8 @@ class Dalai {
         ptyProcess.write("exit\r")
       } catch (e) {
         console.log("caught error", e)
-        ptyProcess.write("exit\r")
+        ptyProcess.kill()
+        // ptyProcess.write("exit\r")
       }
     })
   }
