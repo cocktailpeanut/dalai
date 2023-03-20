@@ -352,13 +352,16 @@ class Dalai {
     // 3.3. virtualenv
     const venv_path = path.join(this.home, "venv")
     for(let root_python_path of root_python_paths) {
-      success = await this.exec(`${root_python_path} -m venv ${venv_path}`)
-      if (success) break;
+      console.log("trying with", root_python_path)
+      let code = await this.exec(`${root_python_path} -m venv ${venv_path}`)
+      console.log({ code })
     }
+    /*
     if (!success) {
       throw new Error("cannot execute python3 or python")
       return
     }
+    */
 
     // 3.4. Python libraries
     const pip_path = platform === "win32" ? path.join(venv_path, "Scripts", "pip.exe") : path.join(venv_path, "bin", "pip")
