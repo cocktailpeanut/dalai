@@ -19,6 +19,7 @@ const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 const L = require("./llama")
 const A = require("./alpaca")
+const TorrentDownloader = require("./torrent")
 const exists = s => new Promise(r=>fs.access(s, fs.constants.F_OK, e => r(!e)))
 const escapeNewLine = (platform, arg) => platform === 'win32' ? arg.replaceAll(/\n/g, "\\n").replaceAll(/\r/g, "\\r") : arg
 const escapeDoubleQuotes = (platform, arg) => platform === 'win32' ? arg.replaceAll(/"/g, '`"') : arg.replaceAll(/"/g, '\\"')
@@ -45,7 +46,7 @@ class Dalai {
     } catch (e) {
       console.log("E", e)
     }
-
+    this.torrent = new TorrentDownloader()
     this.config = {
       name: 'xterm-color',
       cols: 200,
