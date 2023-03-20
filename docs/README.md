@@ -10,7 +10,7 @@ Run LLaMA and Alpaca on your computer.
 
 ## JUST RUN THIS
 
-<img src="npx.png" class='round'>
+<img src="npx2.png" class='round'>
 
 ## TO GET
 
@@ -46,19 +46,25 @@ According to [a llama.cpp discussion thread](https://github.com/ggerganov/llama.
 - 7B => ~4 GB
 - 13B => ~8 GB
 - 30B => ~16 GB
-- 65 => ~32 GB
+- 65B => ~32 GB
 
 ## 3. Disk Space Requirements
 
 ### Alpaca
 
-Currently only the 7B model is available via [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp)
+Currently 7B and 13B models are available via [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp)
 
 #### 7B
 
 Alpaca comes fully quantized (compressed), and the only space you need for the 7B model is 4.21GB:
 
-![alpaca_spec.png](alpaca_spec.png)
+![alpaca_7b.png](alpaca_7b.png)
+
+#### 13B
+
+Alpaca comes fully quantized (compressed), and the only space you need for the 13B model is 8.14GB:
+
+![alpaca_13b.png](alpaca_13b.png)
 
 
 ### LLaMA
@@ -338,7 +344,7 @@ In case the model install silently fails or hangs forever, try the following com
 On ubuntu/debian/etc.:
 
 ```
-sueo apt-get install build-essential python3-venv -y
+sudo apt-get install build-essential python3-venv -y
 ```
 
 On fedora/etc.:

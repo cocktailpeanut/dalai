@@ -18,6 +18,7 @@ const axios = require('axios')
 const platform = os.platform()
 const L = require("./llama")
 const A = require("./alpaca")
+const TorrentDownloader = require("./torrent")
 const exists = s => new Promise(r=>fs.access(s, fs.constants.F_OK, e => r(!e)))
 class Dalai {
   constructor(home) {
@@ -42,7 +43,7 @@ class Dalai {
     } catch (e) {
       console.log("E", e)
     }
-
+    this.torrent = new TorrentDownloader()
     this.config = {
       name: 'xterm-color',
       cols: 200,
@@ -185,7 +186,7 @@ class Dalai {
 
     args.push("-p", req.prompt)
 
-    const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "llama") : path.resolve(this.home, Core, "main")
+    const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "main") : path.resolve(this.home, Core, "main")
     if (req.full) {
       await this.exec(main_bin_path, args, this.cores[Core].home, cb)
     } else {
@@ -346,13 +347,16 @@ class Dalai {
     // 3.3. virtualenv
     const venv_path = path.join(this.home, "venv")
     for(let root_python_path of root_python_paths) {
-      success = await this.exec(root_python_path, ["-m", "venv", venv_path])
-      if (success) break;
+      console.log("trying with", root_python_path)
+      let code = await this.exec(root_python_path, ["-m", "venv", venv_path])
+      console.log({ code })
     }
+    /*
     if (!success) {
       throw new Error("cannot execute python3 or python")
       return
     }
+    */
 
     // 3.4. Python libraries
     const pip_path = platform === "win32" ? path.join(venv_path, "Scripts", "pip.exe") : path.join(venv_path, "bin", "pip")
@@ -439,7 +443,6 @@ class Dalai {
           }
         });
         ptyProcess.onExit((res) => {
-          console.log("# EXIT", res)
           if (res.exitCode === 0) {
             // successful
             resolve(true)
