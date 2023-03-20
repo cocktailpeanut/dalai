@@ -46,7 +46,7 @@ According to [a llama.cpp discussion thread](https://github.com/ggerganov/llama.
 - 7B => ~4 GB
 - 13B => ~8 GB
 - 30B => ~16 GB
-- 65 => ~32 GB
+- 65B => ~32 GB
 
 ## 3. Disk Space Requirements
 
