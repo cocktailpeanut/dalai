@@ -46,7 +46,7 @@ According to [a llama.cpp discussion thread](https://github.com/ggerganov/llama.
 - 7B => ~4 GB
 - 13B => ~8 GB
 - 30B => ~16 GB
-- 64 => ~32 GB
+- 65B => ~32 GB
 
 ## 3. Disk Space Requirements
 
@@ -104,6 +104,17 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 ---
 
 # Quickstart
+
+## Docker
+
+You can run Dalai in a docker container if you wish.
+By default, the build will install the alpaca 7B model.
+To use a different model or version, use the `MODEL_NAME` and `MODEL_VERSION` build args,
+for example  `docker build -t dalai --build-arg MODEL_NAME=llama --build-arg MODEL_VERSION=65B .`
+
+1. Run `docker build -t dalai .` to build the image; this could take an hour or more and may download several gigabytes of data.
+2. Run `docker run --rm -p3000:3000 dalai` to start the container
+3. Go to http://localhost:3000
 
 ## Mac
 
@@ -384,7 +395,7 @@ However, often you may already have a `llama.cpp` repository somewhere else on y
 
 #### Basic
 
-Creates a workspace  at `~/llama.cpp` 
+Creates a workspace  at `~/llama.cpp`
 
 ```javascript
 const dalai = new Dalai()
