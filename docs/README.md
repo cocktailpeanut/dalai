@@ -344,7 +344,7 @@ In case the model install silently fails or hangs forever, try the following com
 On ubuntu/debian/etc.:
 
 ```
-sueo apt-get install build-essential python3-venv -y
+sudo apt-get install build-essential python3-venv -y
 ```
 
 On fedora/etc.:
