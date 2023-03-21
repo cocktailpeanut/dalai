@@ -10,7 +10,7 @@ if (argv._.length > 0) {
   let home = argv.home
   let fresh = argv.fresh
   if (cmd === "serve") {
-    const port = (args.length > 0 ? args[0] : 3000)
+    const port = (args.length > 0 ? args[0] : 4555)
     Web(port, home)
   } else if (cmd === "setup") {
     new Dalai(home).setup().then(() => {

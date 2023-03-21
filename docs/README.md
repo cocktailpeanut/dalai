@@ -193,7 +193,7 @@ After everything has been installed, run the following command to launch the web
 npx dalai serve
 ```
 
-and open http://localhost:3000 in your browser. Have fun!
+and open http://localhost:4555 in your browser. Have fun!
 
 ---
 
@@ -280,7 +280,7 @@ After everything has been installed, run the following command to launch the web
 npx dalai serve
 ```
 
-and open http://localhost:3000 in your browser. Have fun!
+and open http://localhost:4555 in your browser. Have fun!
 
 ---
 
@@ -362,7 +362,7 @@ After everything has been installed, run the following command to launch the web
 npx dalai serve
 ```
 
-and open http://localhost:3000 in your browser. Have fun!
+and open http://localhost:4555 in your browser. Have fun!
 
 
 
@@ -437,7 +437,7 @@ dalai.request(req, callback)
     - Example: `alpaca.7B`, `llama.13B`, ...
   - `url`: only needed if connecting to a remote dalai server
     - if unspecified, it uses the node.js API to directly run dalai locally
-    - if specified (for example `ws://localhost:3000`) it looks for a socket.io endpoint at the URL and connects to it.
+    - if specified (for example `ws://localhost:4555`) it looks for a socket.io endpoint at the URL and connects to it.
   - `threads`: The number of threads to use (The default is 8 if unspecified)
   - `n_predict`: The number of tokens to return (The default is 128 if unspecified)
   - `seed`: The seed. The default is -1 (none)
@@ -477,17 +477,17 @@ First you need to run a Dalai socket server:
 ```javascript
 // server.js
 const Dalai = require('dalai')
-new Dalai().serve(3000)     // port 3000
+new Dalai().serve(4555)     // port 4555
 ```
 
 ##### Step 2. connect to the server
 
-Then once the server is running, simply make requests to it by passing the `ws://localhost:3000` socket url when initializing the Dalai object:
+Then once the server is running, simply make requests to it by passing the `ws://localhost:4555` socket url when initializing the Dalai object:
 
 ```javascript
 const Dalai = require("dalai")
 new Dalai().request({
-  url: "ws://localhost:3000",
+  url: "ws://localhost:4555",
   model: "7B",
   prompt: "The following is a conversation between a boy and a girl:",
 }, (token) => {
@@ -511,7 +511,7 @@ dalai.serve(port)
 
 ```javascript
 const Dalai = require("dalai")
-new Dalai().serve(3000)
+new Dalai().serve(4555)
 ```
 
 ---
@@ -536,7 +536,7 @@ This is useful when you're trying to plug dalai into an existing node.js web app
 const app = require('express')();
 const http = require('http').Server(app);
 dalai.http(http)
-http.listen(3000, () => {
+http.listen(4555, () => {
   console.log("server started")
 })
 ```
