@@ -34,7 +34,9 @@ const start = (port, home) => {
                         .map((file) => {
                             const promptName = path.basename(file, ".txt");
                             const promptValue = fs.readFileSync(path.join(promptsDir, file), "utf8");
-                            return { name: promptName, value: promptValue };
+                            const isCustom = promptsDir.includes("custom");
+                            const editable = isCustom ? true : false;
+                            return { name: promptName, value: promptValue, editable: editable };
                         });
                     allPrompts.push(...prompts);
                     console.log(`Added ${prompts.length} prompts from ${promptsDir}`);
@@ -54,8 +56,6 @@ const start = (port, home) => {
             }
         });
     });
-
-
 
     httpServer.listen(port, () => {
         console.log(`Server running on http://localhost:${port}/`)
