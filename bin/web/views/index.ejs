@@ -211,7 +211,7 @@ const sha256 = async (input) => {
 const say = (msg, id) => {
   let item = document.createElement('li');
   if (id) item.setAttribute("data-id", id)
-  item.textContent = msg;
+  item.innerHTML = msg;
   messages.prepend(item);
 }
 socket.emit('request', {
@@ -232,8 +232,8 @@ socket.on('result', async ({ request, response }) => {
       const id = request.id
       let existing = document.querySelector(`[data-id='${id}']`)
       if (existing) {
-        existing.textContent = existing.textContent + response
-        existing.textContent = existing.textContent.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
+        existing.innerHTML = existing.innerHTML + response
+        //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
         //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
       } else {
         say(response, id)

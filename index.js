@@ -32,6 +32,33 @@ const stripAnsi = (str) => {
   const regex = new RegExp(pattern, 'g')
   return str.replace(regex, '');
 }
+const htmlencode = (str) => {
+  let encodedStr = '';
+  for (let i = 0; i < str.length; i++) {
+    let charCode = str.charCodeAt(i);
+    if (charCode < 128) {
+      // ASCII characters
+      switch (str[i]) {
+        case '<': encodedStr += '&lt;'; break;
+        case '>': encodedStr += '&gt;'; break;
+        case '&': encodedStr += '&amp;'; break;
+        case '"': encodedStr += '&quot;'; break;
+        case '\'': encodedStr += '&#39;'; break;
+        case '\n': encodedStr += '<br>'; break;
+        case '\r': break; // ignore
+        case '\t': encodedStr += '&nbsp;&nbsp;&nbsp;&nbsp;'; break;
+        case '\b': encodedStr += '&nbsp;'; break;
+        case '\f': encodedStr += '&nbsp;'; break;
+        default: encodedStr += String.fromCharCode(charCode); break;
+      }
+    } else {
+      // Non-ASCII characters
+      encodedStr += "&#" + charCode + ";";
+    }
+  }
+  return encodedStr;
+}
+
 
 class Dalai {
   constructor(home) {
@@ -452,7 +479,7 @@ class Dalai {
         const ptyProcess = pty.spawn(shell, [], config)
         ptyProcess.onData((data) => {
           if (cb) {
-            cb(ptyProcess, stripAnsi(data))
+            cb(ptyProcess, htmlencode(stripAnsi(data)))
           } else {
             process.stdout.write(data);
           }
@@ -466,7 +493,12 @@ class Dalai {
             resolve(false)
           }
         });
-        ptyProcess.write(`${cmd}\r`)
+
+        if (platform === "win32") {
+          ptyProcess.write(`[System.Console]::OutputEncoding=[System.Console]::InputEncoding=[System.Text.Encoding]::UTF8; ${cmd}\r`)
+        } else {
+          ptyProcess.write(`${cmd}\r`)
+        }
         ptyProcess.write("exit\r")
       } catch (e) {
         console.log("caught error", e)
