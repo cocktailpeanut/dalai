@@ -264,6 +264,14 @@ function App() {
     setLoading(true);
   };
 
+  const clearHistory = () => {
+    setResponses([]);
+  };
+
+  const deleteResponse = (id: string) => {
+    setResponses((previous) => previous.filter((item) => item.id !== id));
+  };
+
   return (
     <ThemeProvider theme={muiTheme}>
       <ConfigContext.Provider value={config}>
@@ -289,6 +297,7 @@ function App() {
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   width: '100%',
+                  marginLeft: 0,
                 }}
               >
                 <Search>
@@ -317,7 +326,23 @@ function App() {
                 </Button>
               </Box>
             </Box>
-
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                width: '100%',
+              }}
+            >
+              <Button
+                variant="contained"
+                onClick={() => {
+                  clearHistory();
+                }}
+              >
+                Clear History
+              </Button>
+            </Box>
             {responses.reverse().map((r) => {
               return (
                 <Paper
@@ -329,8 +354,31 @@ function App() {
                   }}
                 >
                   <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
-                    <Chip label={` ID: ${r.id}`} />
-                    <Chip label={` PROMPT: ${r.prompt}`} color="error" />
+                    <Box
+                      sx={{
+                        position: 'relative',
+                      }}
+                    >
+                      <Chip label={` ID: ${r.id}`} />
+                      <Chip label={` PROMPT: ${r.prompt}`} color="error" />
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          right: 2,
+                          top: 2,
+                        }}
+                      >
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => {
+                            deleteResponse(r.id);
+                          }}
+                        >
+                          Delete Response
+                        </Button>
+                      </Box>
+                    </Box>
                     <Divider
                       sx={{
                         my: 2,
