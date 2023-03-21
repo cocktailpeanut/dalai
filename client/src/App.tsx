@@ -160,6 +160,7 @@ function App() {
   };
 
   useEffect(() => {
+    console.log('model', model);
     setConfig((previous) => ({ ...previous, model }));
   }, [model]);
 
@@ -167,7 +168,7 @@ function App() {
     if (isConnected) {
       setModel(config?.models[0] || '');
     }
-  }, [isConnected, config]);
+  }, [isConnected]);
 
   const [responses, setResponses] = useState<Response[]>([]);
 
@@ -209,7 +210,12 @@ function App() {
         if (response === '\n\n<end>') {
           // document.querySelector(".form-header").innerHTML = renderHeader(config)
         } else {
-          setConfig((previous: any) => ({ ...previous, models: [response] }));
+          setConfig((previous: any) => ({
+            ...previous,
+            models: previous.models
+              .filter((m: any) => m !== response)
+              .concat(response),
+          }));
           setModel(config?.models[0] || '');
         }
       } else {
