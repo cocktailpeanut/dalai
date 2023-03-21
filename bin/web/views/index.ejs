@@ -170,10 +170,11 @@
             n_predict: 200,
             top_k: 40,
             top_p: 0.9,
-            temp: 0.1,
+  temp: 0.8,
             repeat_last_n: 64,
             repeat_penalty: 1.3,
             debug: false,
+  html: true,
             models: []
         }
         const socket = io();
@@ -305,7 +306,7 @@ ${fields}
         const say = (msg, id) => {
             let item = document.createElement('li');
             if (id) item.setAttribute("data-id", id)
-            item.textContent = msg;
+  item.innerHTML = msg;
             messages.prepend(item);
         }
         socket.emit('request', {
@@ -328,8 +329,8 @@ ${fields}
                     const id = request.id
                     let existing = document.querySelector(`[data-id='${id}']`)
                     if (existing) {
-                        existing.textContent = existing.textContent + response
-                        existing.textContent = existing.textContent.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
+        existing.innerHTML = existing.innerHTML + response
+        //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
                         //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
                     } else {
                         say(response, id)
