@@ -32,32 +32,6 @@ const stripAnsi = (str) => {
   const regex = new RegExp(pattern, 'g')
   return str.replace(regex, '');
 }
-const htmlencode = (str) => {
-  let encodedStr = '';
-  for (let i = 0; i < str.length; i++) {
-    let charCode = str.charCodeAt(i);
-    if (charCode < 128) {
-      // ASCII characters
-      switch (str[i]) {
-        case '<': encodedStr += '&lt;'; break;
-        case '>': encodedStr += '&gt;'; break;
-        case '&': encodedStr += '&amp;'; break;
-        case '"': encodedStr += '&quot;'; break;
-        case '\'': encodedStr += '&#39;'; break;
-        case '\n': encodedStr += '<br>'; break;
-        case '\r': break; // ignore
-        case '\t': encodedStr += '&nbsp;&nbsp;&nbsp;&nbsp;'; break;
-        case '\b': encodedStr += '&nbsp;'; break;
-        case '\f': encodedStr += '&nbsp;'; break;
-        default: encodedStr += String.fromCharCode(charCode); break;
-      }
-    } else {
-      // Non-ASCII characters
-      encodedStr += "&#" + charCode + ";";
-    }
-  }
-  return encodedStr;
-}
 
 
 class Dalai {
@@ -86,13 +60,39 @@ class Dalai {
     this.torrent = new TorrentDownloader()
     this.config = {
       name: 'xterm-color',
-      cols: 200,
+      cols: 1000,
       rows: 30,
     }
     this.cores = {
       llama: new L(this),
       alpaca: new A(this),
     }
+  }
+  htmlencode (str) {
+    let encodedStr = '';
+    for (let i = 0; i < str.length; i++) {
+      let charCode = str.charCodeAt(i);
+      if (charCode < 128) {
+        // ASCII characters
+        switch (str[i]) {
+          case '<': encodedStr += '&lt;'; break;
+          case '>': encodedStr += '&gt;'; break;
+          case '&': encodedStr += '&amp;'; break;
+          case '"': encodedStr += '&quot;'; break;
+          case '\'': encodedStr += '&#39;'; break;
+          case '\n': encodedStr += '<br>'; break;
+          case '\r': break; // ignore
+          case '\t': encodedStr += '&nbsp;&nbsp;&nbsp;&nbsp;'; break;
+          case '\b': encodedStr += '&nbsp;'; break;
+          case '\f': encodedStr += '&nbsp;'; break;
+          default: encodedStr += String.fromCharCode(charCode); break;
+        }
+      } else {
+        // Non-ASCII characters
+        encodedStr += "&#" + charCode + ";";
+      }
+    }
+    return encodedStr;
   }
   down(url, dest, headers) {
     return new Promise((resolve, reject) => {
@@ -240,7 +240,11 @@ class Dalai {
       await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (proc, msg) => {
         if (endpattern.test(msg)) ended = true
         if (started && !ended) {
-          cb(msg)
+          if (req.html) {
+            cb(this.htmlencode(msg))
+          } else {
+            cb(msg)
+          }
         } else if (ended && writeEnd) {
           cb('\n\n<end>')
           writeEnd = false
@@ -479,7 +483,7 @@ class Dalai {
         const ptyProcess = pty.spawn(shell, [], config)
         ptyProcess.onData((data) => {
           if (cb) {
-            cb(ptyProcess, htmlencode(stripAnsi(data)))
+            cb(ptyProcess, stripAnsi(data))
           } else {
             process.stdout.write(data);
           }
