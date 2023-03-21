@@ -1,4 +1,5 @@
 const express = require('express')
+const os = require("os");
 const http = require('http')
 const path = require('path')
 const fs = require('fs')
@@ -16,46 +17,53 @@ const start = (port, home) => {
     app.get("/", (req, res) => {
         res.render("index")
     })
+
+    const defaultDir = path.join(__dirname, "prompts");
+    const customDir = path.join(os.homedir(), "dalai", "config", "prompts");
+
+    if (!fs.existsSync(customDir)) {
+        fs.mkdirSync(customDir, { recursive: true });
+        console.log(`Created custom directory: ${customDir}`);
+    }
+
     app.get("/prompts", (req, res) => {
-        const promptsDirs = [
-            path.join(__dirname, "prompts"),
-            path.join(__dirname, "prompts", "custom")
-        ];
-        const allPrompts = [];
-        let numDirsChecked = 0;
-        promptsDirs.forEach(promptsDir => {
-            if (fs.existsSync(promptsDir) && fs.statSync(promptsDir).isDirectory()) {
-                fs.readdir(promptsDir, (err, files) => {
-                    if (err) {
-                        console.error(err);
-                        return res.status(500).json({ error: "Internal server error" });
-                    }
-                    const prompts = files.filter(file => !fs.statSync(path.join(promptsDir, file)).isDirectory())
-                        .map((file) => {
-                            const promptName = path.basename(file, ".txt");
-                            const promptValue = fs.readFileSync(path.join(promptsDir, file), "utf8");
-                            const isCustom = promptsDir.includes("custom");
-                            const editable = isCustom ? true : false;
-                            return { name: promptName, value: promptValue, editable: editable };
-                        });
-                    allPrompts.push(...prompts);
-                    console.log(`Added ${prompts.length} prompts from ${promptsDir}`);
-                    numDirsChecked++;
-                    if (numDirsChecked === promptsDirs.length) {
-                        res.json(allPrompts);
-                        console.log(`Returning ${allPrompts.length} prompts`);
-                    }
-                });
-            } else {
-                console.error(`Directory not found: ${promptsDir}`);
-                numDirsChecked++;
-                if (numDirsChecked === promptsDirs.length) {
-                    res.json(allPrompts);
-                    console.log(`Returning ${allPrompts.length} prompts`);
+        let prompts = [];
+
+        const filesToPrompts = (files, directory, editable) =>
+            files.flatMap((file) => {
+                const filePath = path.join(directory, file);
+                const stats = fs.statSync(filePath, "utf8");
+
+                // Filter out directories and non .txt files
+                if (!stats.isFile() || !file.endsWith('.txt')) {
+                    return []
                 }
+                const promptName = path.basename(file, ".txt");
+                const promptValue = fs.readFileSync(filePath, "utf8");
+                return { name: promptName, value: promptValue, editable };
+            });
+
+        // Read default prompts
+        fs.readdir(defaultDir, (err, files) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Internal server error" });
             }
+            prompts = filesToPrompts(files, defaultDir, false);
+
+            // Read custom prompts
+            fs.readdir(customDir, (err, files) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).json({ error: "Internal server error" });
+                }
+                prompts = prompts.concat(filesToPrompts(files, customDir, true));
+                res.json(prompts);
+            });
         });
     });
+
+
 
     httpServer.listen(port, () => {
         console.log(`Server running on http://localhost:${port}/`)
