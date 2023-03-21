@@ -2,9 +2,9 @@ Below is an instruction that describes a task, paired with an input that provide
 Write a response that appropriately completes the request.
 
 ### Instruction:
-<INSTRUCTION>
+>INSTRUCTION
 
 ### Input:
-<PROMPT>
+>PROMPT
 
 ### Response:

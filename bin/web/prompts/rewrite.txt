@@ -4,6 +4,6 @@ Below is an instruction that describes a task, paired with an input that provide
 Rephrase the sentence.
 
 ### Input:
-<PROMPT>
+>PROMPT
 
 ### Response:

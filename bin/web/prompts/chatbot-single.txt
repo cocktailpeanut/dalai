@@ -6,7 +6,7 @@ Write the last AI response to complete the dialog.
 Dialog
 User: Hello, AI. 
 AI: Hello! How can I assist you today?
-User: <PROMPT>
+User: >PROMPT
 
 Response
 AI:
