@@ -23,6 +23,16 @@ const TorrentDownloader = require("./torrent")
 const exists = s => new Promise(r=>fs.access(s, fs.constants.F_OK, e => r(!e)))
 const escapeNewLine = (platform, arg) => platform === 'win32' ? arg.replaceAll(/\n/g, "\\n").replaceAll(/\r/g, "\\r") : arg
 const escapeDoubleQuotes = (platform, arg) => platform === 'win32' ? arg.replaceAll(/"/g, '`"') : arg.replaceAll(/"/g, '\\"')
+const stripAnsi = (str) => {
+  const pattern = [
+    '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
+    '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))'
+  ].join('|');
+
+  const regex = new RegExp(pattern, 'g')
+  return str.replace(regex, '');
+}
+
 class Dalai {
   constructor(home) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -442,7 +452,7 @@ class Dalai {
         const ptyProcess = pty.spawn(shell, [], config)
         ptyProcess.onData((data) => {
           if (cb) {
-            cb(ptyProcess, data)
+            cb(ptyProcess, stripAnsi(data))
           } else {
             process.stdout.write(data);
           }
