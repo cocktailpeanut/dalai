@@ -114,6 +114,14 @@ const themeDark = createTheme({
 const themeLight = createTheme({
   palette: {},
 });
+interface Response {
+  id: string;
+  textContent: string;
+  prompt: string;
+}
+
+const prepend = (element: any, array: Response[] = []) =>
+  !element ? [] : Array.of(element, ...array);
 
 function App() {
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
@@ -160,11 +168,7 @@ function App() {
       setModel(config?.models[0] || '');
     }
   }, [isConnected, config]);
-  interface Response {
-    id: string;
-    textContent: string;
-    prompt: string;
-  }
+
   const [responses, setResponses] = useState<Response[]>([]);
 
   const [question, setQuestion] = useState<string>('');
@@ -220,24 +224,22 @@ function App() {
               ''
             );
             const prompt = responses[existing]?.prompt;
-            setResponses((previous) =>
-              previous
-                .filter((item) => item.id !== id)
-                /* Append replacement { label, uniqueId } to state array */
-                .concat([{ id, textContent: t, prompt }])
-            );
+            setResponses((previous) => {
+              const p = previous.filter((item) => item.id !== id);
+              return prepend({ id, textContent: t, prompt }, p);
+              /* Append replacement { label, uniqueId } to state array */
+            });
             // existing.textContent = existing.textContent.replaceAll("\\n", "\n");
           } else {
             const t = (
               responses[existing]?.textContent || '' + response
             ).replaceAll(/\r?\n\x1B\[\d+;\d+H./g, '');
             const prompt = responses[existing]?.prompt;
-            setResponses((previous) =>
-              previous
-                .filter((item) => item.id !== id)
-                /* Append replacement { label, uniqueId } to state array */
-                .concat([{ id, textContent: t, prompt }])
-            );
+            setResponses((previous) => {
+              const p = previous.filter((item) => item.id !== id);
+              return prepend({ id, textContent: t, prompt }, p);
+              /* Append replacement { label, uniqueId } to state array */
+            });
           }
         }
       }
@@ -254,12 +256,11 @@ function App() {
 
   const emitQuestion = (question: string, id: string) => {
     setConfig((previous) => ({ ...previous, prompt: question, id }));
-    setResponses((previous) =>
-      previous
-        .filter((item) => item.id !== id)
-        /* Append replacement { label, uniqueId } to state array */
-        .concat([{ id, textContent: '', prompt: question }])
-    );
+    setResponses((previous) => {
+      const p = previous.filter((item) => item.id !== id);
+      return prepend({ id, textContent: '', prompt: question }, p);
+      /* Append replacement { label, uniqueId } to state array */
+    });
     config.id = null;
     setLoading(true);
   };
@@ -343,7 +344,7 @@ function App() {
                 Clear History
               </Button>
             </Box>
-            {responses.reverse().map((r) => {
+            {responses.map((r) => {
               return (
                 <Paper
                   key={r.id}
