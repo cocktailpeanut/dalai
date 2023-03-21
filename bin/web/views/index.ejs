@@ -286,8 +286,27 @@ ${fields}
                 // Listen to change event on the dropdown
                 promptSelect.addEventListener('change', () => {
                     const selectedPromptValue = promptSelect.value;
+                    const currentInputValue = input.textContent;
+
+                    // Update the input text with the selected prompt value
                     input.textContent = selectedPromptValue;
+
+                    // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
+                    const promptIndex = input.textContent.indexOf('>PROMPT');
+                    if (promptIndex >= 0) {
+                        const range = document.createRange();
+                        const selection = window.getSelection();
+                        const promptEndIndex = promptIndex + ">PROMPT".length;
+                        range.setStart(input.childNodes[0], promptIndex);
+                        range.setEnd(input.childNodes[0], promptEndIndex);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+
+                    // Focus the input
+                    input.focus();
                 });
+
             })
             .catch(error => {
                 console.error('Error loading prompts:', error);
