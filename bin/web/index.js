@@ -16,21 +16,22 @@ const start = (port, home) => {
     app.get("/", (req, res) => {
         res.render("index")
     })
-    app.get("/presets", (req, res) => {
-        const presetsDir = path.join(__dirname, "presets")
-        fs.readdir(presetsDir, (err, files) => {
+    app.get("/prompts", (req, res) => {
+        const promptsDir = path.join(__dirname, "prompts");
+        fs.readdir(promptsDir, (err, files) => {
             if (err) {
-                console.error(err)
-                return res.status(500).json({ error: "Internal server error" })
+                console.error(err);
+                return res.status(500).json({ error: "Internal server error" });
             }
-            const presets = files.map((file) => {
-                const presetName = path.basename(file, ".txt")
-                const presetValue = fs.readFileSync(path.join(presetsDir, file), "utf8")
-                return { name: presetName, value: presetValue }
-            })
-            res.json(presets)
-        })
-    })
+            const prompts = files.map((file) => {
+                const promptName = path.basename(file, ".txt");
+                const promptValue = fs.readFileSync(path.join(promptsDir, file), "utf8");
+                return { name: promptName, value: promptValue };
+            });
+            res.json(prompts);
+        });
+    });
+
     httpServer.listen(port, () => {
         console.log(`Server running on http://localhost:${port}/`)
     })
