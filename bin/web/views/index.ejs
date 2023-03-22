@@ -181,6 +181,9 @@
           color: white;
           background: rgba(0,0,0,0.7);
         }
+        #prompt-cancel i {
+            padding: 5px;
+        }
     </style>
 </head>
 
@@ -210,7 +213,6 @@
     <script>
         const str = localStorage.getItem("config")
         let config
-          console.log("str", str)
         if (str) {
           try {
             config = JSON.parse(str)
@@ -353,7 +355,6 @@ ${fields}
         fetch('./prompts')
             .then(response => response.json())
             .then(prompts => {
-                console.log(prompts)
                 if (prompts.length === 0) {
                     promptSelect.disabled = true;
                     return;
@@ -409,7 +410,6 @@ ${fields}
             response
         }) => {
             loading(false)
-            console.log(response)
             if (request.method === "installed") {
                 if (response == "\n\n<end>") {
                   document.querySelector(".form-header").innerHTML = renderHeader(config)
