@@ -338,17 +338,40 @@ class Dalai {
     let temp_models_path = path.resolve(temp_path, "models")
     await fs.promises.mkdir(temp_path, { recursive: true }).catch((e) => { })
     await fs.promises.access(models_path)
-    // 1. move the models folder to ../tmp
-    await fs.promises.rename(models_path, temp_models_path)
+    // 1. copy the models folder to ../tmp
+    await copyDir(models_path, temp_models_path)
     // 2. wipe out the folder
     await fs.promises.rm(models_path, { recursive: true }).catch((e) => { console.log(e) })
     // 3. install engine
     await this.add(core)
     // 4. move back the files inside /tmp
     await fs.promises.access(temp_models_path)
-    await fs.promises.rename(temp_models_path, models_path)
-    
-    
+    await copyDir(temp_models_path, models_path)
+    await fs.promises.rm(temp_models_path, { recursive: true }).catch((e) => { console.log(e) })
+
+    async function copyDir(src, dest) {
+      try {
+        await fs.promises.access(src, fs.constants.F_OK)
+      } catch (error) {
+        console.error(`Source directory ${src} does not exist`)
+        return
+      }
+      
+      await fs.promises.mkdir(dest, { recursive: true })
+      
+      const entries = await fs.promises.readdir(src, { withFileTypes: true })
+      
+      for (const entry of entries) {
+        const srcPath = path.join(src, entry.name)
+        const destPath = path.join(dest, entry.name)
+        
+        if (entry.isDirectory()) {
+          await copyDir(srcPath, destPath)
+        } else {
+          await fs.promises.copyFile(srcPath, destPath)
+        }
+      }
+    }
     
 
     // next add the models
