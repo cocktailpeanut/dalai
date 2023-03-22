@@ -16,8 +16,8 @@
 
         .input-field {
             /*
-    border: 2px solid rgba(0,0,0,0.2);
-    */
+          border: 2px solid rgba(0,0,0,0.2);
+          */
             display: flex;
             padding: 10px;
             box-sizing: border-box;
@@ -33,8 +33,8 @@
 
         .input-field-chat {
             /*
-          border: 2px solid rgba(0,0,0,0.2);
-          */
+                border: 2px solid rgba(0,0,0,0.2);
+                */
             background: rgba(0, 0, 0, 0.04);
             padding: 10px;
             overflow: hidden;
@@ -265,7 +265,12 @@
                 </div>
                 <div class='info'>You can chose interactive-chat templates from the dropdown menu above.
                 </div>
-                <textarea title="prePrompt" id='prePrompt' style="width: 100%; height: 120px;"></textarea>
+                <textarea title="prePrompt" id='prePrompt' style="width: 100%; height: 120px;">Transcript of a dialog, where [USER_NAME] interacts with an Assistant named Bob. Bob is helpful, kind, honest, good at writing, and never fails to answer [USER_NAME]'s requests immediately and with precision.
+[USER_NAME]: Hello, Bob.
+Bob: Hello. How may I help you today?
+[USER_NAME]: Please tell me the largest city in Europe.
+Bob: Sure. The largest city in Europe is Moscow, the capital of Russia.
+[USER_NAME]:</textarea>
                 <div class='input-container' id="personNameContainer">
                     <div class='white-input-field'>
                         <div class='info'>Your Name</div>
