@@ -304,19 +304,20 @@ class Dalai {
 
     // temporary
 
-    let models_path = path.resolve(engine.home, "models")
-    let temp_path = path.resolve(this.home, "tmp")
-    let temp_models_path = path.resolve(temp_path, "models")
-    await fs.promises.mkdir(temp_path, { recursive: true }).catch((e) => { })
+    let models_path = path.resolve(engine.home, "models");
+    await fs.promises.mkdir(models_path, { recursive: true }).catch((e) => { });
+    let temp_path = path.resolve(this.home, "tmp");
+    let temp_models_path = path.resolve(temp_path, "models");
+    await fs.promises.mkdir(temp_path, { recursive: true }).catch((e) => { });
     // 1. move the models folder to ../tmp
-    await fs.promises.rename(models_path, temp_models_path)
+    await fs.promises.rename(models_path, temp_models_path);
     // 2. wipe out the folder
-    await fs.promises.rm(engine.home, { recursive: true }).catch((e) => { console.log(e) })
+    await fs.promises.rm(models_path, { recursive: true }).catch((e) => { console.log(e) });
     // 3. install engine
-    await this.add(core)
+    await this.add(core);
     // 4. move back the files inside /tmp
-    await fs.promises.rename(temp_models_path, models_path)
-
+    await fs.promises.rename(temp_models_path, models_path);
+    
     // next add the models
     let res = await this.cores[core].add(...models)
     return res
