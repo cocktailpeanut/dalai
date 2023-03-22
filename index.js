@@ -192,6 +192,20 @@ class Dalai {
       return
     }
 
+    if (req.prompt && req.prompt.startsWith("/")) {
+      try {
+        const mod = require(`./cmds/${req.prompt.slice(1)}`)
+        if (mod) {
+          mod(this)
+        }
+      } catch (e) {
+        console.log("require log", e)
+      }
+    }
+
+    if (!req.prompt) {
+      return
+    }
 
     let [Core, Model] = req.model.split(".")
     Model = Model.toUpperCase()
@@ -253,20 +267,54 @@ class Dalai {
       })
     }
   }
+  async uninstall(core, ...models) {
+    // delete the rest of the files
+
+    //const files = (await fs.promises.readdir(path.resolve(this.home, core), { withFileTypes: true }))
+    //    .filter(dirent => dirent.isFile() && !dirent.name.startsWith("."))
+    //    .map(dirent => dirent.name);
+    //console.log("files", files)
+    //for(let file of files) {
+    //  await fs.promises.rm(path.resolve(this.home, core, file)).catch((e) => { })
+    //}
+
+
+    if (models.length > 0) {
+      // delete the model folder
+      const modelsPath = path.resolve(this.home, core, "models")
+      for(let model of models) {
+        const modelPath = path.resolve(modelsPath, model)
+        console.log("rm", modelPath)
+        await fs.promises.rm(modelPath, { recursive: true, force: true }).catch((e) => {
+          console.log("rm", modelPath, e)
+        })
+      }
+    }
+  }
   async install(core, ...models) {
+
+    let engine = this.cores[core]
+
     const venv_path = path.join(this.home, "venv")
     let ve = await exists(venv_path)
     if (!ve) {
       await this.setup()
     }
-    // first install
-    let engine = this.cores[core]
-    let e = await exists(path.resolve(engine.home));
-//    if (e) {
-//      // already exists, no need to install
-//    } else {
-      await this.add(core)
-//    }
+
+    // temporary
+
+    let models_path = path.resolve(engine.home, "models")
+    let temp_path = path.resolve(this.home, "tmp")
+    let temp_models_path = path.resolve(temp_path, "models")
+    await fs.promises.mkdir(temp_path, { recursive: true }).catch((e) => { })
+    // 1. move the models folder to ../tmp
+    await fs.promises.rename(models_path, temp_models_path)
+    // 2. wipe out the folder
+    await fs.promises.rm(engine.home, { recursive: true }).catch((e) => { console.log(e) })
+    // 3. install engine
+    await this.add(core)
+    // 4. move back the files inside /tmp
+    await fs.promises.rename(temp_models_path, models_path)
 
     // next add the models
     let res = await this.cores[core].add(...models)
@@ -451,6 +499,7 @@ class Dalai {
     const io = new Server(httpServer)
     io.on("connection", (socket) => {
       socket.on('request', async (req) => {
+        req.models = Array.from(new Set(req.models))
         await this.query(req, (str) => {
           io.emit("result", { response: str, request: req })
         })
@@ -480,15 +529,15 @@ class Dalai {
           config.cwd = path.resolve(cwd)
         }
         console.log(`exec: ${cmd} in ${config.cwd}`)
-        const ptyProcess = pty.spawn(shell, [], config)
-        ptyProcess.onData((data) => {
+        this.ptyProcess = pty.spawn(shell, [], config)
+        this.ptyProcess.onData((data) => {
           if (cb) {
-            cb(ptyProcess, stripAnsi(data))
+            cb(this.ptyProcess, stripAnsi(data))
           } else {
             process.stdout.write(data);
           }
         });
-        ptyProcess.onExit((res) => {
+        this.ptyProcess.onExit((res) => {
           if (res.exitCode === 0) {
             // successful
             resolve(true)
@@ -499,14 +548,14 @@ class Dalai {
         });
 
         if (platform === "win32") {
-          ptyProcess.write(`[System.Console]::OutputEncoding=[System.Console]::InputEncoding=[System.Text.Encoding]::UTF8; ${cmd}\r`)
+          this.ptyProcess.write(`[System.Console]::OutputEncoding=[System.Console]::InputEncoding=[System.Text.Encoding]::UTF8; ${cmd}\r`)
         } else {
-          ptyProcess.write(`${cmd}\r`)
+          this.ptyProcess.write(`${cmd}\r`)
         }
-        ptyProcess.write("exit\r")
+        this.ptyProcess.write("exit\r")
       } catch (e) {
         console.log("caught error", e)
-        ptyProcess.kill()
+        this.ptyProcess.kill()
         // ptyProcess.write("exit\r")
       }
     })

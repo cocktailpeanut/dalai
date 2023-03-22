@@ -10,7 +10,8 @@ class Alpaca {
   constructor(root) {
     this.root = root
     this.home = path.resolve(this.root.home, "alpaca")
-    this.url = "https://github.com/candywrap/alpaca.cpp.git"
+    //this.url = "https://github.com/candywrap/alpaca.cpp.git"
+    this.url = "https://github.com/ItsPi3141/alpaca.cpp"
   }
   async make() {
     let success
@@ -92,9 +93,14 @@ class Alpaca {
               path.resolve(dir, "ggml-model-q4_0.bin")
             )
             break;
+
+          case "30B":
+            const url = "https://huggingface.co/Pi3141/alpaca-30B-ggml/resolve/main/ggml-model-q4_0.bin"
+            await this.root.down(url, path.resolve(dir, "ggml-model-q4_0.bin"))
+            break;
           
           default:
-            console.log("Select either model 7B or 13B")
+            console.log("Select either model 7B, 13B, or 30B")
             break;
         }
       }

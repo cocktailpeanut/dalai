@@ -3,6 +3,8 @@
 <head>
     <title>Dalai LLaMA</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/css/fontawesome.min.css" rel="stylesheet" />
+    <link href="/css/solid.min.css" rel="stylesheet" />
     <style>
         body,
         pre {
@@ -16,7 +18,6 @@
             /*
     border: 2px solid rgba(0,0,0,0.2);
     */
-            background: rgba(0, 0, 0, 0.04);
             display: flex;
             padding: 10px;
             box-sizing: border-box;
@@ -24,12 +25,13 @@
         
         #input {
             white-space: pre-wrap;
-            padding: 5px;
+            border: 1px solid rgba(0,0,0,0.2);
+            padding: 20px;
             outline: none;
-            border: none;
             flex-grow: 1;
             font-size: 14px;
             box-sizing: border-box;
+            background: white;
         }
         
         #input:focus {
@@ -41,7 +43,6 @@
             background: rgba(0, 0, 0, 0.8);
             color: white;
             border: none;
-            border-radius: 3px;
             outline: none;
             box-sizing: border-box;
         }
@@ -82,12 +83,20 @@
         }
         
         .input-container {
-            margin: 10px;
+            background: rgba(0, 0, 0, 0.06);
+        }
+        .input-container button {
+          padding: 30px;
+          margin-left: 10px;
         }
         
         .info {
             font-size: 12px;
-            padding: 5px;
+            padding: 0 5px 10px;
+        }
+        .info button {
+          padding: 5px 10px;
+          margin-right: 10px;
         }
         
         .form-header {
@@ -95,7 +104,7 @@
             align-items: center;
             flex-wrap: wrap;
             margin: 0;
-            background: rgba(0, 0, 0, 0.04);
+            background: rgba(0,0,0,0.9);
             padding: 10px 20px;
         }
         
@@ -103,19 +112,23 @@
             flex-grow: 1;
         }
         
-        input[type=text],
-        select {
+        .form-header input[type=text],
+        .form-header select {
             border: none;
-            background: rgba(0, 0, 0, 0.08);
+            background: rgba(255,255,255,0.1);
+            color: white;
             padding: 5px 10px;
             box-sizing: border-box;
             width: 100px;
         }
+        .form-header select {
+          width: 150px;
+        }
         
         .logo {
+          color: white;
             font-weight: bold;
             text-decoration: none;
-            color: black;
             display: block;
             font-size: 30px;
             letter-spacing: -1px;
@@ -135,11 +148,38 @@
         }
         
         .kv label {
+            text-align: right;
             display: block;
             padding: 5px 0px;
-            font-weight: bold;
-            color: rgba(0, 0, 0, 0.7);
+            color: rgba(255,255,255,0.9);
             font-size: 12px;
+        }
+        .prompt-header {
+          display: flex;
+          align-items: center;
+          padding: 10px 20px 0;
+          box-sizing: border-box;
+          font-size: 14px;
+          background: rgba(0, 0, 0, 0.06);
+        }
+        .prompt-header select {
+          margin: 0 10px;
+          flex-grow: 1;
+          padding: 5px;
+          border: 1px solid rgba(0,0,0,0.2);
+          max-width: 200px;
+        }
+        .prompt-header button {
+          padding: 7px 10px;
+          font-size: 12px;
+        }
+        button {
+          cursor: pointer;
+        }
+        #prompt-cancel {
+          background: none;
+          color: white;
+          background: rgba(0,0,0,0.7);
         }
     </style>
 </head>
@@ -147,17 +187,21 @@
 <body>
     <form id="form" action="">
         <div class='form-header'></div>
-        <div class="kv">
-            <label for="prompt-select">prompt</label>
+        <div class="prompt-header">
+            <label for="prompt-select">Select a template</label>
             <select id="prompt-select"></select>
+            <div class='stretch'></div>
         </div>
         <div class='input-container'>
-
             <div class='input-field'>
                 <div contenteditable id='input'></div>
-                <button>Autocomplete</button>
+                <button id='prompt-run'>Go</button>
+                <button id="prompt-cancel" class='hidden'><i class="fa-solid fa-circle-notch fa-spin"></i> Cancel</button>
             </div>
-            <div class='info'>TIP: shift+enter for multiple lines</div>
+            <div class='info'>
+              <button id="prompt-reset">Reset</button>
+              <span>TIP: shift+enter for multiple lines</span>
+            </div>
         </div>
     </form>
     <pre class='loading hidden'></pre>
@@ -241,6 +285,8 @@ ${fields}
                 //config.prompt = input.textContent.replaceAll("\n", "\\n");
                 config.prompt = input.textContent
                 config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
+                document.querySelector("#prompt-run").classList.add("hidden")
+                document.querySelector("#prompt-cancel").classList.remove("hidden")
                 socket.emit('request', config)
                 config.id = null
                 loading(config.prompt)
@@ -307,12 +353,15 @@ ${fields}
                 }
                 promptSelect.addEventListener('change', handlePromptChange);
 
+                /*
                 // Create a Reset button
                 const resetButton = document.createElement('button');
                 resetButton.textContent = 'Reset';
 
                 // Append the Reset button to the same container as the dropdown
                 promptSelect.parentNode.appendChild(resetButton);
+                */
+                const resetButton = document.querySelector("#prompt-reset")
 
                 resetButton.addEventListener('click', (e) => {
                     e.preventDefault() // Prevent form from submitting
@@ -352,12 +401,15 @@ ${fields}
             console.log(response)
             if (request.method === "installed") {
                 if (response == "\n\n<end>") {
-                    document.querySelector(".form-header").innerHTML = renderHeader(config)
+                  document.querySelector(".form-header").innerHTML = renderHeader(config)
                 } else {
-                    config.models.push(response)
+                  config.models = Array.from(new Set(config.models).add(response))
                 }
             } else {
-                if (response == "\n\n<end>") {} else {
+                if (response == "\n\n<end>") {
+                  document.querySelector("#prompt-run").classList.remove("hidden")
+                  document.querySelector("#prompt-cancel").classList.add("hidden")
+                } else {
                     const id = request.id
                     let existing = document.querySelector(`[data-id='${id}']`)
                     if (existing) {
