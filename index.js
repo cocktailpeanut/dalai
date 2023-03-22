@@ -337,6 +337,7 @@ class Dalai {
     let models_path = path.resolve(engine.home, "models")
     let temp_path = path.resolve(this.home, "tmp")
     let temp_models_path = path.resolve(temp_path, "models")
+    await fs.promises.mkdir(models_path, { recursive: true }).catch((e) => { });
     await fs.promises.mkdir(temp_path, { recursive: true }).catch((e) => { })
     // 1. move the models folder to ../tmp
     await fs.promises.rename(models_path, temp_models_path)
