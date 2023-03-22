@@ -446,10 +446,10 @@ class Dalai {
     // 3.2. Build tools
     if (platform === "linux") {
       // ubuntu debian
-      success = await this.exec("apt-get install build-essential python3-venv -y")
+      success = await this.exec('sh -c "apt-get install build-essential python3-venv -y"')
       if (!success) {
         // fefdora
-        success = await this.exec("dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y")
+        success = await this.exec('sh -c "dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y"')
       }
     } else {
       // for win32 / darwin
