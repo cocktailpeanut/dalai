@@ -258,10 +258,9 @@
 
             }).join("")
 
-
-            config.model = config.models[0]
+            if (!str) config.model = config.models[0]
             const models = config.models.map((model, i) => {
-                return `<option value="${model}" ${i === 0 ? "selected" : ""}>${model}</option>`
+                return `<option value="${model}" ${config.model === model ? "selected" : ""}>${model}</option>`
             }).join("")
             return `<a class='logo' href="/">Dalai</a><div class='stretch'></div>
 <div class='config-container'>
@@ -308,16 +307,16 @@ ${fields}
                 input.textContent = promptSelect.value;
             }
         });
-        input.addEventListener("keydown", (e) => {
-            if (e.keyCode === 13) {
-                e.preventDefault();
-                if (e.shiftKey) {
-                    document.execCommand("insertLineBreak");
-                } else {
-                    form.requestSubmit()
-                }
-            }
-        })
+        // input.addEventListener("keydown", (e) => {
+        //     if (e.keyCode === 13) {
+        //         e.preventDefault();
+        //         if (e.shiftKey) {
+        //             document.execCommand("insertLineBreak");
+        //         } else {
+        //             form.requestSubmit()
+        //         }
+        //     }
+        // })
         document.querySelector("#prompt-cancel").addEventListener("click", (e) => {
           e.preventDefault()
           e.stopPropagation()
