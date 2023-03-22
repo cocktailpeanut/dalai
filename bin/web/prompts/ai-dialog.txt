@@ -1,0 +1,12 @@
+Below is a dialog, where User interacts with AI. AI is helpful, kind, obedient, honest, and knows its own limits. 
+
+Instruction
+Write the last AI response to complete the dialog.
+
+Dialog
+User: Hello, AI. 
+AI: Hello! How can I assist you today?
+User: >PROMPT
+
+Response
+AI:

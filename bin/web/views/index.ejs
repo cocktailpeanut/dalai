@@ -1,155 +1,213 @@
 <html>
+
 <head>
-<title>Dalai LLaMA</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-  body, pre { margin: 0; padding: 0px; color: rgba(0,0,0,0.8); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-  .input-field {
-  /*
+    <title>Dalai LLaMA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body,
+        pre {
+            margin: 0;
+            padding: 0px;
+            color: rgba(0, 0, 0, 0.8);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        .input-field {
+            /*
     border: 2px solid rgba(0,0,0,0.2);
     */
-    background: rgba(0,0,0,0.04);
-    display: flex;
-    padding: 10px;
-    box-sizing: border-box;
-  }
-  #input {
-    white-space: pre-wrap;
-    padding: 5px;
-    outline: none;
-    border: none;
-    flex-grow: 1;
-    font-size: 14px;
-    box-sizing: border-box;
-  }
-  #input:focus { outline: none; }
-  button { padding: 10px; background: rgba(0,0,0,0.8); color: white; border: none; border-radius: 3px; outline: none; box-sizing: border-box; }
-
-  #messages { list-style-type: none; margin: 0; box-sizing: border-box; font-size: 14px; padding: 0; }
-  #messages > li { padding: 10px; font-size: 14px; box-sizing: border-box; }
-  #messages > li:nth-child(odd) { background: #efefef; }
-  li { white-space: pre-wrap; }
-  .loading {
-    margin-bottom: 10px;
-    padding: 10px;
-    box-sizing: border-box;
-    color: rgba(0,0,0,0.7);
-    font-size: 14px;
-    background: #efefef;
-  }
-  .hidden {
-    display: none !important;
-  }
-  .input-container {
-    margin: 10px;
-  }
-  .info {
-    font-size: 12px;
-    padding: 5px;
-  }
-  .form-header {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    margin: 0;
-    background: rgba(0,0,0,0.04);
-    padding: 10px 20px;
-  }
-  .stretch {
-    flex-grow: 1;
-  }
-  input[type=text] , select {
-    border: none;
-    background: rgba(0,0,0,0.08);
-    padding: 5px 10px;
-    box-sizing: border-box;
-    width: 100px;
-  }
-  .logo {
-    font-weight: bold;
-    text-decoration: none;
-    color: black;
-    display: block;
-    font-size: 30px;
-    letter-spacing: -1px;
-    font-weight: bold;
-    font-family: georgia;
-
-  }
-  .config-container {
-    display: flex;
-    flex-wrap: wrap;
-  }
-  .kv {
-    display: block;
-    font-size: 14px;
-    margin-left: 10px;
-  }
-  .kv label {
-    display: block;
-    padding: 5px 0px;
-    font-weight: bold;
-    color: rgba(0,0,0,0.7);
-    font-size: 12px;
-  }
-</style>
+            background: rgba(0, 0, 0, 0.04);
+            display: flex;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        
+        #input {
+            white-space: pre-wrap;
+            padding: 5px;
+            outline: none;
+            border: none;
+            flex-grow: 1;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        #input:focus {
+            outline: none;
+        }
+        
+        button {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            outline: none;
+            box-sizing: border-box;
+        }
+        
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            box-sizing: border-box;
+            font-size: 14px;
+            padding: 0;
+        }
+        
+        #messages>li {
+            padding: 10px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        #messages>li:nth-child(odd) {
+            background: #efefef;
+        }
+        
+        li {
+            white-space: pre-wrap;
+        }
+        
+        .loading {
+            margin-bottom: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            color: rgba(0, 0, 0, 0.7);
+            font-size: 14px;
+            background: #efefef;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .input-container {
+            margin: 10px;
+        }
+        
+        .info {
+            font-size: 12px;
+            padding: 5px;
+        }
+        
+        .form-header {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 0;
+            background: rgba(0, 0, 0, 0.04);
+            padding: 10px 20px;
+        }
+        
+        .stretch {
+            flex-grow: 1;
+        }
+        
+        input[type=text],
+        select {
+            border: none;
+            background: rgba(0, 0, 0, 0.08);
+            padding: 5px 10px;
+            box-sizing: border-box;
+            width: 100px;
+        }
+        
+        .logo {
+            font-weight: bold;
+            text-decoration: none;
+            color: black;
+            display: block;
+            font-size: 30px;
+            letter-spacing: -1px;
+            font-weight: bold;
+            font-family: georgia;
+        }
+        
+        .config-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .kv {
+            display: block;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .kv label {
+            display: block;
+            padding: 5px 0px;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.7);
+            font-size: 12px;
+        }
+    </style>
 </head>
+
 <body>
-<form id="form" action="">
-  <div class='form-header'></div>
-  <div class='input-container'>
-    <div class='input-field'>
-      <div contenteditable id='input'></div>
-      <button>Autocomplete</button>
-    </div>
-    <div class='info'>TIP: shift+enter for multiple lines</div>
-  </div>
-</form>
-<pre class='loading hidden'></pre>
-<ul id="messages"></ul>
-<script src="/socket.io.min.js"></script>
-<script>
-const config = {
-  seed: -1,
-  threads: <%= threads %>,
-  n_predict: 200,
-  top_k: 420,
-  top_p: 0.9,
-  temp: 0.9,
-  repeat_last_n: 64,
-  repeat_penalty: 1.3,
-  debug: false,
-  html: true,
-  models: []
-}
-const socket = io();
-const form = document.getElementById('form');
-const input = document.querySelector('#input');
-const model = document.querySelector('#model');
-const renderHeader = (config) => {
-  const fields = [{ key: "debug", type: "checkbox" }, "n_predict", "repeat_last_n", "repeat_penalty", "top_k", "top_p", "temp", "seed", "threads"].map((key) => {
-    if (typeof key === "string") {
-      return `<div class='kv'>
+    <form id="form" action="">
+        <div class='form-header'></div>
+        <div class="kv">
+            <label for="prompt-select">prompt</label>
+            <select id="prompt-select"></select>
+        </div>
+        <div class='input-container'>
+
+            <div class='input-field'>
+                <div contenteditable id='input'></div>
+                <button>Autocomplete</button>
+            </div>
+            <div class='info'>TIP: shift+enter for multiple lines</div>
+        </div>
+    </form>
+    <pre class='loading hidden'></pre>
+    <ul id="messages"></ul>
+    <script src="/socket.io.min.js"></script>
+    <script>
+        const config = {
+            seed: -1,
+            threads: 4,
+            n_predict: 200,
+            top_k: 40,
+            top_p: 0.9,
+            temp: 0.8,
+            repeat_last_n: 64,
+            repeat_penalty: 1.3,
+            debug: false,
+            html: true,
+            models: []
+        }
+        const socket = io();
+        const form = document.getElementById('form');
+        const input = document.querySelector('#input');
+        const model = document.querySelector('#model');
+        const renderHeader = (config) => {
+            const fields = [{
+                key: "debug",
+                type: "checkbox"
+            }, "n_predict", "repeat_last_n", "repeat_penalty", "top_k", "top_p", "temp", "seed"].map((key) => {
+                if (typeof key === "string") {
+                    return `<div class='kv'>
 <label>${key}</label>
 <input name="${key}" type='text' placeholder="${key}" value="${config[key] || ''}">
 </div>`
-    } else {
-      if (key.type === "checkbox") {
-      return `<div class='kv'>
+                } else {
+                    if (key.type === "checkbox") {
+                        return `<div class='kv'>
 <label>${key.key}</label>
 <input name="${key.key}" type='checkbox' ${config[key.key] ? "checked" : ""}>
 </div>`
-      }
-    }
+                    }
+                }
 
-  }).join("")
+            }).join("")
 
 
-  config.model = config.models[0]
-  const models = config.models.map((model, i) => {
-    return `<option value="${model}" ${i === 0 ? "selected" : ""}>${model}</option>`
-  }).join("")
-  return `<a class='logo' href="/">Dalai</a><div class='stretch'></div>
+            config.model = config.models[0]
+            const models = config.models.map((model, i) => {
+                return `<option value="${model}" ${i === 0 ? "selected" : ""}>${model}</option>`
+            }).join("")
+            return `<a class='logo' href="/">Dalai</a><div class='stretch'></div>
 <div class='config-container'>
 ${fields}
 <div class='kv'>
@@ -157,91 +215,162 @@ ${fields}
 <select id="model" name="model">${models}</select>
 </div>
 </div>`
-}
-const loading = (on) => {
-  if (on) {
-    document.querySelector(".loading").textContent = on
-    document.querySelector(".loading").classList.remove("hidden")
-  } else {
-    document.querySelector(".loading").textContent = ""
-    document.querySelector(".loading").classList.add("hidden")
-  }
-}
-document.querySelector("form").addEventListener("input", (e) => {
-  if (e.target.tagName === "SELECT") {
-    config[e.target.name] = config.models[e.target.selectedIndex]
-  } else if (e.target.type === "checkbox") {
-    config[e.target.name] = e.target.checked
-  } else {
-    config[e.target.name] = e.target.value
-  }
-})
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  e.stopPropagation()
-  if (input.textContent) {
-    //config.prompt = input.textContent.replaceAll("\n", "\\n");
-    config.prompt = input.textContent
-    config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
-    socket.emit('request', config)
-    config.id = null
-    loading(config.prompt)
-    input.textContent = "";
-  }
-});
-input.addEventListener("keydown", (e) => {
-  if (e.keyCode === 13) {
-    e.preventDefault();
-    if (e.shiftKey) {
-      document.execCommand("insertLineBreak");
-    } else {
-      form.requestSubmit()
-    }
-  }
-})
+        }
+        const loading = (on) => {
+            if (on) {
+                document.querySelector(".loading").textContent = on
+                document.querySelector(".loading").classList.remove("hidden")
+            } else {
+                document.querySelector(".loading").textContent = ""
+                document.querySelector(".loading").classList.add("hidden")
+            }
+        }
+        document.querySelector("form").addEventListener("input", (e) => {
+            if (e.target.tagName === "SELECT") {
+                config[e.target.name] = config.models[e.target.selectedIndex]
+            } else if (e.target.type === "checkbox") {
+                config[e.target.name] = e.target.checked
+            } else {
+                config[e.target.name] = e.target.value
+            }
+        })
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            e.stopPropagation()
+            if (input.textContent) {
+                //config.prompt = input.textContent.replaceAll("\n", "\\n");
+                config.prompt = input.textContent
+                config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
+                socket.emit('request', config)
+                config.id = null
+                loading(config.prompt)
+                input.textContent = "";
+            }
+        });
+        input.addEventListener("keydown", (e) => {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    document.execCommand("insertLineBreak");
+                } else {
+                    form.requestSubmit()
+                }
+            }
+        })
 
-const sha256 = async (input) => {
-  const textAsBuffer = new TextEncoder().encode(input);
-  const hashBuffer = await window.crypto.subtle.digest("SHA-256", textAsBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hash = hashArray
-    .map((item) => item.toString(16).padStart(2, "0"))
-    .join("");
-  return hash;
-};
-const say = (msg, id) => {
-  let item = document.createElement('li');
-  if (id) item.setAttribute("data-id", id)
-  item.innerHTML = msg;
-  messages.prepend(item);
-}
-socket.emit('request', {
-  method: "installed"
-})
-socket.on('result', async ({ request, response }) => {
-  loading(false)
-  console.log(response)
-  if (request.method === "installed") {
-    if (response == "\n\n<end>") {
-      document.querySelector(".form-header").innerHTML = renderHeader(config)
-    } else {
-      config.models.push(response)
-    }
-  } else {
-    if (response == "\n\n<end>") {
-    } else {
-      const id = request.id
-      let existing = document.querySelector(`[data-id='${id}']`)
-      if (existing) {
-        existing.innerHTML = existing.innerHTML + response
-        //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
-        //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
-      } else {
-        say(response, id)
-      }
-    }
-  }
-});
-</script>
+        // Load prompts from files
+        const promptSelect = document.getElementById('prompt-select');
+        fetch('./prompts')
+            .then(response => response.json())
+            .then(prompts => {
+                console.log(prompts)
+                if (prompts.length === 0) {
+                    promptSelect.disabled = true;
+                    return;
+                }
+
+                // Populate prompt options
+                prompts.forEach(prompt => {
+                    const option = document.createElement('option');
+                    option.value = prompt.value;
+                    option.textContent = prompt.name;
+                    promptSelect.appendChild(option);
+                });
+
+                // Select the "default" prompt if it exists, otherwise select the first prompt
+                const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default');
+                const initialPrompt = defaultPrompt || prompts[0];
+                promptSelect.value = initialPrompt.value;
+                input.textContent = initialPrompt.value;
+
+                // Update the input text with the selected prompt value
+                const handlePromptChange = () => {
+                    const selectedPromptValue = promptSelect.value;
+                    const currentInputValue = input.textContent;
+
+                    input.textContent = selectedPromptValue;
+
+                    // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
+                    const promptIndex = input.textContent.indexOf('>PROMPT');
+                    if (promptIndex >= 0) {
+                        const range = document.createRange();
+                        const selection = window.getSelection();
+                        const promptEndIndex = promptIndex + ">PROMPT".length;
+                        range.setStart(input.childNodes[0], promptIndex);
+                        range.setEnd(input.childNodes[0], promptEndIndex);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+
+                    // Focus the input
+                    input.focus();
+                }
+                promptSelect.addEventListener('change', handlePromptChange);
+
+                // Create a Reset button
+                const resetButton = document.createElement('button');
+                resetButton.textContent = 'Reset';
+
+                // Append the Reset button to the same container as the dropdown
+                promptSelect.parentNode.appendChild(resetButton);
+
+                resetButton.addEventListener('click', (e) => {
+                    e.preventDefault() // Prevent form from submitting
+                    handlePromptChange()
+                });
+
+
+            })
+            .catch(error => {
+                console.error('Error loading prompts:', error);
+            });
+
+
+        const sha256 = async(input) => {
+            const textAsBuffer = new TextEncoder().encode(input);
+            const hashBuffer = await window.crypto.subtle.digest("SHA-256", textAsBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hash = hashArray
+                .map((item) => item.toString(16).padStart(2, "0"))
+                .join("");
+            return hash;
+        };
+        const say = (msg, id) => {
+            let item = document.createElement('li');
+            if (id) item.setAttribute("data-id", id)
+            item.innerHTML = msg;
+            messages.prepend(item);
+        }
+        socket.emit('request', {
+            method: "installed"
+        })
+        socket.on('result', async({
+            request,
+            response
+        }) => {
+            loading(false)
+            console.log(response)
+            if (request.method === "installed") {
+                if (response == "\n\n<end>") {
+                    document.querySelector(".form-header").innerHTML = renderHeader(config)
+                } else {
+                    config.models.push(response)
+                }
+            } else {
+                if (response == "\n\n<end>") {} else {
+                    const id = request.id
+                    let existing = document.querySelector(`[data-id='${id}']`)
+                    if (existing) {
+                        existing.innerHTML = existing.innerHTML + response
+                            //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
+                            //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
+                    } else {
+                        say(response, id)
+                    }
+                }
+            }
+        });
+    </script>
 </body>
+
 </html>
