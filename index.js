@@ -278,18 +278,14 @@ class Dalai {
     if (!this.queue) this.queue = []
     if (platform === "win32") {
       for(let i=0;i<msg.length; i++) {
-        console.log("msgi", msg[i]);
         if (msg[i] === "\\") {
           this.queueActive = true
           // start pushing to buffer
-          // console.log("adding to queue", msg[i])
           this.queue.push(msg[i]);
         } else {
           // otherwise flush
           this.queue.push(msg[i])
-          console.log("flushing queue", this.queue)
           let queueContent = this.queue.join("")
-          console.log({ before: queueContent, beforeEscape: winEscape(queueContent), after : this.htmlencode(winEscape(queueContent)) })
           
           if (!this.bufferStarted && ["\n", "\b", "\f", "\r", "\t"].includes(queueContent)) {
             // if the buffer hasn't started and incoming tokens are whitespaces, ignore
@@ -307,24 +303,13 @@ class Dalai {
       }
     } else {
       if (req.html) {
-        cb(this.htmlencode(queueContent))
+        cb(this.htmlencode(msg))
       } else {
-        cb(queueContent)
+        cb(msg)
       } 
     }
   }
   async uninstall(core, ...models) {
-    // delete the rest of the files
-
-    //const files = (await fs.promises.readdir(path.resolve(this.home, core), { withFileTypes: true }))
-    //    .filter(dirent => dirent.isFile() && !dirent.name.startsWith("."))
-    //    .map(dirent => dirent.name);
-    //console.log("files", files)
-    //for(let file of files) {
-    //  await fs.promises.rm(path.resolve(this.home, core, file)).catch((e) => { })
-    //}
-
-
     if (models.length > 0) {
       // delete the model folder
       const modelsPath = path.resolve(this.home, core, "models")
