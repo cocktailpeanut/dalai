@@ -25,7 +25,7 @@
         
         #input {
             white-space: pre-wrap;
-            border: 1px solid rgba(0,0,0,0.2);
+            border: 1px solid rgba(0, 0, 0, 0.2);
             padding: 20px;
             outline: none;
             flex-grow: 1;
@@ -85,18 +85,20 @@
         .input-container {
             background: rgba(0, 0, 0, 0.06);
         }
+        
         .input-container button {
-          padding: 30px;
-          margin-left: 10px;
+            padding: 30px;
+            margin-left: 10px;
         }
         
         .info {
             font-size: 12px;
             padding: 0 5px 10px;
         }
+        
         .info button {
-          padding: 5px 10px;
-          margin-right: 10px;
+            padding: 5px 10px;
+            margin-right: 10px;
         }
         
         .form-header {
@@ -104,7 +106,7 @@
             align-items: center;
             flex-wrap: wrap;
             margin: 0;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.9);
             padding: 10px 20px;
         }
         
@@ -115,18 +117,19 @@
         .form-header input[type=text],
         .form-header select {
             border: none;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: white;
             padding: 5px 10px;
             box-sizing: border-box;
             width: 100px;
         }
+        
         .form-header select {
-          width: 150px;
+            width: 150px;
         }
         
         .logo {
-          color: white;
+            color: white;
             font-weight: bold;
             text-decoration: none;
             display: block;
@@ -151,35 +154,40 @@
             text-align: right;
             display: block;
             padding: 5px 0px;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 12px;
         }
+        
         .prompt-header {
-          display: flex;
-          align-items: center;
-          padding: 10px 20px 0;
-          box-sizing: border-box;
-          font-size: 14px;
-          background: rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            padding: 10px 20px 0;
+            box-sizing: border-box;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.06);
         }
+        
         .prompt-header select {
-          margin: 0 10px;
-          flex-grow: 1;
-          padding: 5px;
-          border: 1px solid rgba(0,0,0,0.2);
-          max-width: 200px;
+            margin: 0 10px;
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            max-width: 200px;
         }
+        
         .prompt-header button {
-          padding: 7px 10px;
-          font-size: 12px;
+            padding: 7px 10px;
+            font-size: 12px;
         }
+        
         button {
-          cursor: pointer;
+            cursor: pointer;
         }
+        
         #prompt-cancel {
-          background: none;
-          color: white;
-          background: rgba(0,0,0,0.7);
+            background: none;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
         }
     </style>
 </head>
@@ -199,8 +207,8 @@
                 <button id="prompt-cancel" class='hidden'><i class="fa-solid fa-circle-notch fa-spin"></i> Cancel</button>
             </div>
             <div class='info'>
-              <button id="prompt-reset">Reset</button>
-              <span>TIP: shift+enter for multiple lines</span>
+                <button id="prompt-reset">Reset</button>
+                <span>TIP: shift+enter for multiple lines</span>
             </div>
         </div>
     </form>
@@ -315,13 +323,63 @@ ${fields}
                     return;
                 }
 
+                // Sort prompts alphabetically by category and prompt name
+                prompts.sort((a, b) => {
+                    const categoryA = getCategoryName(a.name);
+                    const categoryB = getCategoryName(b.name);
+                    if (categoryA !== categoryB) {
+                        return categoryA.localeCompare(categoryB);
+                    }
+                    return a.name.localeCompare(b.name);
+                });
+
                 // Populate prompt options
+                let currentCategory = "";
+                let currentOptgroup = null;
                 prompts.forEach(prompt => {
                     const option = document.createElement('option');
                     option.value = prompt.value;
                     option.textContent = prompt.name;
-                    promptSelect.appendChild(option);
+
+                    const category = getCategoryName(prompt.name);
+
+                    if (category !== currentCategory) {
+                        currentCategory = category;
+                        currentOptgroup = promptSelect.querySelector(`optgroup[label="${category}"]`);
+                        if (!currentOptgroup) {
+                            currentOptgroup = document.createElement('optgroup');
+                            currentOptgroup.label = category;
+                            promptSelect.appendChild(currentOptgroup);
+                        }
+                    }
+
+                    if (!currentOptgroup) {
+                        currentOptgroup = document.createElement('optgroup');
+                        currentOptgroup.label = "other";
+                        promptSelect.appendChild(currentOptgroup);
+                    }
+
+                    const subOption = document.createElement('option');
+                    subOption.value = prompt.value;
+                    subOption.textContent = getPromptName(prompt.name);
+                    currentOptgroup.appendChild(subOption);
                 });
+
+                function getCategoryName(name) {
+                    const categoryIndex = name.indexOf('-');
+                    if (categoryIndex !== -1) {
+                        return name.slice(categoryIndex + 1);
+                    }
+                    return "other";
+                }
+
+                function getPromptName(name) {
+                    const categoryIndex = name.indexOf('-');
+                    if (categoryIndex !== -1) {
+                        return name.slice(0, categoryIndex);
+                    }
+                    return name;
+                }
 
                 // Select the "default" prompt if it exists, otherwise select the first prompt
                 const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default');
@@ -401,14 +459,14 @@ ${fields}
             console.log(response)
             if (request.method === "installed") {
                 if (response == "\n\n<end>") {
-                  document.querySelector(".form-header").innerHTML = renderHeader(config)
+                    document.querySelector(".form-header").innerHTML = renderHeader(config)
                 } else {
-                  config.models = Array.from(new Set(config.models).add(response))
+                    config.models = Array.from(new Set(config.models).add(response))
                 }
             } else {
                 if (response == "\n\n<end>") {
-                  document.querySelector("#prompt-run").classList.remove("hidden")
-                  document.querySelector("#prompt-cancel").classList.add("hidden")
+                    document.querySelector("#prompt-run").classList.remove("hidden")
+                    document.querySelector("#prompt-cancel").classList.add("hidden")
                 } else {
                     const id = request.id
                     let existing = document.querySelector(`[data-id='${id}']`)
