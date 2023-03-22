@@ -189,12 +189,13 @@ class Dalai {
 //    await fs.promises.rm(path.resolve(this.home, "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"))
 //  }
   async query(req, cb) {
+    let models = await this.gatherInstalledModels();
     
     console.log(`> query:`, req)
     if (req.method === "installed") {
-      let models = await this.installed()
+      // let models = await this.installed()
       for(let model of models) {
-        cb(model)
+        cb(`${model.core}.${model.model}`)
       }
       cb('\n\n<end>')
       return
@@ -220,12 +221,12 @@ class Dalai {
     Model = Model.toUpperCase()
 
     console.log( { Core, Model } )
-
+    const model = models.find(m => m.core === Core && m.model === Model)
     let o = {
       seed: req.seed || -1,
       threads: req.threads || 8,
       n_predict: req.n_predict || 128,
-      model: `models/${Model || "7B"}/ggml-model-q4_0.bin`,
+      model: `models/${Model || "7B"}/${model.file}`,
     }
 
     let e = await exists(path.resolve(this.home, Core, "models", Model))
@@ -351,6 +352,54 @@ class Dalai {
     let res = await this.cores[core].add(...models)
     return res
   }
+  /*
+  * Returns a list of installed models
+    [
+      {
+        core: "alpaca",
+        model: "7B",
+        file: "ggml-model-q4_0.bin"
+      },
+      {
+        core: "llama",
+        model: "7B",
+        file: "ggml-model-q4_0.bin"
+      },
+    ]
+  */
+  async gatherInstalledModels() {
+    // Iterate over all cores
+    // Find all models that start with ggml-model- and end with .bin
+    // Return a list of objects with core, model, and file
+    let models = []
+    for(let core of Object.keys(this.cores)) {
+      let corePath = path.resolve(this.home, core)
+      let e = await fs.existsSync(corePath)
+      if (!e) {
+        continue
+      }
+      let modelFolders = await fs.promises.readdir(path.resolve(corePath, "models"))
+      for(let modelFolder of modelFolders) {
+        let modelPath = path.resolve(corePath, "models", modelFolder)
+        const isDir = fs.lstatSync(modelPath).isDirectory() 
+        if (!isDir) {
+          continue
+        }
+        let modelFiles = await fs.promises.readdir(modelPath)
+        for(let modelFile of modelFiles) {
+          if (modelFile.startsWith("ggml-model-") && modelFile.endsWith(".bin")) {
+            models.push({
+              core,
+              model: modelFolder,
+              file: modelFile,
+            })
+          }
+        }
+      }
+    }
+    return models
+  }
+
   async installed() {
     // get cores
     const modelNames = []
