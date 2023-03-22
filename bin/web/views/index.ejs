@@ -283,12 +283,11 @@ ${fields}
                 promptSelect.value = initialPrompt.value;
                 input.textContent = initialPrompt.value;
 
-                // Listen to change event on the dropdown
-                promptSelect.addEventListener('change', () => {
+                // Update the input text with the selected prompt value
+                const handlePromptChange = () => {
                     const selectedPromptValue = promptSelect.value;
                     const currentInputValue = input.textContent;
 
-                    // Update the input text with the selected prompt value
                     input.textContent = selectedPromptValue;
 
                     // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
@@ -305,7 +304,21 @@ ${fields}
 
                     // Focus the input
                     input.focus();
+                }
+                promptSelect.addEventListener('change', handlePromptChange);
+
+                // Create a Reset button
+                const resetButton = document.createElement('button');
+                resetButton.textContent = 'Reset';
+
+                // Append the Reset button to the same container as the dropdown
+                promptSelect.parentNode.appendChild(resetButton);
+
+                resetButton.addEventListener('click', (e) => {
+                    e.preventDefault() // Prevent form from submitting
+                    handlePromptChange()
                 });
+
 
             })
             .catch(error => {
