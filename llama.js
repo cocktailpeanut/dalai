@@ -139,10 +139,10 @@ npx dalai install 7B 13B
     await fs.promises.mkdir(resolvedPath, { recursive: true }).catch((e) => { })
 
     for(let file of files) {
-//      if (fs.existsSync(path.resolve(resolvedPath, file))) {
-//        console.log(`Skip file download, it already exists: ${file}`)
-//        continue;
-//      }
+     if (fs.existsSync(path.resolve(resolvedPath, file))) {
+       console.log(`Skip file download, it already exists: ${file}`)
+       continue;
+     }
 
       const url = `https://agi.gpt4.org/llama/LLaMA/${model}/${file}`
       await this.root.down(url, path.resolve(resolvedPath, file), {
