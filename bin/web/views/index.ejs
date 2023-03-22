@@ -573,11 +573,13 @@ ${fields}
         let chatDivs = document.querySelector("#chatDivs");
         let chattingDivs = document.querySelector("#chattingDivs");
         let answerField = document.querySelector("#answerField");
+        let autoCompleteDivs = document.querySelector("#autoCompleteDivs");
         if (!checked) {
             endChat();
             answerField.hidden = false;
             chatDivs.hidden = true;
             chattingDivs.hidden = true;
+            autoCompleteDivs.hidden = false;
         } else {
             answerField.hidden = true;
             chatDivs.hidden = false;
