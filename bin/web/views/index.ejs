@@ -115,7 +115,7 @@
         .form-header input[type=text],
         .form-header select {
             border: none;
-            background: rgba(255,255,255,0.1);
+            background: #444;
             color: white;
             padding: 5px 10px;
             box-sizing: border-box;
@@ -218,7 +218,7 @@
             repeat_last_n: 64,
             repeat_penalty: 1.3,
             debug: false,
-            html: true,
+            // html: true,
             models: []
         }
         const socket = io();
@@ -289,6 +289,7 @@ ${fields}
                 config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
                 document.querySelector("#prompt-run").classList.add("hidden")
                 document.querySelector("#prompt-cancel").classList.remove("hidden")
+                buffer = "";
                 socket.emit('request', config)
                 config.id = null
                 loading(config.prompt)
@@ -413,7 +414,7 @@ ${fields}
                     const id = request.id
                     let existing = document.querySelector(`[data-id='${id}']`)
                     if (existing) {
-                        existing.innerHTML = existing.innerHTML + response
+                        existing.textContent = existing.textContent + response
                             //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
                             //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
                     } else {

@@ -32,7 +32,14 @@ const stripAnsi = (str) => {
   const regex = new RegExp(pattern, 'g')
   return str.replace(regex, '');
 }
-
+const winEscape = (str) => {
+  return str
+  .replaceAll(/\\n/g, "\n")
+  .replaceAll(/\\r/g, "\r")
+  .replaceAll(/\\t/g, "\t")
+  .replaceAll(/\\b/g, "\b")
+  .replaceAll(/\\f/g, "/f")
+}
 
 class Dalai {
   constructor(home) {
@@ -244,6 +251,8 @@ class Dalai {
     chunks.push(`-p ${prompt}`)
 
     const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "main") : path.resolve(this.home, Core, "main")
+    this.sessionBuffer = "";
+    this.bufferStarted = false;
     if (req.full) {
       await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, cb)
     } else {
@@ -255,17 +264,52 @@ class Dalai {
       await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (proc, msg) => {
         if (endpattern.test(msg)) ended = true
         if (started && !ended) {
-          if (req.html) {
-            cb(this.htmlencode(msg))
-          } else {
-            cb(msg)
-          }
+          this.buffer(req, msg, cb)
         } else if (ended && writeEnd) {
           cb('\n\n<end>')
           writeEnd = false
         }
         if (startpattern.test(msg)) started = true
       })
+    }
+  }
+  buffer(req, msg, cb) {
+    if (!this.queue) this.queue = []
+    if (platform === "win32") {
+      for(let i=0;i<msg.length; i++) {
+        console.log("msgi", msg[i]);
+        if (msg[i] === "\\") {
+          this.queueActive = true
+          // start pushing to buffer
+          // console.log("adding to queue", msg[i])
+          this.queue.push(msg[i]);
+        } else {
+          // otherwise flush
+          this.queue.push(msg[i])
+          console.log("flushing queue", this.queue)
+          let queueContent = this.queue.join("")
+          console.log({ before: queueContent, beforeEscape: winEscape(queueContent), after : this.htmlencode(winEscape(queueContent)) })
+          
+          if (!this.bufferStarted && ["\n", "\b", "\f", "\r", "\t"].includes(queueContent)) {
+            // if the buffer hasn't started and incoming tokens are whitespaces, ignore
+          } else {
+            if (req.html) {
+              cb(this.htmlencode(winEscape(queueContent)))
+            } else {
+              cb(winEscape(queueContent))
+            }
+            this.bufferStarted = true
+          }
+          this.queue = []
+          this.queueActive = false
+        }
+      }
+    } else {
+      if (req.html) {
+        cb(this.htmlencode(queueContent))
+      } else {
+        cb(queueContent)
+      } 
     }
   }
   async uninstall(core, ...models) {
