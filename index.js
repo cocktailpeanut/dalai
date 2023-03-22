@@ -64,7 +64,6 @@ const  cleanString =(platform,str)=> {
 }
 var isInteractive = false;
 var chatInited = false;
-var ptyProcess;
 
 
 class Dalai {
@@ -175,7 +174,11 @@ class Dalai {
       cb('\n\n<end>')
       return
     }
-
+    if (req.method === "endChat") {
+      this.endChat()
+      cb('\n\n<end>')
+      return
+    }
     if (req.prompt && req.prompt.startsWith("/")) {
       try {
         const mod = require(`./cmds/${req.prompt.slice(1)}`)
@@ -270,13 +273,41 @@ class Dalai {
           if (endpattern.test(msg)) ended = true
           if (started && !ended) {
             cb(msg)
-          }
-          else if (ended && writeEnd) {
+          } else if (ended && writeEnd) {
             cb('\n\n<end>')
             writeEnd = false
           }
           if (startpattern.test(msg)) {started = true}
         })
+      }
+    }
+    if (isInteractive){
+      if (!chatInited){
+
+        chatInited = true;
+        if (req.full) {
+          console.log("full")
+          await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, cb,false)
+        } else {
+          console.log("not full")
+          const startpattern = /.*sampling parameters:.*/g
+          const endpattern = /.*mem per token.*/g
+          let started = req.debug
+          let ended = false
+          let writeEnd = !req.skip_end
+          await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (proc, msg) => {
+            if (endpattern.test(msg)) ended = true
+            if (started && !ended) {
+              cb(msg)
+            } else if (ended && writeEnd) {
+              cb('\n\n<end>')
+              writeEnd = false
+            }
+            if (startpattern.test(msg)) started = true
+          },false)
+        }
+      }else{
+        await this.keepTalking(platform,prompt)
       }
     }
   }
@@ -537,12 +568,6 @@ class Dalai {
   exec(cmd, cwd, cb,kill=true) {
     return new Promise((resolve, reject) => {
       try {
-        // if(ptyProcess){
-        //   ptyProcess.write("exit\r")
-        //   ptyProcess.kill()
-        //   ptyProcess = null
-        // }
-
         const config = Object.assign({}, this.config)
         if (cwd) {
           config.cwd = path.resolve(cwd)
@@ -571,7 +596,11 @@ class Dalai {
         } else {
           this.ptyProcess.write(`${cmd}\r`)
         }
-        this.ptyProcess.write("exit\r")
+        if(kill){
+          this.ptyProcess.write("exit\r")
+        }else{
+          resolve(true);
+        }
       } catch (e) {
         console.log("caught error", e)
         this.ptyProcess.kill()
@@ -583,8 +612,8 @@ class Dalai {
   keepTalking(platform,prompt) {
     console.log("keepTalking writing : ", prompt);
     try{
-      if (ptyProcess){
-        ptyProcess.write(` ${prompt.replaceAll('"','')}\r`)
+      if (this.ptyProcess){
+        this.ptyProcess.write(` ${prompt.replaceAll('"','')}\r`)
       }
 
     }catch(e){
@@ -594,10 +623,10 @@ class Dalai {
 
   endChat(){
     console.log("endChat")
-    if (ptyProcess){
-      ptyProcess.write("exit\r")
-      ptyProcess.kill()
-      ptyProcess = null
+    if (this.ptyProcess){
+      this.ptyProcess.write("exit\r")
+      this.ptyProcess.kill()
+      this.ptyProcess = null
       chatInited = false
     }
   }
