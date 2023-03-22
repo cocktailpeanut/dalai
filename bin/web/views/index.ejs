@@ -313,7 +313,7 @@ ${fields}
                 socket.emit('request', config)
                 config.id = null
                 loading(config.prompt)
-                input.textContent = promptSelect.value;
+                updateInputToPrompt()
             }
         });
         // input.addEventListener("keydown", (e) => {
@@ -339,7 +339,7 @@ ${fields}
         // Load prompts from files
 
         // Update the input text with the selected prompt value
-        const handlePromptChange = () => {
+        const updateInputToPrompt = () => {
             const selectedPromptValue = promptSelect.value;
             const currentInputValue = input.textContent;
 
@@ -432,10 +432,10 @@ ${fields}
                 promptSelect.value = initialPrompt.value;
                 input.textContent = initialPrompt.value;
 
-                promptSelect.addEventListener('change', handlePromptChange);
+                promptSelect.addEventListener('change', updateInputToPrompt);
                 resetButton.addEventListener('click', (e) => {
                     e.preventDefault() // Prevent form from submitting
-                    handlePromptChange()
+                    updateInputToPrompt()
                 });
 
 
