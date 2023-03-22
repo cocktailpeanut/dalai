@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  serve-dalai-7b:
+    build:
+      context: .
+      args:
+        MODEL_NAME: alpaca
+        MODEL_VERSION: 7B
+    ports:
+      - "3000:3000"
