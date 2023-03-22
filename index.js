@@ -32,6 +32,38 @@ const stripAnsi = (str) => {
   const regex = new RegExp(pattern, 'g')
   return str.replace(regex, '');
 }
+const htmlencode = (str) => {
+  let encodedStr = '';
+  for (let i = 0; i < str.length; i++) {
+    let charCode = str.charCodeAt(i);
+    if (charCode < 128) {
+      // ASCII characters
+      switch (str[i]) {
+        case '<': encodedStr += '&lt;'; break;
+        case '>': encodedStr += '&gt;'; break;
+        case '&': encodedStr += '&amp;'; break;
+        case '"': encodedStr += '&quot;'; break;
+        case '\'': encodedStr += '&#39;'; break;
+        case '\n': encodedStr += '<br>'; break;
+        case '\r': break; // ignore
+        case '\t': encodedStr += '&nbsp;&nbsp;&nbsp;&nbsp;'; break;
+        case '\b': encodedStr += '&nbsp;'; break;
+        case '\f': encodedStr += '&nbsp;'; break;
+        default: encodedStr += String.fromCharCode(charCode); break;
+      }
+    } else {
+      // Non-ASCII characters
+      encodedStr += "&#" + charCode + ";";
+    }
+  }
+  return encodedStr;
+}
+const  cleanString =(platform,str)=> {
+  const escaped = escapeNewLine(platform, str);
+  return `"${escapeDoubleQuotes(platform, escaped).trim()}"`;
+}
+var isInteractive = false;
+var chatInited = false;
 
 
 class Dalai {
@@ -60,7 +92,7 @@ class Dalai {
     this.torrent = new TorrentDownloader()
     this.config = {
       name: 'xterm-color',
-      cols: 1000,
+      cols: 200,
       rows: 30,
     }
     this.cores = {
@@ -68,32 +100,7 @@ class Dalai {
       alpaca: new A(this),
     }
   }
-  htmlencode (str) {
-    let encodedStr = '';
-    for (let i = 0; i < str.length; i++) {
-      let charCode = str.charCodeAt(i);
-      if (charCode < 128) {
-        // ASCII characters
-        switch (str[i]) {
-          case '<': encodedStr += '&lt;'; break;
-          case '>': encodedStr += '&gt;'; break;
-          case '&': encodedStr += '&amp;'; break;
-          case '"': encodedStr += '&quot;'; break;
-          case '\'': encodedStr += '&#39;'; break;
-          case '\n': encodedStr += '<br>'; break;
-          case '\r': break; // ignore
-          case '\t': encodedStr += '&nbsp;&nbsp;&nbsp;&nbsp;'; break;
-          case '\b': encodedStr += '&nbsp;'; break;
-          case '\f': encodedStr += '&nbsp;'; break;
-          default: encodedStr += String.fromCharCode(charCode); break;
-        }
-      } else {
-        // Non-ASCII characters
-        encodedStr += "&#" + charCode + ";";
-      }
-    }
-    return encodedStr;
-  }
+
   down(url, dest, headers) {
     return new Promise((resolve, reject) => {
       const task = path.basename(dest)
@@ -152,36 +159,12 @@ class Dalai {
     console.log("cleaning up temp files")
     await fs.promises.rm(path.resolve(this.home, filename))
   }
-//  async mingw() {
-//    const mingw = "https://github.com/niXman/mingw-builds-binaries/releases/download/12.2.0-rt_v10-rev2/x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"
-//    const downloader = new Downloader({
-//      url: mingw,
-//      directory: this.home,
-//      onProgress: (percentage, chunk, remainingSize) => {
-//        this.progress("download mingw", percentage)
-//      },
-//    });
-//    try {
-//      await this.startProgress("download mingw")
-//      await downloader.download();
-//    } catch (error) {
-//      console.log(error);
-//    }
-//    this.progressBar.update(1);
-//    await new Promise((resolve, reject) => {
-//      _7z.unpack(path.resolve(this.home, "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"), this.home, (err) => {
-//        if (err) { 
-//          reject(err)
-//        } else {
-//          resolve()
-//        }
-//      })
-//    })
-//    console.log("cleaning up temp files")
-//    await fs.promises.rm(path.resolve(this.home, "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"))
-//  }
+
+
+
+
   async query(req, cb) {
-    
+
     console.log(`> query:`, req)
     if (req.method === "installed") {
       let models = await this.installed()
@@ -191,7 +174,11 @@ class Dalai {
       cb('\n\n<end>')
       return
     }
-
+    if (req.method === "endChat") {
+      this.endChat()
+      cb('\n\n<end>')
+      return
+    }
     if (req.prompt && req.prompt.startsWith("/")) {
       try {
         const mod = require(`./cmds/${req.prompt.slice(1)}`)
@@ -232,40 +219,96 @@ class Dalai {
     if (req.batch_size) o.batch_size = req.batch_size
     if (req.repeat_last_n) o.repeat_last_n = req.repeat_last_n
     if (req.repeat_penalty) o.repeat_penalty = req.repeat_penalty
-    if (typeof req.interactive !== "undefined") o.interactive = req.interactive
 
     let chunks = []
     for(let key in o) {
       chunks.push(`--${key} ${escapeDoubleQuotes(platform, o[key].toString())}`)
     }
-    const escaped = escapeNewLine(platform, req.prompt)
-    const prompt = `"${escapeDoubleQuotes(platform, escaped)}"`
 
-    chunks.push(`-p ${prompt}`)
+    const prompt = cleanString(platform,req.prompt??"");
+
+    // const prePrompt = cleanString(platform,req.prePrompt??"");
+    const prePrompt = req.prePrompt;
+
+    const personName = cleanString(platform,req.personName??"");
+
+
+    isInteractive = true;
+
+    if (req.interactive){
+      chunks.push('-i');
+      chunks.push('--color');
+      var name = (personName && personName.length > 0  ) ? personName : "User:";
+      chunks.push(`-r ${name} `);
+
+      if (prePrompt && prePrompt.length > 0  ) {
+        console.log("prePrompt GOT")
+        //write prePrompt to file
+        const prePromptFile = path.resolve(this.home, Core, "prePrompt.txt");
+        fs.writeFileSync(prePromptFile, prePrompt);
+        chunks.push(`-f ${prePromptFile}`);
+        // chunks.push(`-f ${prePrompt}`);
+      }else{
+        console.log("prePrompt NOT GOT")
+      }
+
+    }else{
+      isInteractive = false;
+      chatInited = false;
+      chunks.push(`-p ${prompt}`)
+    }
 
     const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "main") : path.resolve(this.home, Core, "main")
-    if (req.full) {
-      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, cb)
-    } else {
-      const startpattern = /.*sampling parameters:.*/g
-      const endpattern = /.*mem per token.*/g
-      let started = req.debug
-      let ended = false
-      let writeEnd = !req.skip_end
-      await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (proc, msg) => {
-        if (endpattern.test(msg)) ended = true
-        if (started && !ended) {
-          if (req.html) {
-            cb(this.htmlencode(msg))
-          } else {
+    console.log('inited', chatInited,"isInteractive", isInteractive)
+    if (!isInteractive){
+      if (req.full) {
+        await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, cb)
+      } else {
+        const startpattern = /.*sampling parameters:.*/g
+        const endpattern = /.*mem per token.*/g
+        let started = req.debug
+        let ended = false
+        let writeEnd = !req.skip_end
+        await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (proc, msg) => {
+          if (endpattern.test(msg)) ended = true
+          if (started && !ended) {
             cb(msg)
+          } else if (ended && writeEnd) {
+            cb('\n\n<end>')
+            writeEnd = false
           }
-        } else if (ended && writeEnd) {
-          cb('\n\n<end>')
-          writeEnd = false
+          if (startpattern.test(msg)) {started = true}
+        })
+      }
+    }
+    if (isInteractive){
+      if (!chatInited){
+
+        chatInited = true;
+        if (req.full) {
+          console.log("full")
+          await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, cb,false)
+        } else {
+          console.log("not full")
+          const startpattern = /.*sampling parameters:.*/g
+          const endpattern = /.*mem per token.*/g
+          let started = req.debug
+          let ended = false
+          let writeEnd = !req.skip_end
+          await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (proc, msg) => {
+            if (endpattern.test(msg)) ended = true
+            if (started && !ended) {
+              cb(msg)
+            } else if (ended && writeEnd) {
+              cb('\n\n<end>')
+              writeEnd = false
+            }
+            if (startpattern.test(msg)) started = true
+          },false)
         }
-        if (startpattern.test(msg)) started = true
-      })
+      }else{
+        await this.keepTalking(platform,prompt)
+      }
     }
   }
   async uninstall(core, ...models) {
@@ -330,8 +373,8 @@ class Dalai {
       let modelFolders = []
       try {
         modelFolders = (await fs.promises.readdir(modelsPath, { withFileTypes: true }))
-          .filter(dirent => dirent.isDirectory())
-          .map(dirent => dirent.name)
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name)
       } catch (e) {
       }
 
@@ -348,10 +391,10 @@ class Dalai {
   }
   async add (core) {
     /**************************************************************************************************************
-    *
-    * 2. Download Core
-    *
-    **************************************************************************************************************/
+     *
+     * 2. Download Core
+     *
+     **************************************************************************************************************/
     let engine = this.cores[core]
     let e = await exists(path.resolve(engine.home));
     console.log("mkdir", path.resolve(engine.home))
@@ -373,12 +416,12 @@ class Dalai {
     }
     console.log("next", core, engine.make);
     /**************************************************************************************************************
-    *
-    * 4. Compile & Build
-    *   - make: linux + mac
-    *   - cmake: windows
-    *
-    **************************************************************************************************************/
+     *
+     * 4. Compile & Build
+     *   - make: linux + mac
+     *   - cmake: windows
+     *
+     **************************************************************************************************************/
     await engine.make()
   }
   async setup() {
@@ -386,29 +429,29 @@ class Dalai {
     let success;
 
     /**************************************************************************************************************
-    *
-    * 1. Validate
-    *
-    **************************************************************************************************************/
-    // Check if current version is greater than or equal to 18
+     *
+     * 1. Validate
+     *
+     **************************************************************************************************************/
+        // Check if current version is greater than or equal to 18
     const node_version = process.version;
     if (!semver.gte(node_version, '18.0.0')) {
       throw new Error("outdated Node version, please install Node 18 or newer")
     }
 
     /**************************************************************************************************************
-    *
-    * 3. Download Global Dependencies
-    *   - Python (windows only)
-    *   - build-essential (linux only)
-    *   - virtualenv
-    *   - torch, numpy, etc.
-    *
-    **************************************************************************************************************/
+     *
+     * 3. Download Global Dependencies
+     *   - Python (windows only)
+     *   - build-essential (linux only)
+     *   - virtualenv
+     *   - torch, numpy, etc.
+     *
+     **************************************************************************************************************/
 
     // 3.1. Python: Windows doesn't ship with python, so install a dedicated self-contained python
     if (platform === "win32") {
-      await this.python() 
+      await this.python()
     }
     const root_python_paths = (platform === "win32" ? ["python3", "python", path.resolve(this.home, "python", "python.exe")] : ["python3", "python"])
     const root_pip_paths = (platform === "win32" ? ["pip3", "pip", path.resolve(this.home, "python", "python -m pip")] : ["pip3", "pip"])
@@ -469,7 +512,7 @@ class Dalai {
       success = await this.exec(`${pip_path} install --user --upgrade pip setuptools wheel`)
       if (!success) {
         throw new Error("pip setuptools wheel upgrade failed")
-        return  
+        return
       }
     }
     success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy`)
@@ -478,7 +521,7 @@ class Dalai {
       success = await this.exec(`${pip_path} install --user torch torchvision torchaudio sentencepiece numpy`)
       if (!success) {
         throw new Error("dependency installation failed")
-        return  
+        return
       }
     }
 
@@ -522,7 +565,7 @@ class Dalai {
       throw e
     });
   }
-  exec(cmd, cwd, cb) {
+  exec(cmd, cwd, cb,kill=true) {
     return new Promise((resolve, reject) => {
       try {
         const config = Object.assign({}, this.config)
@@ -553,7 +596,11 @@ class Dalai {
         } else {
           this.ptyProcess.write(`${cmd}\r`)
         }
-        this.ptyProcess.write("exit\r")
+        if(kill){
+          this.ptyProcess.write("exit\r")
+        }else{
+          resolve(true);
+        }
       } catch (e) {
         console.log("caught error", e)
         this.ptyProcess.kill()
@@ -561,6 +608,29 @@ class Dalai {
       }
     })
   }
+
+  keepTalking(platform,prompt) {
+    console.log("keepTalking writing : ", prompt);
+    try{
+      if (this.ptyProcess){
+        this.ptyProcess.write(` ${prompt.replaceAll('"','')}\r`)
+      }
+
+    }catch(e){
+      console.log(e)
+    }
+  }
+
+  endChat(){
+    console.log("endChat")
+    if (this.ptyProcess){
+      this.ptyProcess.write("exit\r")
+      this.ptyProcess.kill()
+      this.ptyProcess = null
+      chatInited = false
+    }
+  }
+
   progress(task, percent) {
     this.progressBar.update(percent/100);
     //if (percent >= 100) {

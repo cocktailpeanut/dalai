@@ -3,8 +3,8 @@
 <head>
     <title>Dalai LLaMA</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="/css/fontawesome.min.css" rel="stylesheet" />
-    <link href="/css/solid.min.css" rel="stylesheet" />
+    <link href="/css/fontawesome.min.css" rel="stylesheet"/>
+    <link href="/css/solid.min.css" rel="stylesheet"/>
     <style>
         body,
         pre {
@@ -13,19 +13,36 @@
             color: rgba(0, 0, 0, 0.8);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
-        
+
         .input-field {
             /*
-    border: 2px solid rgba(0,0,0,0.2);
-    */
+          border: 2px solid rgba(0,0,0,0.2);
+          */
             display: flex;
             padding: 10px;
             box-sizing: border-box;
         }
-        
+
+        .white-input-field {
+
+            display: flex;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: white;
+        }
+
+        .input-field-chat {
+            /*
+                border: 2px solid rgba(0,0,0,0.2);
+                */
+            background: rgba(0, 0, 0, 0.04);
+            padding: 10px;
+            overflow: hidden;
+        }
+
         #input {
             white-space: pre-wrap;
-            border: 1px solid rgba(0,0,0,0.2);
+            border: 1px solid rgba(0, 0, 0, 0.2);
             padding: 20px;
             outline: none;
             flex-grow: 1;
@@ -33,11 +50,22 @@
             box-sizing: border-box;
             background: white;
         }
-        
+
+        #personName {
+            white-space: pre-wrap;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            outline: none;
+            flex-grow: 1;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: white;
+        }
+
         #input:focus {
             outline: none;
         }
-        
+
         button {
             padding: 10px;
             background: rgba(0, 0, 0, 0.8);
@@ -46,7 +74,7 @@
             outline: none;
             box-sizing: border-box;
         }
-        
+
         #messages {
             list-style-type: none;
             margin: 0;
@@ -54,21 +82,21 @@
             font-size: 14px;
             padding: 0;
         }
-        
-        #messages>li {
+
+        #messages > li {
             padding: 10px;
             font-size: 14px;
             box-sizing: border-box;
         }
-        
-        #messages>li:nth-child(odd) {
+
+        #messages > li:nth-child(odd) {
             background: #efefef;
         }
-        
+
         li {
             white-space: pre-wrap;
         }
-        
+
         .loading {
             margin-bottom: 10px;
             padding: 10px;
@@ -77,56 +105,65 @@
             font-size: 14px;
             background: #efefef;
         }
-        
+
         .hidden {
             display: none !important;
         }
-        
+
         .input-container {
             background: rgba(0, 0, 0, 0.06);
         }
+
         .input-container button {
-          padding: 30px;
-          margin-left: 10px;
+            padding: 30px;
+            margin-left: 10px;
         }
-        
+
         .info {
             font-size: 12px;
             padding: 0 5px 10px;
         }
-        .info button {
-          padding: 5px 10px;
-          margin-right: 10px;
+
+        .info-red {
+            font-size: 12px;
+            padding: 5px;
+            color: red;
         }
-        
+
+        .info button {
+            padding: 5px 10px;
+            margin-right: 10px;
+        }
+
         .form-header {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
             margin: 0;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.9);
             padding: 10px 20px;
         }
-        
+
         .stretch {
             flex-grow: 1;
         }
-        
+
         .form-header input[type=text],
         .form-header select {
             border: none;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: white;
             padding: 5px 10px;
             box-sizing: border-box;
             width: 100px;
         }
+
         .form-header select {
-          width: 150px;
+            width: 150px;
         }
-        
+
         .logo {
-          color: white;
+            color: white;
             font-weight: bold;
             text-decoration: none;
             display: block;
@@ -135,123 +172,203 @@
             font-weight: bold;
             font-family: georgia;
         }
-        
+
         .config-container {
             display: flex;
             flex-wrap: wrap;
         }
-        
+
         .kv {
             display: block;
             font-size: 14px;
             margin-left: 10px;
         }
-        
+
         .kv label {
             text-align: right;
             display: block;
             padding: 5px 0px;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 12px;
         }
+
         .prompt-header {
-          display: flex;
-          align-items: center;
-          padding: 10px 20px 0;
-          box-sizing: border-box;
-          font-size: 14px;
-          background: rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            padding: 10px 20px 0;
+            box-sizing: border-box;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.06);
         }
+
         .prompt-header select {
-          margin: 0 10px;
-          flex-grow: 1;
-          padding: 5px;
-          border: 1px solid rgba(0,0,0,0.2);
-          max-width: 200px;
+            margin: 0 10px;
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            max-width: 200px;
         }
+
         .prompt-header button {
-          padding: 7px 10px;
-          font-size: 12px;
+            padding: 7px 10px;
+            font-size: 12px;
         }
+
         button {
-          cursor: pointer;
+            cursor: pointer;
         }
+
         #prompt-cancel {
-          background: none;
-          color: white;
-          background: rgba(0,0,0,0.7);
+            background: none;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .end-chat-btn {
+            background: rgba(250, 0, 0, 0.8);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            outline: none;
+            box-sizing: border-box;
+            padding: 10px;
+            margin: 10px;
         }
     </style>
 </head>
 
 <body>
-    <form id="form" action="">
-        <div class='form-header'></div>
-        <div class="prompt-header">
-            <label for="prompt-select">Select a template</label>
-            <select id="prompt-select"></select>
-            <div class='stretch'></div>
+<form id="form" action="">
+    <div class='form-header'></div>
+    <div class="prompt-header">
+        <label for="prompt-select">Select a template</label>
+        <select id="prompt-select"></select>
+        <button id="prompt-reset">Reset</button>
+
+        <div class='stretch'></div>
+    </div>
+
+    <div id="chatDivs">
+
+        <div class='input-container' id="prePromptContainer">
+
+
+            <div class='input-field-chat'>
+
+                <div>Pre-prompt that will be the start of the chat. it will give the AI its firts lines to
+                    understand
+                    what it must do
+                </div>
+                <div class='info-red'>You MUST put [USER_NAME] where you want your name to be present. it will be
+                    automatically
+                    replaced
+                </div>
+                <div class='info'>You can choose interactive-chat templates from the dropdown menu above.
+                </div>
+                <textarea title="prePrompt" id='prePrompt' style="width: 100%; height: 120px;">Transcript of a dialog, where [USER_NAME] interacts with an Assistant named Bob. Bob is helpful, kind, honest, good at writing, and never fails to answer [USER_NAME]'s requests immediately and with precision.
+[USER_NAME]: Hello, Bob.
+Bob: Hello. How may I help you today?
+[USER_NAME]: Please tell me the largest city in Europe.
+Bob: Sure. The largest city in Europe is Moscow, the capital of Russia.
+[USER_NAME]:</textarea>
+                <div class='input-container' id="personNameContainer">
+                    <div class='white-input-field'>
+                        <div class='info'>Your Name</div>
+                        <div contenteditable id='personName'>User</div>
+                    </div>
+                </div>
+            </div>
+
         </div>
-        <div class='input-container'>
+
+        <div class='input-container' id="startChatBT">
             <div class='input-field'>
-                <div contenteditable id='input'></div>
-                <button id='prompt-run'>Go</button>
-                <button id="prompt-cancel" class='hidden'><i class="fa-solid fa-circle-notch fa-spin"></i> Cancel</button>
-            </div>
-            <div class='info'>
-              <button id="prompt-reset">Reset</button>
-              <span>TIP: shift+enter for multiple lines</span>
+                <button onclick="startChat()">Start chat</button>
             </div>
         </div>
-    </form>
-    <pre class='loading hidden'></pre>
-    <ul id="messages"></ul>
-    <script src="/socket.io.min.js"></script>
-    <script>
-        const config = {
-            seed: -1,
-            threads: 4,
-            n_predict: 200,
-            top_k: 40,
-            top_p: 0.9,
-            temp: 0.8,
-            repeat_last_n: 64,
-            repeat_penalty: 1.3,
-            debug: false,
-            html: true,
-            models: []
-        }
-        const socket = io();
-        const form = document.getElementById('form');
-        const input = document.querySelector('#input');
-        const model = document.querySelector('#model');
-        const renderHeader = (config) => {
-            const fields = [{
-                key: "debug",
-                type: "checkbox"
-            }, "n_predict", "repeat_last_n", "repeat_penalty", "top_k", "top_p", "temp", "seed", "threads"].map((key) => {
-                if (typeof key === "string") {
-                    return `<div class='kv'>
+    </div>
+    <div class='input-container' id="answerField" hidden>
+        <div class='input-field' id='input-fields'>
+            <div contenteditable id='input'></div>
+            <div id="autoCompleteDivs">
+                <button id='prompt-run'>Go</button>
+                <button id="prompt-cancel" class='hidden'><i class="fa-solid fa-circle-notch fa-spin"></i> Cancel
+                </button>
+            </div>
+            <div id="chattingDivs">
+                <button>✉</button>
+            </div>
+        </div>
+        <div class='info'>
+            <span>TIP: shift+enter for multiple lines</span>
+        </div>
+    </div>
+
+</form>
+
+<div>
+    <button type="button" onclick="endChat()" id="endChatBtn" class="end-chat-btn" hidden>End chat</button>
+</div>
+
+<pre class='loading hidden'></pre>
+<ul id="messages"></ul>
+<script src="/socket.io.min.js"></script>
+<script>
+    const config = {
+        seed: -1,
+        threads: 4,
+        n_predict: 200,
+        top_k: 40,
+        top_p: 0.9,
+        temp: 0.8,
+        repeat_last_n: 64,
+        repeat_penalty: 1.3,
+        debug: false,
+        interactive: true,
+        html: true,
+        models: []
+    }
+    const socket = io();
+    const form = document.getElementById('form');
+    const input = document.querySelector('#input');
+    const model = document.querySelector('#model');
+    const prePrompt = document.querySelector('#prePrompt');
+    const renderHeader = (config) => {
+        const fields = [{
+            key: "debug",
+            type: "checkbox"
+        }, {
+            key: "interactive",
+            type: "checkbox",
+            secondLabel: "(chatGPT like)"
+        }, "n_predict", "repeat_last_n", "repeat_penalty", "top_k", "top_p", "temp", "seed", "threads"].map((key) => {
+            if (typeof key === "string") {
+                return `<div class='kv'>
 <label>${key}</label>
 <input name="${key}" type='text' placeholder="${key}" value="${config[key] || ''}">
 </div>`
-                } else {
-                    if (key.type === "checkbox") {
-                        return `<div class='kv'>
-<label>${key.key}</label>
-<input name="${key.key}" type='checkbox' ${config[key.key] ? "checked" : ""}>
-</div>`
+            } else {
+                if (key.type === "checkbox") {
+                    let secondKeyField = "";
+                    if (key.secondLabel) {
+                        secondKeyField = `<label>${key.secondLabel}</label>`
                     }
+
+                    return `<div class='kv'>
+            <label>${key.key}${secondKeyField}</label>
+            <input name="${key.key}" type='checkbox' ${config[key.key] ? "checked" : ""}>
+            </div>`
                 }
+            }
 
-            }).join("")
+        }).join("")
 
 
-            config.model = config.models[0]
-            const models = config.models.map((model, i) => {
-                return `<option value="${model}" ${i === 0 ? "selected" : ""}>${model}</option>`
-            }).join("")
-            return `<a class='logo' href="/">Dalai</a><div class='stretch'></div>
+        config.model = config.models[0]
+        const models = config.models.map((model, i) => {
+            return `<option value="${model}" ${i === 0 ? "selected" : ""}>${model}</option>`
+        }).join("")
+        return `<a class='logo' href="/">Dalai</a><div class='stretch'></div>
 <div class='config-container'>
 ${fields}
 <div class='kv'>
@@ -259,170 +376,244 @@ ${fields}
 <select id="model" name="model">${models}</select>
 </div>
 </div>`
+    }
+    const loading = (on) => {
+        if (on) {
+            document.querySelector(".loading").textContent = on
+            document.querySelector(".loading").classList.remove("hidden")
+        } else {
+            document.querySelector(".loading").textContent = ""
+            document.querySelector(".loading").classList.add("hidden")
         }
-        const loading = (on) => {
-            if (on) {
-                document.querySelector(".loading").textContent = on
-                document.querySelector(".loading").classList.remove("hidden")
-            } else {
-                document.querySelector(".loading").textContent = ""
-                document.querySelector(".loading").classList.add("hidden")
+    }
+    const promptSelect = document.getElementById('prompt-select');
+    const resetButton = document.querySelector("#prompt-reset")
+    const personName = document.querySelector("#personName")
+    document.querySelector("form").addEventListener("input", (e) => {
+        if (e.target.tagName === "SELECT") {
+            config[e.target.name] = config.models[e.target.selectedIndex]
+        } else if (e.target.type === "checkbox") {
+            config[e.target.name] = e.target.checked
+            if (e.target.name === "interactive") {
+                // if (e.target.checked) {
+                //   document.querySelector(".input-container").classList.remove("hidden")
+                // } else {
+                //   document.querySelector(".input-container").classList.add("hidden")
+                // }
+                interactiveCheckbox(e.target.checked);
+                console.log("interactive", e.target.checked)
             }
+        } else {
+            config[e.target.name] = e.target.value
         }
-        const promptSelect = document.getElementById('prompt-select');
-        const resetButton = document.querySelector("#prompt-reset")
-        document.querySelector("form").addEventListener("input", (e) => {
-            if (e.target.tagName === "SELECT") {
-                config[e.target.name] = config.models[e.target.selectedIndex]
-            } else if (e.target.type === "checkbox") {
-                config[e.target.name] = e.target.checked
-            } else {
-                config[e.target.name] = e.target.value
+    })
+    form.addEventListener('submit', (e) => {
+        let isInteractive = document.querySelector("input[name='interactive']").checked;
+
+        e.preventDefault();
+        e.stopPropagation()
+        if (input.textContent) {
+            //config.prompt = input.textContent.replaceAll("\n", "\\n");
+            config.prompt = input.textContent
+            if (personName.textContent && personName.textContent.trim().length > 0) {
+                config.personName = personName.textContent.trim();
             }
-        })
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            e.stopPropagation()
-            if (input.textContent) {
-                //config.prompt = input.textContent.replaceAll("\n", "\\n");
-                config.prompt = input.textContent
-                config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
-                document.querySelector("#prompt-run").classList.add("hidden")
-                document.querySelector("#prompt-cancel").classList.remove("hidden")
-                socket.emit('request', config)
-                config.id = null
-                loading(config.prompt)
+            if (prePrompt.value && prePrompt.value.trim().length > 0) {
+                config.prePrompt = prePrompt.value.replaceAll("[USER_NAME]", config.personName);
+            }
+            config.personName += ": "
+
+            config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
+            document.querySelector("#prompt-run").classList.add("hidden")
+            document.querySelector("#prompt-cancel").classList.remove("hidden")
+            socket.emit('request', config)
+            config.id = null
+            loading(config.prompt)
+            if (isInteractive) {
+                input.textContent = ' ';
+                input.textContent = " "
+            } else {
                 input.textContent = promptSelect.value;
             }
-        });
-        input.addEventListener("keydown", (e) => {
-            if (e.keyCode === 13) {
-                e.preventDefault();
-                if (e.shiftKey) {
-                    document.execCommand("insertLineBreak");
-                } else {
-                    form.requestSubmit()
-                }
-            }
-        })
-        document.querySelector("#prompt-cancel").addEventListener("click", (e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          socket.emit("request", {
-            prompt: "/stop"
-          })
-          document.querySelector("#prompt-run").classList.remove("hidden")
-          document.querySelector("#prompt-cancel").classList.add("hidden")
-        })
-
-        // Load prompts from files
-
-        // Update the input text with the selected prompt value
-        const handlePromptChange = () => {
-            const selectedPromptValue = promptSelect.value;
-            const currentInputValue = input.textContent;
-
-            input.textContent = selectedPromptValue;
-
-            // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
-            const promptIndex = input.textContent.indexOf('>PROMPT');
-            if (promptIndex >= 0) {
-                const range = document.createRange();
-                const selection = window.getSelection();
-                const promptEndIndex = promptIndex + ">PROMPT".length;
-                range.setStart(input.childNodes[0], promptIndex);
-                range.setEnd(input.childNodes[0], promptEndIndex);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
-
-            // Focus the input
-            input.focus();
         }
-        fetch('./prompts')
-            .then(response => response.json())
-            .then(prompts => {
-                console.log(prompts)
-                if (prompts.length === 0) {
-                    promptSelect.disabled = true;
-                    return;
-                }
+    });
+    input.addEventListener("keydown", (e) => {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            if (e.shiftKey) {
+                document.execCommand("insertLineBreak");
+            } else {
+                form.requestSubmit()
+            }
+        }
+    })
+    document.querySelector("#prompt-cancel").addEventListener("click", (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        socket.emit("request", {
+            prompt: "/stop"
+        })
+        document.querySelector("#prompt-run").classList.remove("hidden")
+        document.querySelector("#prompt-cancel").classList.add("hidden")
+    })
 
-                // Populate prompt options
-                prompts.forEach(prompt => {
-                    const option = document.createElement('option');
-                    option.value = prompt.value;
-                    option.textContent = prompt.name;
-                    promptSelect.appendChild(option);
-                });
+    // Load prompts from files
 
-                // Select the "default" prompt if it exists, otherwise select the first prompt
-                const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default');
-                const initialPrompt = defaultPrompt || prompts[0];
-                promptSelect.value = initialPrompt.value;
-                input.textContent = initialPrompt.value;
+    // Update the input text with the selected prompt value
+    const handlePromptChange = () => {
+        let isInteractive = document.querySelector("input[name='interactive']").checked;
+        const selectedPromptValue = promptSelect.value;
 
-                promptSelect.addEventListener('change', handlePromptChange);
-                resetButton.addEventListener('click', (e) => {
-                    e.preventDefault() // Prevent form from submitting
-                    handlePromptChange()
-                });
+        console.log("selectedPromptValue", selectedPromptValue)
+        if (isInteractive) {
+            prePrompt.textContent = selectedPromptValue;
+            input.textContent = ' ';
+        } else {
+            input.textContent = selectedPromptValue;
+        }
 
+        // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
+        const promptIndex = input.textContent.indexOf('>PROMPT');
+        if (promptIndex >= 0) {
+            const range = document.createRange();
+            const selection = window.getSelection();
+            const promptEndIndex = promptIndex + ">PROMPT".length;
+            range.setStart(input.childNodes[0], promptIndex);
+            range.setEnd(input.childNodes[0], promptEndIndex);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
 
-            })
-            .catch(error => {
-                console.error('Error loading prompts:', error);
+        // Focus the input
+        input.focus();
+    }
+    fetch('./prompts')
+        .then(response => response.json())
+        .then(prompts => {
+            console.log(prompts)
+            if (prompts.length === 0) {
+                promptSelect.disabled = true;
+                return;
+            }
+
+            // Populate prompt options
+            prompts.forEach(prompt => {
+                const option = document.createElement('option');
+                option.value = prompt.value;
+                option.textContent = prompt.name;
+                promptSelect.appendChild(option);
+            });
+
+            // Select the "default" prompt if it exists, otherwise select the first prompt
+            const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default');
+            const initialPrompt = defaultPrompt || prompts[0];
+            promptSelect.value = initialPrompt.value;
+            input.textContent = initialPrompt.value;
+
+            promptSelect.addEventListener('change', handlePromptChange);
+            resetButton.addEventListener('click', (e) => {
+                e.preventDefault() // Prevent form from submitting
+                handlePromptChange()
             });
 
 
-        const sha256 = async(input) => {
-            const textAsBuffer = new TextEncoder().encode(input);
-            const hashBuffer = await window.crypto.subtle.digest("SHA-256", textAsBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hash = hashArray
-                .map((item) => item.toString(16).padStart(2, "0"))
-                .join("");
-            return hash;
-        };
-        const say = (msg, id) => {
-            let item = document.createElement('li');
-            if (id) item.setAttribute("data-id", id)
-            item.innerHTML = msg;
-            messages.prepend(item);
-        }
-        socket.emit('request', {
-            method: "installed"
         })
-        socket.on('result', async({
-            request,
-            response
-        }) => {
-            loading(false)
-            console.log(response)
-            if (request.method === "installed") {
-                if (response == "\n\n<end>") {
-                  document.querySelector(".form-header").innerHTML = renderHeader(config)
-                } else {
-                  config.models = Array.from(new Set(config.models).add(response))
-                }
+        .catch(error => {
+            console.error('Error loading prompts:', error);
+        });
+
+
+    const sha256 = async (input) => {
+        const textAsBuffer = new TextEncoder().encode(input);
+        const hashBuffer = await window.crypto.subtle.digest("SHA-256", textAsBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hash = hashArray
+            .map((item) => item.toString(16).padStart(2, "0"))
+            .join("");
+        return hash;
+    };
+    const say = (msg, id) => {
+        let item = document.createElement('li');
+        if (id) item.setAttribute("data-id", id)
+        item.innerHTML = msg;
+        messages.prepend(item);
+    }
+    socket.emit('request', {
+        method: "installed"
+    })
+    socket.on('result', async ({
+                                   request,
+                                   response
+                               }) => {
+        loading(false)
+        console.log(response)
+        if (request.method === "installed") {
+            if (response == "\n\n<end>") {
+                document.querySelector(".form-header").innerHTML = renderHeader(config)
             } else {
-                if (response == "\n\n<end>") {
-                  document.querySelector("#prompt-run").classList.remove("hidden")
-                  document.querySelector("#prompt-cancel").classList.add("hidden")
+                config.models = Array.from(new Set(config.models).add(response))
+            }
+        } else {
+            if (response == "\n\n<end>") {
+                document.querySelector("#prompt-run").classList.remove("hidden")
+                document.querySelector("#prompt-cancel").classList.add("hidden")
+            } else {
+                const id = request.id
+                let existing = document.querySelector(`[data-id='${id}']`)
+                if (existing) {
+                    existing.innerHTML = existing.innerHTML + response
                 } else {
-                    const id = request.id
-                    let existing = document.querySelector(`[data-id='${id}']`)
-                    if (existing) {
-                        existing.innerHTML = existing.innerHTML + response
-                            //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
-                            //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
-                    } else {
-                        say(response, id)
-                    }
+                    say(response, id)
                 }
             }
-        });
-    </script>
+        }
+    });
+
+    interactiveCheckbox = (checked) => {
+        let chatDivs = document.querySelector("#chatDivs");
+        let chattingDivs = document.querySelector("#chattingDivs");
+        let answerField = document.querySelector("#answerField");
+        let autoCompleteDivs = document.querySelector("#autoCompleteDivs");
+        if (!checked) {
+            endChat();
+            answerField.hidden = false;
+            chatDivs.hidden = true;
+            chattingDivs.hidden = true;
+            autoCompleteDivs.hidden = false;
+        } else {
+            answerField.hidden = true;
+            chatDivs.hidden = false;
+            chattingDivs.hidden = false;
+
+        }
+    }
+
+    startChat = () => {
+        let startChatButton = document.querySelector("#startChatBt");
+        let endChatBtn = document.querySelector("#endChatBtn");
+        let autoCompleteDivs = document.querySelector("#autoCompleteDivs");
+        let answerField = document.querySelector("#answerField");
+        answerField.hidden = false;
+        autoCompleteDivs.hidden = true;
+        endChatBtn.hidden = false;
+        startChatButton.hidden = true;
+
+    }
+
+    endChat = () => {
+        let startChatBT = document.querySelector("#startChatBT");
+        let endChatBtn = document.querySelector("#endChatBtn");
+        let input = document.querySelector("#input");
+        let answerField = document.querySelector("#answerField");
+        answerField.hidden = true;
+        endChatBtn.hidden = true;
+        startChatBT.hidden = false;
+        input.textContent = ' ';
+        socket.emit('request', {
+            method: "endChat"
+        })
+    }
+</script>
 </body>
 
 </html>
