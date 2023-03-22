@@ -341,7 +341,7 @@ class Dalai {
     // 1. move the models folder to ../tmp
     await fs.promises.rename(models_path, temp_models_path)
     // 2. wipe out the folder
-    await fs.promises.rm(engine.home, { recursive: true }).catch((e) => { console.log(e) })
+    await fs.promises.rm(models_path, { recursive: true }).catch((e) => { console.log(e) })
     // 3. install engine
     await this.add(core)
     // 4. move back the files inside /tmp
