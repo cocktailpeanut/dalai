@@ -269,6 +269,8 @@ ${fields}
                 document.querySelector(".loading").classList.add("hidden")
             }
         }
+        const promptSelect = document.getElementById('prompt-select');
+        const resetButton = document.querySelector("#prompt-reset")
         document.querySelector("form").addEventListener("input", (e) => {
             if (e.target.tagName === "SELECT") {
                 config[e.target.name] = config.models[e.target.selectedIndex]
@@ -290,7 +292,7 @@ ${fields}
                 socket.emit('request', config)
                 config.id = null
                 loading(config.prompt)
-                input.textContent = "";
+                input.textContent = promptSelect.value;
             }
         });
         input.addEventListener("keydown", (e) => {
@@ -303,9 +305,40 @@ ${fields}
                 }
             }
         })
+        document.querySelector("#prompt-cancel").addEventListener("click", (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          socket.emit("request", {
+            prompt: "/stop"
+          })
+          document.querySelector("#prompt-run").classList.remove("hidden")
+          document.querySelector("#prompt-cancel").classList.add("hidden")
+        })
 
         // Load prompts from files
-        const promptSelect = document.getElementById('prompt-select');
+
+        // Update the input text with the selected prompt value
+        const handlePromptChange = () => {
+            const selectedPromptValue = promptSelect.value;
+            const currentInputValue = input.textContent;
+
+            input.textContent = selectedPromptValue;
+
+            // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
+            const promptIndex = input.textContent.indexOf('>PROMPT');
+            if (promptIndex >= 0) {
+                const range = document.createRange();
+                const selection = window.getSelection();
+                const promptEndIndex = promptIndex + ">PROMPT".length;
+                range.setStart(input.childNodes[0], promptIndex);
+                range.setEnd(input.childNodes[0], promptEndIndex);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+
+            // Focus the input
+            input.focus();
+        }
         fetch('./prompts')
             .then(response => response.json())
             .then(prompts => {
@@ -329,40 +362,7 @@ ${fields}
                 promptSelect.value = initialPrompt.value;
                 input.textContent = initialPrompt.value;
 
-                // Update the input text with the selected prompt value
-                const handlePromptChange = () => {
-                    const selectedPromptValue = promptSelect.value;
-                    const currentInputValue = input.textContent;
-
-                    input.textContent = selectedPromptValue;
-
-                    // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
-                    const promptIndex = input.textContent.indexOf('>PROMPT');
-                    if (promptIndex >= 0) {
-                        const range = document.createRange();
-                        const selection = window.getSelection();
-                        const promptEndIndex = promptIndex + ">PROMPT".length;
-                        range.setStart(input.childNodes[0], promptIndex);
-                        range.setEnd(input.childNodes[0], promptEndIndex);
-                        selection.removeAllRanges();
-                        selection.addRange(range);
-                    }
-
-                    // Focus the input
-                    input.focus();
-                }
                 promptSelect.addEventListener('change', handlePromptChange);
-
-                /*
-                // Create a Reset button
-                const resetButton = document.createElement('button');
-                resetButton.textContent = 'Reset';
-
-                // Append the Reset button to the same container as the dropdown
-                promptSelect.parentNode.appendChild(resetButton);
-                */
-                const resetButton = document.querySelector("#prompt-reset")
-
                 resetButton.addEventListener('click', (e) => {
                     e.preventDefault() // Prevent form from submitting
                     handlePromptChange()

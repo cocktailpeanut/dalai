@@ -197,6 +197,7 @@ class Dalai {
         const mod = require(`./cmds/${req.prompt.slice(1)}`)
         if (mod) {
           mod(this)
+          return
         }
       } catch (e) {
         console.log("require log", e)
