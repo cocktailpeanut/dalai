@@ -15,7 +15,9 @@ const start = (port, home) => {
     app.set('view engine', 'ejs');
     app.set('views', path.resolve(__dirname, "views"))
     app.get("/", (req, res) => {
-        res.render("index")
+        res.render("index", {
+          threads: os.cpus().length
+        })
     })
 
     const defaultDir = path.join(__dirname, "prompts");

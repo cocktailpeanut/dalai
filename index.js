@@ -32,7 +32,15 @@ const stripAnsi = (str) => {
   const regex = new RegExp(pattern, 'g')
   return str.replace(regex, '');
 }
-
+const winEscape = (str) => {
+  return str
+  .replaceAll(/\\n/g, "\n")
+  .replaceAll(/\\r/g, "\r")
+  .replaceAll(/\\t/g, "\t")
+  .replaceAll(/\\b/g, "\b")
+  .replaceAll(/\\f/g, "\f")
+  .replaceAll(/\\/g, "")
+}
 
 class Dalai {
   constructor(home) {
@@ -197,6 +205,7 @@ class Dalai {
         const mod = require(`./cmds/${req.prompt.slice(1)}`)
         if (mod) {
           mod(this)
+          return
         }
       } catch (e) {
         console.log("require log", e)
@@ -243,6 +252,8 @@ class Dalai {
     chunks.push(`-p ${prompt}`)
 
     const main_bin_path = platform === "win32" ? path.resolve(this.home, Core, "build", "Release", "main") : path.resolve(this.home, Core, "main")
+    this.sessionBuffer = "";
+    this.bufferStarted = false;
     if (req.full) {
       await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, cb)
     } else {
@@ -254,11 +265,7 @@ class Dalai {
       await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (proc, msg) => {
         if (endpattern.test(msg)) ended = true
         if (started && !ended) {
-          if (req.html) {
-            cb(this.htmlencode(msg))
-          } else {
-            cb(msg)
-          }
+          this.buffer(req, msg, cb)
         } else if (ended && writeEnd) {
           cb('\n\n<end>')
           writeEnd = false
@@ -267,18 +274,42 @@ class Dalai {
       })
     }
   }
+  buffer(req, msg, cb) {
+    if (!this.queue) this.queue = []
+    if (platform === "win32") {
+      for(let i=0;i<msg.length; i++) {
+        if (msg[i] === "\\") {
+          this.queueActive = true
+          // start pushing to buffer
+          this.queue.push(msg[i]);
+        } else {
+          // otherwise flush
+          this.queue.push(msg[i])
+          let queueContent = this.queue.join("")
+          
+          if (!this.bufferStarted && ["\n", "\b", "\f", "\r", "\t"].includes(queueContent)) {
+            // if the buffer hasn't started and incoming tokens are whitespaces, ignore
+          } else {
+            if (req.html) {
+              cb(this.htmlencode(winEscape(queueContent)))
+            } else {
+              cb(winEscape(queueContent))
+            }
+            this.bufferStarted = true
+          }
+          this.queue = []
+          this.queueActive = false
+        }
+      }
+    } else {
+      if (req.html) {
+        cb(this.htmlencode(msg))
+      } else {
+        cb(msg)
+      } 
+    }
+  }
   async uninstall(core, ...models) {
-    // delete the rest of the files
-
-    //const files = (await fs.promises.readdir(path.resolve(this.home, core), { withFileTypes: true }))
-    //    .filter(dirent => dirent.isFile() && !dirent.name.startsWith("."))
-    //    .map(dirent => dirent.name);
-    //console.log("files", files)
-    //for(let file of files) {
-    //  await fs.promises.rm(path.resolve(this.home, core, file)).catch((e) => { })
-    //}
-
-
     if (models.length > 0) {
       // delete the model folder
       const modelsPath = path.resolve(this.home, core, "models")
@@ -306,15 +337,15 @@ class Dalai {
     let models_path = path.resolve(engine.home, "models")
     let temp_path = path.resolve(this.home, "tmp")
     let temp_models_path = path.resolve(temp_path, "models")
-    await fs.promises.mkdir(temp_path, { recursive: true }).catch((e) => { })
+    await fs.promises.mkdir(temp_path, { recursive: true }).catch((e) => { console.log("1", e) })
     // 1. move the models folder to ../tmp
-    await fs.promises.rename(models_path, temp_models_path)
+    await fs.promises.rename(models_path, temp_models_path).catch((e) => { console.log("2", e) })
     // 2. wipe out the folder
-    await fs.promises.rm(engine.home, { recursive: true }).catch((e) => { console.log(e) })
+    await fs.promises.rm(engine.home, { recursive: true }).catch((e) => { console.log("3", e) })
     // 3. install engine
     await this.add(core)
     // 4. move back the files inside /tmp
-    await fs.promises.rename(temp_models_path, models_path)
+    await fs.promises.rename(temp_models_path, models_path).catch((e) => { console.log("4", e) })
 
     // next add the models
     let res = await this.cores[core].add(...models)
