@@ -299,7 +299,6 @@ ${fields}
                 config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
                 document.querySelector("#prompt-run").classList.add("hidden")
                 document.querySelector("#prompt-cancel").classList.remove("hidden")
-                buffer = "";
                 localStorage.setItem("config", JSON.stringify(config))
                 socket.emit('request', config)
                 config.id = null
