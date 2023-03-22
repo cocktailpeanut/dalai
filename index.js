@@ -333,11 +333,11 @@ class Dalai {
     }
 
     // temporary
-
     let models_path = path.resolve(engine.home, "models")
     let temp_path = path.resolve(this.home, "tmp")
     let temp_models_path = path.resolve(temp_path, "models")
     await fs.promises.mkdir(temp_path, { recursive: true }).catch((e) => { })
+    await fs.promises.access(models_path)
     // 1. move the models folder to ../tmp
     await fs.promises.rename(models_path, temp_models_path)
     // 2. wipe out the folder
@@ -345,7 +345,11 @@ class Dalai {
     // 3. install engine
     await this.add(core)
     // 4. move back the files inside /tmp
+    await fs.promises.access(temp_models_path)
     await fs.promises.rename(temp_models_path, models_path)
+    
+    
+    
 
     // next add the models
     let res = await this.cores[core].add(...models)
