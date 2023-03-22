@@ -115,7 +115,7 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 
 ### Step 1. Install node.js >= 18
 
-If your mac doesn't have node.js installed yet, make sure to install node.js >= 10
+If your mac doesn't have node.js installed yet, make sure to install node.js >= 18
 
 <a href="https://nodejs.org/en/download/" class='btn'>Install Node.js</a>
 
@@ -126,7 +126,7 @@ Currently supported engines are `llama` and `alpaca`.
 
 #### Add alpaca models
 
-Currently alpaca only has the 7B model:
+To download alpaca models, you can run:
 
 ```
 npx dalai alpaca install 7B
@@ -231,7 +231,7 @@ Currently supported engines are `llama` and `alpaca`.
 
 #### Install alpaca
 
-Currently alpaca only has the 7B model. Open your `cmd` application and enter:
+To download alpaca models. Open your `cmd` application and enter:
 
 ```
 npx dalai alpaca install 7B
@@ -315,7 +315,7 @@ Currently supported engines are `llama` and `alpaca`.
 
 #### Add alpaca models
 
-Currently alpaca only has the 7B model:
+To download alpaca models, you can run:
 
 ```
 npx dalai alpaca install 7B
@@ -406,7 +406,7 @@ However, often you may already have a `llama.cpp` repository somewhere else on y
 
 #### Basic
 
-Creates a workspace  at `~/llama.cpp` 
+Creates a workspace  at `~/llama.cpp`
 
 ```javascript
 const dalai = new Dalai()

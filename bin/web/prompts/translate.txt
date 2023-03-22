@@ -1,0 +1,4 @@
+Here is how a professional Translator accurately translates the following English text to a grammatically correct >LANGUAGE text:
+
+English: >PROMPT
+>LANGUAGE:

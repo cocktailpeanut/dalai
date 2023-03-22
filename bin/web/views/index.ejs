@@ -173,7 +173,12 @@
 <body>
     <form id="form" action="">
         <div class='form-header'></div>
+        <div class="kv">
+            <label for="prompt-select">prompt</label>
+            <select id="prompt-select"></select>
+        </div>
         <div class='input-container'>
+
             <div class='input-field'>
                 <div contenteditable id='input'></div>
                 <button>Autocomplete</button>
@@ -181,7 +186,6 @@
             <div class='info'>TIP: shift+enter for multiple lines</div>
         </div>
     </form>
-    <button class="danger-btn" onclick="clearHistory()">Clear History</button>
     <pre class='loading hidden'></pre>
     <ul id="messages"></ul>
     <script src="/socket.io.min.js"></script>
@@ -192,11 +196,11 @@
             n_predict: 200,
             top_k: 40,
             top_p: 0.9,
-  temp: 0.8,
+            temp: 0.8,
             repeat_last_n: 64,
             repeat_penalty: 1.3,
             debug: false,
-  html: true,
+            html: true,
             models: []
         }
         const socket = io();
@@ -280,6 +284,74 @@ ${fields}
             }
         })
 
+        // Load prompts from files
+        const promptSelect = document.getElementById('prompt-select');
+        fetch('./prompts')
+            .then(response => response.json())
+            .then(prompts => {
+                console.log(prompts)
+                if (prompts.length === 0) {
+                    promptSelect.disabled = true;
+                    return;
+                }
+
+                // Populate prompt options
+                prompts.forEach(prompt => {
+                    const option = document.createElement('option');
+                    option.value = prompt.value;
+                    option.textContent = prompt.name;
+                    promptSelect.appendChild(option);
+                });
+
+                // Select the "default" prompt if it exists, otherwise select the first prompt
+                const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default');
+                const initialPrompt = defaultPrompt || prompts[0];
+                promptSelect.value = initialPrompt.value;
+                input.textContent = initialPrompt.value;
+
+                // Update the input text with the selected prompt value
+                const handlePromptChange = () => {
+                    const selectedPromptValue = promptSelect.value;
+                    const currentInputValue = input.textContent;
+
+                    input.textContent = selectedPromptValue;
+
+                    // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
+                    const promptIndex = input.textContent.indexOf('>PROMPT');
+                    if (promptIndex >= 0) {
+                        const range = document.createRange();
+                        const selection = window.getSelection();
+                        const promptEndIndex = promptIndex + ">PROMPT".length;
+                        range.setStart(input.childNodes[0], promptIndex);
+                        range.setEnd(input.childNodes[0], promptEndIndex);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+
+                    // Focus the input
+                    input.focus();
+                }
+                promptSelect.addEventListener('change', handlePromptChange);
+
+                // Create a Reset button
+                const resetButton = document.createElement('button');
+                resetButton.textContent = 'Reset';
+
+                // Append the Reset button to the same container as the dropdown
+                promptSelect.parentNode.appendChild(resetButton);
+
+                resetButton.addEventListener('click', (e) => {
+                    e.preventDefault() // Prevent form from submitting
+                    handlePromptChange()
+                });
+
+
+            })
+            .catch(error => {
+                console.error('Error loading prompts:', error);
+            });
+
+
         const sha256 = async(input) => {
             const textAsBuffer = new TextEncoder().encode(input);
             const hashBuffer = await window.crypto.subtle.digest("SHA-256", textAsBuffer);
@@ -295,7 +367,7 @@ ${fields}
         const say = (msg, id) => {
             let item = document.createElement('li');
             if (id) item.setAttribute("data-id", id)
-  item.innerHTML = msg;
+            item.innerHTML = msg;
             messages.prepend(item);
         }
         socket.emit('request', {
@@ -327,9 +399,9 @@ ${fields}
                     existing.appendChild(deleteButton);
                 } else {
                     if (existing) {
-        existing.innerHTML = existing.innerHTML + response
-        //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
-                        //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
+                        existing.innerHTML = existing.innerHTML + response
+                            //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
+                            //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
                     } else {
                         say(response, id)
                     }

@@ -48,7 +48,6 @@ class Alpaca {
       success = await this.root.exec(`make`, this.home)
       if (!success) {
         throw new Error("running 'make' failed")
-        return
       }
     }
   }
@@ -69,33 +68,34 @@ class Alpaca {
       if (fs.existsSync(outputFile)) {
         console.log(`Skip conversion, file already exists: ${outputFile}`)
       } else {
-        const task = `downloading ${outputFile}`
-
         const dir = path.resolve(this.home, "models", model)
         console.log("dir", dir)
         await fs.promises.mkdir(dir, { recursive: true }).catch((e) => {
           console.log("mkdir", e)
         })
-        if (model === "7B") {
-          //const url = "https://ipfs.io/ipfs/QmQ1bf2BTnYxq73MFJWu1B7bQ2UD6qG7D7YDCxhTndVkPC"
-          //console.log("down", url)
-          //await this.root.down(url, path.resolve(dir, "ggml-model-q4_0.bin"))
-          console.log("downloading torrent")
-          await this.root.torrent.add('magnet:?xt=urn:btih:5aaceaec63b03e51a98f04fd5c42320b2a033010&dn=ggml-alpaca-7b-q4.bin&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce', dir)
-          console.log("renaming")
-          await fs.promises.rename(
-            path.resolve(dir, "ggml-alpaca-7b-q4.bin"),
-            path.resolve(dir, "ggml-model-q4_0.bin")
-          )
-        } else if (model === "13B") {
-          console.log("downloading torrent")
-          //await this.root.torrent.add('magnet:?xt=urn:btih:AU5T2VGS4577AIHL3X2R3LLID4VGKEDR&dn=ggml-alpaca-13b-q4.bin&xl=8136637097&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce', dir)
-          await this.root.torrent.add('magnet:?xt=urn:btih:053b3d54d2e77ff020ebddf51dad681f2a651071&dn=ggml-alpaca-13b-q4.bin&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.com%3A2810%2Fannounce', dir)
-          console.log("renaming")
-          await fs.promises.rename(
-            path.resolve(dir, "ggml-alpaca-13b-q4.bin"),
-            path.resolve(dir, "ggml-model-q4_0.bin")
-          )
+        console.log("downloading torrent")
+        switch (model) {
+          case "7B":
+            await this.root.torrent.add('magnet:?xt=urn:btih:5aaceaec63b03e51a98f04fd5c42320b2a033010&dn=ggml-alpaca-7b-q4.bin&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce', dir)
+            console.log("renaming")
+            await fs.promises.rename(
+              path.resolve(dir, "ggml-alpaca-7b-q4.bin"),
+              path.resolve(dir, "ggml-model-q4_0.bin")
+            )
+            break;
+          
+          case "13B":
+            await this.root.torrent.add('magnet:?xt=urn:btih:053b3d54d2e77ff020ebddf51dad681f2a651071&dn=ggml-alpaca-13b-q4.bin&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.com%3A2810%2Fannounce', dir)
+            console.log("renaming")
+            await fs.promises.rename(
+              path.resolve(dir, "ggml-alpaca-13b-q4.bin"),
+              path.resolve(dir, "ggml-model-q4_0.bin")
+            )
+            break;
+          
+          default:
+            console.log("Select either model 7B or 13B")
+            break;
         }
       }
     }
