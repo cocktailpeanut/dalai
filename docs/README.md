@@ -115,7 +115,7 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 
 ### Step 1. Install node.js >= 18
 
-If your mac doesn't have node.js installed yet, make sure to install node.js >= 10
+If your mac doesn't have node.js installed yet, make sure to install node.js >= 18
 
 <a href="https://nodejs.org/en/download/" class='btn'>Install Node.js</a>
 
