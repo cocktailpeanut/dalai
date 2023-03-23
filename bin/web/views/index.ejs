@@ -53,13 +53,13 @@
             background: rgba(0, 0, 0, 1);
         }
         
-        .light-btn {
-            background: rgba(0, 0, 0, 0.2);
-            color: black;
+        .transparent-btn {
+            background: transparent;
+            color: rgba(0, 0, 0, 0.8);
         }
         
-        .light-btn:hover {
-            background: rgba(0, 0, 0, 0.15);
+        .transparent-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
         }
         
         .danger-btn {
@@ -68,6 +68,16 @@
         
         .danger-btn:hover {
             background: rgba(255, 0, 0, 0.8);
+        }
+        
+        .messages-header {
+            display: flex;
+            justify-content: flex-end;
+            margin: 10px;
+        }
+        
+        .messages-header>button {
+            padding: 5px 10px;
         }
         
         #messages {
@@ -82,6 +92,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            gap: 10px;
             padding: 10px;
             font-size: 14px;
             box-sizing: border-box;
@@ -242,6 +253,9 @@
             </div>
         </div>
     </form>
+    <div class="messages-header">
+        <button class='danger-btn' onclick="clearHistory()"><i class="fa-solid fa-eraser"></i> Clear All</button>
+    </div>
     <pre class='loading hidden'></pre>
     <ul id="messages"></ul>
     <script src="/socket.io.min.js"></script>
@@ -462,8 +476,8 @@ ${fields}
 
                     // Add a delete button
                     let deleteButton = document.createElement('button');
-                    deleteButton.className = 'light-btn'
-                    deleteButton.textContent = 'X';
+                    deleteButton.className = 'transparent-btn'
+                    deleteButton.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
                     deleteButton.addEventListener('click', function() {
                         existing.remove();
                     });
