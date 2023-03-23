@@ -225,7 +225,7 @@ class Dalai {
       seed: req.seed || -1,
       threads: req.threads || 8,
       n_predict: req.n_predict || 128,
-      model: `models/${Model || "7B"}/ggml-model-q4_0.bin`,
+      model: `${Core}/models/${Model || "7B"}/ggml-model-q4_0.bin`,
     }
 
     let e = await exists(path.resolve(this.home, Core, "models", Model))
