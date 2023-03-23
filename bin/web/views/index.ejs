@@ -38,6 +38,32 @@
             outline: none;
         }
         
+        .icon-container {
+            position: relative;
+            display: inline-block;
+            margin-left: 3px;
+        }
+        
+        .info-text {
+            visibility: hidden;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            white-space: normal;
+            font-size: 11px;
+            max-width: 150px;
+            overflow-wrap: break-word;
+        }
+        
+        .icon-container:hover .info-text {
+            visibility: visible;
+        }
+        
         button {
             padding: 10px;
             background: rgba(0, 0, 0, 0.8);
@@ -201,6 +227,10 @@
         <div class='form-header'></div>
         <div class="prompt-header">
             <label for="prompt-select">Select a template</label>
+            <div class="icon-container">
+                <i class="fa-solid fa-circle-info"></i>
+                <span class="info-text">Use the templates by replacing >PROMPT with your own prompt. Save custom prompts in ~/user/dalai/config/prompts as .txt files.</span>
+            </div>
             <select id="prompt-select"></select>
             <div class='stretch'></div>
         </div>
@@ -427,7 +457,7 @@ ${fields}
                 }
 
                 // Select the "default" prompt if it exists, otherwise select the first prompt
-                const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default');
+                const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'none');
                 const initialPrompt = defaultPrompt || prompts[0];
                 promptSelect.value = initialPrompt.value;
                 input.textContent = initialPrompt.value;
