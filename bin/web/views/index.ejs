@@ -458,7 +458,7 @@ ${fields}
                 }
 
                 // Select the "default" prompt if it exists, otherwise select the first prompt
-                const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'none');
+                const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default');
                 const initialPrompt = defaultPrompt || prompts[0];
                 promptSelect.value = initialPrompt.value;
                 input.textContent = initialPrompt.value;
