@@ -3,6 +3,8 @@
 <head>
     <title>Dalai LLaMA</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/css/fontawesome.min.css" rel="stylesheet" />
+    <link href="/css/solid.min.css" rel="stylesheet" />
     <style>
         body,
         pre {
@@ -16,7 +18,6 @@
             /*
     border: 2px solid rgba(0,0,0,0.2);
     */
-            background: rgba(0, 0, 0, 0.04);
             display: flex;
             padding: 10px;
             box-sizing: border-box;
@@ -24,12 +25,13 @@
         
         #input {
             white-space: pre-wrap;
-            padding: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            padding: 20px;
             outline: none;
-            border: none;
             flex-grow: 1;
             font-size: 14px;
             box-sizing: border-box;
+            background: white;
         }
         
         #input:focus {
@@ -42,7 +44,6 @@
             background: rgba(0, 0, 0, 0.8);
             color: white;
             border: none;
-            border-radius: 3px;
             outline: none;
             box-sizing: border-box;
             cursor: pointer;
@@ -108,12 +109,22 @@
         }
         
         .input-container {
-            margin: 10px;
+            background: rgba(0, 0, 0, 0.06);
+        }
+        
+        .input-container button {
+            padding: 30px;
+            margin-left: 10px;
         }
         
         .info {
             font-size: 12px;
-            padding: 5px;
+            padding: 0 5px 10px;
+        }
+        
+        .info button {
+            padding: 5px 10px;
+            margin-right: 10px;
         }
         
         .form-header {
@@ -121,7 +132,7 @@
             align-items: center;
             flex-wrap: wrap;
             margin: 0;
-            background: rgba(0, 0, 0, 0.04);
+            background: rgba(0, 0, 0, 0.9);
             padding: 10px 20px;
         }
         
@@ -129,19 +140,24 @@
             flex-grow: 1;
         }
         
-        input[type=text],
-        select {
+        .form-header input[type=text],
+        .form-header select {
             border: none;
-            background: rgba(0, 0, 0, 0.08);
+            background: #444;
+            color: white;
             padding: 5px 10px;
             box-sizing: border-box;
             width: 100px;
         }
         
+        .form-header select {
+            width: 150px;
+        }
+        
         .logo {
+            color: white;
             font-weight: bold;
             text-decoration: none;
-            color: black;
             display: block;
             font-size: 30px;
             letter-spacing: -1px;
@@ -161,11 +177,47 @@
         }
         
         .kv label {
+            text-align: right;
             display: block;
             padding: 5px 0px;
-            font-weight: bold;
-            color: rgba(0, 0, 0, 0.7);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 12px;
+        }
+        
+        .prompt-header {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px 0;
+            box-sizing: border-box;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.06);
+        }
+        
+        .prompt-header select {
+            margin: 0 10px;
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            max-width: 200px;
+        }
+        
+        .prompt-header button {
+            padding: 7px 10px;
+            font-size: 12px;
+        }
+        
+        button {
+            cursor: pointer;
+        }
+        
+        #prompt-cancel {
+            background: none;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        #prompt-cancel i {
+            padding: 5px;
         }
     </style>
 </head>
@@ -173,35 +225,47 @@
 <body>
     <form id="form" action="">
         <div class='form-header'></div>
-        <div class="kv">
-            <label for="prompt-select">prompt</label>
+        <div class="prompt-header">
+            <label for="prompt-select">Select a template</label>
             <select id="prompt-select"></select>
+            <div class='stretch'></div>
         </div>
         <div class='input-container'>
-
             <div class='input-field'>
                 <div contenteditable id='input'></div>
-                <button>Autocomplete</button>
+                <button id='prompt-run'>Go</button>
+                <button id="prompt-cancel" class='hidden'><i class="fa-solid fa-circle-notch fa-spin"></i> Cancel</button>
             </div>
-            <div class='info'>TIP: shift+enter for multiple lines</div>
+            <div class='info'>
+                <button id="prompt-reset">Reset</button>
+                <span>TIP: shift+enter for multiple lines</span>
+            </div>
         </div>
     </form>
     <pre class='loading hidden'></pre>
     <ul id="messages"></ul>
     <script src="/socket.io.min.js"></script>
     <script>
-        const config = {
-            seed: -1,
-            threads: 4,
-            n_predict: 200,
-            top_k: 40,
-            top_p: 0.9,
-            temp: 0.8,
-            repeat_last_n: 64,
-            repeat_penalty: 1.3,
-            debug: false,
-            html: true,
-            models: []
+        const str = localStorage.getItem("config")
+        let config
+        if (str) {
+            try {
+                config = JSON.parse(str)
+            } catch (e) {}
+        }
+        if (!config) {
+            config = {
+                seed: -1,
+                threads: 4,
+                n_predict: 200,
+                top_k: 40,
+                top_p: 0.9,
+                temp: 0.8,
+                repeat_last_n: 64,
+                repeat_penalty: 1.3,
+                debug: false,
+                models: []
+            }
         }
         const socket = io();
         const form = document.getElementById('form');
@@ -211,7 +275,7 @@
             const fields = [{
                 key: "debug",
                 type: "checkbox"
-            }, "n_predict", "repeat_last_n", "repeat_penalty", "top_k", "top_p", "temp", "seed"].map((key) => {
+            }, "n_predict", "repeat_last_n", "repeat_penalty", "top_k", "top_p", "temp", "seed", "threads"].map((key) => {
                 if (typeof key === "string") {
                     return `<div class='kv'>
 <label>${key}</label>
@@ -228,10 +292,9 @@
 
             }).join("")
 
-
-            config.model = config.models[0]
+            if (!str) config.model = config.models[0]
             const models = config.models.map((model, i) => {
-                return `<option value="${model}" ${i === 0 ? "selected" : ""}>${model}</option>`
+                return `<option value="${model}" ${config.model === model ? "selected" : ""}>${model}</option>`
             }).join("")
             return `<a class='logo' href="/">Dalai</a><div class='stretch'></div>
 <div class='config-container'>
@@ -251,6 +314,8 @@ ${fields}
                 document.querySelector(".loading").classList.add("hidden")
             }
         }
+        const promptSelect = document.getElementById('prompt-select');
+        const resetButton = document.querySelector("#prompt-reset")
         document.querySelector("form").addEventListener("input", (e) => {
             if (e.target.tagName === "SELECT") {
                 config[e.target.name] = config.models[e.target.selectedIndex]
@@ -267,29 +332,63 @@ ${fields}
                 //config.prompt = input.textContent.replaceAll("\n", "\\n");
                 config.prompt = input.textContent
                 config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
+                document.querySelector("#prompt-run").classList.add("hidden")
+                document.querySelector("#prompt-cancel").classList.remove("hidden")
+                delete config.html
+                localStorage.setItem("config", JSON.stringify(config))
                 socket.emit('request', config)
                 config.id = null
                 loading(config.prompt)
-                input.textContent = "";
+                input.textContent = promptSelect.value;
             }
         });
-        input.addEventListener("keydown", (e) => {
-            if (e.keyCode === 13) {
-                e.preventDefault();
-                if (e.shiftKey) {
-                    document.execCommand("insertLineBreak");
-                } else {
-                    form.requestSubmit()
-                }
-            }
+        // input.addEventListener("keydown", (e) => {
+        //     if (e.keyCode === 13) {
+        //         e.preventDefault();
+        //         if (e.shiftKey) {
+        //             document.execCommand("insertLineBreak");
+        //         } else {
+        //             form.requestSubmit()
+        //         }
+        //     }
+        // })
+        document.querySelector("#prompt-cancel").addEventListener("click", (e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            socket.emit("request", {
+                prompt: "/stop"
+            })
+            document.querySelector("#prompt-run").classList.remove("hidden")
+            document.querySelector("#prompt-cancel").classList.add("hidden")
         })
 
         // Load prompts from files
-        const promptSelect = document.getElementById('prompt-select');
+
+        // Update the input text with the selected prompt value
+        const handlePromptChange = () => {
+            const selectedPromptValue = promptSelect.value;
+            const currentInputValue = input.textContent;
+
+            input.textContent = selectedPromptValue;
+
+            // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
+            const promptIndex = input.textContent.indexOf('>PROMPT');
+            if (promptIndex >= 0) {
+                const range = document.createRange();
+                const selection = window.getSelection();
+                const promptEndIndex = promptIndex + ">PROMPT".length;
+                range.setStart(input.childNodes[0], promptIndex);
+                range.setEnd(input.childNodes[0], promptEndIndex);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+
+            // Focus the input
+            input.focus();
+        }
         fetch('./prompts')
             .then(response => response.json())
             .then(prompts => {
-                console.log(prompts)
                 if (prompts.length === 0) {
                     promptSelect.disabled = true;
                     return;
@@ -309,37 +408,7 @@ ${fields}
                 promptSelect.value = initialPrompt.value;
                 input.textContent = initialPrompt.value;
 
-                // Update the input text with the selected prompt value
-                const handlePromptChange = () => {
-                    const selectedPromptValue = promptSelect.value;
-                    const currentInputValue = input.textContent;
-
-                    input.textContent = selectedPromptValue;
-
-                    // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
-                    const promptIndex = input.textContent.indexOf('>PROMPT');
-                    if (promptIndex >= 0) {
-                        const range = document.createRange();
-                        const selection = window.getSelection();
-                        const promptEndIndex = promptIndex + ">PROMPT".length;
-                        range.setStart(input.childNodes[0], promptIndex);
-                        range.setEnd(input.childNodes[0], promptEndIndex);
-                        selection.removeAllRanges();
-                        selection.addRange(range);
-                    }
-
-                    // Focus the input
-                    input.focus();
-                }
                 promptSelect.addEventListener('change', handlePromptChange);
-
-                // Create a Reset button
-                const resetButton = document.createElement('button');
-                resetButton.textContent = 'Reset';
-
-                // Append the Reset button to the same container as the dropdown
-                promptSelect.parentNode.appendChild(resetButton);
-
                 resetButton.addEventListener('click', (e) => {
                     e.preventDefault() // Prevent form from submitting
                     handlePromptChange()
@@ -378,17 +447,19 @@ ${fields}
             response
         }) => {
             loading(false)
-            console.log(response)
             if (request.method === "installed") {
                 if (response == "\n\n<end>") {
                     document.querySelector(".form-header").innerHTML = renderHeader(config)
                 } else {
-                    config.models.push(response)
+                    config.models = Array.from(new Set(config.models).add(response))
                 }
             } else {
                 const id = request.id
                 let existing = document.querySelector(`[data-id='${id}']`)
                 if (response == "\n\n<end>") {
+                    document.querySelector("#prompt-run").classList.remove("hidden")
+                    document.querySelector("#prompt-cancel").classList.add("hidden")
+
                     // Add a delete button
                     let deleteButton = document.createElement('button');
                     deleteButton.className = 'light-btn'
@@ -399,7 +470,7 @@ ${fields}
                     existing.appendChild(deleteButton);
                 } else {
                     if (existing) {
-                        existing.innerHTML = existing.innerHTML + response
+                        existing.textContent = existing.textContent + response
                             //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
                             //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
                     } else {

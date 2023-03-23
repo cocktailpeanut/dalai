@@ -4,7 +4,7 @@ Run LLaMA and Alpaca on your computer.
 
 <a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> GitHub</a>
 <a href="https://twitter.com/cocktailpeanut" class='inverse btn'><i class="fa-brands fa-twitter"></i> Twitter</a>
-<a href="https://discord.gg/XahBUrbVwz" class='inverse btn'><i class="fa-brands fa-discord"></i> Discord</a>
+<a href="https://discord.gg/WWfgrzzkCT" class='inverse btn'><i class="fa-brands fa-discord"></i> Discord</a>
 
 ---
 
@@ -110,6 +110,19 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 ---
 
 # Quickstart
+
+## Docker compose
+
+Requires that you have docker installed and running.
+```
+docker compose build
+docker compose run dalai npx dalai alpaca install 7B # or a different model
+docker compose up -d
+```
+
+This will dave the models in the `./models` folder
+
+View the site at http://127.0.0.1:3000/
 
 ## Mac
 
@@ -672,7 +685,7 @@ Have questions or feedback? Follow the project through the following outlets:
 
 <a href="https://github.com/cocktailpeanut/dalai" class='inverse btn'><i class="fa-brands fa-github"></i> GitHub</a>
 <a href="https://twitter.com/cocktailpeanut" class='inverse btn'><i class="fa-brands fa-twitter"></i> Twitter</a>
-<a href="https://discord.gg/XahBUrbVwz" class='inverse btn'><i class="fa-brands fa-discord"></i> Discord</a>
+<a href="https://discord.gg/WWfgrzzkCT" class='inverse btn'><i class="fa-brands fa-discord"></i> Discord</a>
 
 
 ---
