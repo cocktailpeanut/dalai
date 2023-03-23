@@ -1,0 +1,9 @@
+version: '3.7'
+services:
+  dalai:
+    build: .
+    ports:
+      - 3000:3000
+    volumes:
+      - ./models/alpaca:/root/dalai/alpaca
+      - ./models/llama:/root/dalai/llama
