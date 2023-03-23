@@ -450,7 +450,17 @@ ${fields}
         const say = (msg, id) => {
             let item = document.createElement('li');
             if (id) item.setAttribute("data-id", id)
-            item.innerHTML = msg;
+
+            let messageContent = document.createElement('span');
+            messageContent.className = 'message-content'
+            messageContent.innerHTML = msg;
+
+            let messageAction = document.createElement('button');
+            messageAction.className = 'message-action transparent-btn'
+            messageAction.innerHTML = '<i class="fa-solid fa-spinner fa-spin-pulse"></i>';
+
+            item.appendChild(messageContent)
+            item.appendChild(messageAction)
             messages.prepend(item);
         }
         socket.emit('request', {
@@ -475,16 +485,15 @@ ${fields}
                     document.querySelector("#prompt-cancel").classList.add("hidden")
 
                     // Add a delete button
-                    let deleteButton = document.createElement('button');
-                    deleteButton.className = 'transparent-btn'
-                    deleteButton.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
-                    deleteButton.addEventListener('click', function() {
+                    let messageAction = existing.querySelector('.message-action');
+                    messageAction.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+                    messageAction.addEventListener('click', function() {
                         existing.remove();
                     });
-                    existing.appendChild(deleteButton);
                 } else {
                     if (existing) {
-                        existing.textContent = existing.textContent + response
+                        let messageContent = existing.querySelector('.message-content')
+                        messageContent.textContent = existing.textContent + response
                             //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
                             //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
                     } else {
