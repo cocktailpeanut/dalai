@@ -63,11 +63,11 @@
         }
         
         .danger-btn {
-            background: rgba(255, 0, 0, 0.6);
+            background: rgb(244, 67, 54, 0.8);
         }
         
         .danger-btn:hover {
-            background: rgba(255, 0, 0, 0.8);
+            background: rgb(244, 67, 54, 1);
         }
         
         .messages-header {
@@ -445,7 +445,9 @@ ${fields}
             return hash;
         };
         const clearHistory = () => {
-            messages.replaceChildren()
+            if (confirm('Are you sure you want to clear all history messages?\nThis action cannot be undone and all messages will be lost.')) {
+                messages.replaceChildren()
+            }
         }
         const say = (msg, id) => {
             let item = document.createElement('li');
