@@ -25,7 +25,7 @@
         
         #input {
             white-space: pre-wrap;
-            border: 1px solid rgba(0,0,0,0.2);
+            border: 1px solid rgba(0, 0, 0, 0.2);
             padding: 20px;
             outline: none;
             flex-grow: 1;
@@ -85,18 +85,20 @@
         .input-container {
             background: rgba(0, 0, 0, 0.06);
         }
+        
         .input-container button {
-          padding: 30px;
-          margin-left: 10px;
+            padding: 30px;
+            margin-left: 10px;
         }
         
         .info {
             font-size: 12px;
             padding: 0 5px 10px;
         }
+        
         .info button {
-          padding: 5px 10px;
-          margin-right: 10px;
+            padding: 5px 10px;
+            margin-right: 10px;
         }
         
         .form-header {
@@ -104,7 +106,7 @@
             align-items: center;
             flex-wrap: wrap;
             margin: 0;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.9);
             padding: 10px 20px;
         }
         
@@ -121,12 +123,13 @@
             box-sizing: border-box;
             width: 100px;
         }
+        
         .form-header select {
-          width: 150px;
+            width: 150px;
         }
         
         .logo {
-          color: white;
+            color: white;
             font-weight: bold;
             text-decoration: none;
             display: block;
@@ -151,36 +154,42 @@
             text-align: right;
             display: block;
             padding: 5px 0px;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 12px;
         }
+        
         .prompt-header {
-          display: flex;
-          align-items: center;
-          padding: 10px 20px 0;
-          box-sizing: border-box;
-          font-size: 14px;
-          background: rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            padding: 10px 20px 0;
+            box-sizing: border-box;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.06);
         }
+        
         .prompt-header select {
-          margin: 0 10px;
-          flex-grow: 1;
-          padding: 5px;
-          border: 1px solid rgba(0,0,0,0.2);
-          max-width: 200px;
+            margin: 0 10px;
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            max-width: 200px;
         }
+        
         .prompt-header button {
-          padding: 7px 10px;
-          font-size: 12px;
+            padding: 7px 10px;
+            font-size: 12px;
         }
+        
         button {
-          cursor: pointer;
+            cursor: pointer;
         }
+        
         #prompt-cancel {
-          background: none;
-          color: white;
-          background: rgba(0,0,0,0.7);
+            background: none;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
         }
+        
         #prompt-cancel i {
             padding: 5px;
         }
@@ -202,8 +211,8 @@
                 <button id="prompt-cancel" class='hidden'><i class="fa-solid fa-circle-notch fa-spin"></i> Cancel</button>
             </div>
             <div class='info'>
-              <button id="prompt-reset">Reset</button>
-              <span>TIP: shift+enter for multiple lines</span>
+                <button id="prompt-reset">Reset</button>
+                <span>TIP: shift+enter for multiple lines</span>
             </div>
         </div>
     </form>
@@ -214,24 +223,23 @@
         const str = localStorage.getItem("config")
         let config
         if (str) {
-          try {
-            config = JSON.parse(str)
-          } catch (e) {
-          }
+            try {
+                config = JSON.parse(str)
+            } catch (e) {}
         }
         if (!config) {
-          config = {
-              seed: -1,
-              threads: 4,
-              n_predict: 200,
-              top_k: 40,
-              top_p: 0.9,
-              temp: 0.8,
-              repeat_last_n: 64,
-              repeat_penalty: 1.3,
-              debug: false,
-              models: []
-          }
+            config = {
+                seed: -1,
+                threads: 4,
+                n_predict: 200,
+                top_k: 40,
+                top_p: 0.9,
+                temp: 0.8,
+                repeat_last_n: 64,
+                repeat_penalty: 1.3,
+                debug: false,
+                models: []
+            }
         }
         const socket = io();
         const form = document.getElementById('form');
@@ -271,10 +279,16 @@ ${fields}
 </div>
 </div>`
         }
+
+        const escapeNewLine = (arg) => navigator.userAgent.toLowerCase() === 'win' ? arg.replaceAll(/\n/g, "\\n").replaceAll(/\r/g, "\\r") : arg
+        const escapeDoubleQuotes = (arg) => navigator.userAgent.toLowerCase() === 'win' ? arg.replaceAll(/"/g, '`"') : arg.replaceAll(/"/g, '\\"')
         const loading = (on) => {
             if (on) {
                 document.querySelector(".loading").textContent = on
                 document.querySelector(".loading").classList.remove("hidden")
+
+                activePrompt = escapeDoubleQuotes(escapeNewLine(on))
+                console.log('on', activePrompt)
             } else {
                 document.querySelector(".loading").textContent = ""
                 document.querySelector(".loading").classList.add("hidden")
@@ -319,13 +333,13 @@ ${fields}
         //     }
         // })
         document.querySelector("#prompt-cancel").addEventListener("click", (e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          socket.emit("request", {
-            prompt: "/stop"
-          })
-          document.querySelector("#prompt-run").classList.remove("hidden")
-          document.querySelector("#prompt-cancel").classList.add("hidden")
+            e.preventDefault()
+            e.stopPropagation()
+            socket.emit("request", {
+                prompt: "/stop"
+            })
+            document.querySelector("#prompt-run").classList.remove("hidden")
+            document.querySelector("#prompt-cancel").classList.add("hidden")
         })
 
         // Load prompts from files
@@ -405,31 +419,58 @@ ${fields}
         socket.emit('request', {
             method: "installed"
         })
+
+        // Keep track of the output
+        let tokenStartLen = -2;
+        let responseStart = false;
+        let activePrompt;
+        let promptProgress = 0;
+
         socket.on('result', async({
             request,
             response
         }) => {
-            loading(false)
             if (request.method === "installed") {
                 if (response == "\n\n<end>") {
-                  document.querySelector(".form-header").innerHTML = renderHeader(config)
+                    document.querySelector(".form-header").innerHTML = renderHeader(config)
                 } else {
-                  config.models = Array.from(new Set(config.models).add(response))
+                    config.models = Array.from(new Set(config.models).add(response))
                 }
             } else {
-                if (response == "\n\n<end>") {
-                  document.querySelector("#prompt-run").classList.remove("hidden")
-                  document.querySelector("#prompt-cancel").classList.add("hidden")
+                const id = request.id
+                let existing = document.querySelector(`[data-id='${id}']`)
+                loading(false)
+
+                // Output is still your original prompt
+                if (!responseStart && activePrompt) {
+                    tokenStartLen += response.length;
+                    promptProgress = tokenStartLen / activePrompt.length;
+
+                    if (existing) {
+                        existing.textContent = activePrompt + '\n' + (promptProgress * 100) + '%'
+                    } else {
+                        say(response, id)
+                    }
+
+                    if (tokenStartLen > activePrompt.length) {
+                        responseStart = true;
+                        // Hide progress bar
+                    }
+                } else if (response == "\n\n<end>") {
+                    document.querySelector("#prompt-run").classList.remove("hidden")
+                    document.querySelector("#prompt-cancel").classList.add("hidden")
+
+                    // Reset output generation
+                    activePrompt = undefined
+                    tokenStartLen = -1
+                    promptProgress = 0
+                    responseStart = false
                 } else {
-                    const id = request.id
-                    let existing = document.querySelector(`[data-id='${id}']`)
                     if (existing) {
                         existing.textContent = existing.textContent + response
                             //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
                             //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
-                    } else {
-                        say(response, id)
-                    }
+                    } else {}
                 }
             }
         });
