@@ -134,6 +134,11 @@
             white-space: pre-wrap;
         }
         
+        .message-content-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
         .loading {
             margin-bottom: 10px;
             padding: 10px;
@@ -278,6 +283,8 @@
                 <span class="info-text">Use the templates by replacing >PROMPT with your own prompt. Save custom prompts in ~/user/dalai/config/prompts as .txt files.</span>
             </div>
             <select id="prompt-select"></select>
+            <input type="checkbox" id="show-prompt-checkbox" checked>
+            <label for="show-prompt-checkbox">Show Prompt</label>
             <div class='stretch'></div>
         </div>
         <div class='input-container'>
@@ -327,6 +334,7 @@
         const socket = io();
         const form = document.getElementById('form');
         const input = document.querySelector('#input');
+        const showPromptCheckbox = document.getElementById('show-prompt-checkbox');
         const model = document.querySelector('#model');
         const renderHeader = (config) => {
             const fields = [{
@@ -365,14 +373,14 @@ ${fields}
 
         const escapeNewLine = (arg) => navigator.userAgent.toLowerCase() === 'win' ? arg.replaceAll(/\n/g, "\\n").replaceAll(/\r/g, "\\r") : arg
         const escapeDoubleQuotes = (arg) => navigator.userAgent.toLowerCase() === 'win' ? arg.replaceAll(/"/g, '`"') : arg.replaceAll(/"/g, '\\"')
-        const loading = (on) => {
-            if (on) {
+        const loading = (prompt, input) => {
+            if (prompt) {
                 let messageContent = document.createElement('span');
-                document.getElementById("loading-message").textContent = on
+                document.getElementById("loading-message").textContent = input
                 document.querySelector(".loading").classList.remove("hidden")
 
-                activePrompt = escapeDoubleQuotes(escapeNewLine(on))
-                console.log('on', activePrompt)
+                activePrompt = escapeDoubleQuotes(escapeNewLine(prompt))
+                activeInput = input;
             } else {
                 document.getElementById("loading-message").textContent = ""
                 document.querySelector(".loading").classList.add("hidden")
@@ -394,7 +402,7 @@ ${fields}
             e.stopPropagation()
             if (input.textContent) {
                 //config.prompt = input.textContent.replaceAll("\n", "\\n");
-                config.prompt = input.textContent
+                config.prompt = showPromptCheckbox.checked ? input.textContent : promptSelect.value.replace('>PROMPT', input.textContent);
                 config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
                 document.querySelector("#prompt-run").classList.add("hidden")
                 document.querySelector("#prompt-cancel").classList.remove("hidden")
@@ -402,7 +410,7 @@ ${fields}
                 localStorage.setItem("config", JSON.stringify(config))
                 socket.emit('request', config)
                 config.id = null
-                loading(config.prompt)
+                loading(config.prompt, input.textContent)
                 updateInputToPrompt()
             }
         });
@@ -429,22 +437,32 @@ ${fields}
         // Load prompts from files
 
         // Update the input text with the selected prompt value
-        const updateInputToPrompt = () => {
+        const updateInputToPrompt = (promptValue) => {
             const selectedPromptValue = promptSelect.value;
             const currentInputValue = input.textContent;
 
             input.textContent = selectedPromptValue;
-
-            // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
-            const promptIndex = input.textContent.indexOf('>PROMPT');
-            if (promptIndex >= 0) {
-                const range = document.createRange();
-                const selection = window.getSelection();
-                const promptEndIndex = promptIndex + ">PROMPT".length;
-                range.setStart(input.childNodes[0], promptIndex);
-                range.setEnd(input.childNodes[0], promptEndIndex);
-                selection.removeAllRanges();
-                selection.addRange(range);
+            if (showPromptCheckbox.checked) {
+                // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
+                const promptIndex = input.textContent.indexOf('>PROMPT');
+                if (promptIndex >= 0) {
+                    const range = document.createRange();
+                    const selection = window.getSelection();
+                    let promptEndIndex
+                        // Replace the >PROMPT value if provided
+                    if (promptValue) {
+                        input.textContent = selectedPromptValue.replace('>PROMPT', promptValue);
+                        promptEndIndex = promptIndex + promptValue.length;
+                    } else {
+                        promptEndIndex = promptIndex + ">PROMPT".length;
+                    }
+                    range.setStart(input.childNodes[0], promptIndex);
+                    range.setEnd(input.childNodes[0], promptEndIndex);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+            } else {
+                input.textContent = ""
             }
 
             // Focus the input
@@ -522,7 +540,7 @@ ${fields}
                 promptSelect.value = initialPrompt.value;
                 input.textContent = initialPrompt.value;
 
-                promptSelect.addEventListener('change', updateInputToPrompt);
+                promptSelect.addEventListener('change', () => updateInputToPrompt());
                 resetButton.addEventListener('click', (e) => {
                     e.preventDefault() // Prevent form from submitting
                     updateInputToPrompt()
@@ -544,6 +562,15 @@ ${fields}
                 .join("");
             return hash;
         };
+
+        showPromptCheckbox.addEventListener('change', function() {
+            if (showPromptCheckbox.checked) {
+                updateInputToPrompt(input.textContent)
+            } else {
+                input.textContent = ''
+            }
+        });
+
         const clearHistory = () => {
             if (confirm('Are you sure you want to clear all history messages?\nThis action cannot be undone and all messages will be lost.')) {
                 messages.replaceChildren()
@@ -553,15 +580,23 @@ ${fields}
             let item = document.createElement('li');
             if (id) item.setAttribute("data-id", id)
 
+            let messageContentContainer = document.createElement('div');
+            messageContentContainer.className = 'message-content-container'
+            let messagePrompt = document.createElement('span');
+            messagePrompt.className = 'message-prompt'
+            messagePrompt.innerHTML = msg;
+
             let messageContent = document.createElement('span');
             messageContent.className = 'message-content'
-            messageContent.innerHTML = msg;
+
+            messageContentContainer.appendChild(messagePrompt)
+            messageContentContainer.appendChild(messageContent)
 
             let messageAction = document.createElement('button');
             messageAction.className = 'message-action transparent-btn'
             messageAction.innerHTML = '<i class="fa-solid fa-spinner fa-spin-pulse"></i>';
 
-            item.appendChild(messageContent)
+            item.appendChild(messageContentContainer)
             item.appendChild(messageAction)
             messages.prepend(item);
         }
@@ -573,6 +608,7 @@ ${fields}
         let tokenStartLen = -2;
         let responseStart = false;
         let activePrompt;
+        let activeInput;
         let promptProgress = 0;
 
         socket.on('result', async({
@@ -599,7 +635,7 @@ ${fields}
                     if (existing) {
                         loadingProgress.style.width = `${promptProgress}%`
                     } else {
-                        say(activePrompt, id)
+                        say(activeInput, id)
                     }
 
                     if (tokenStartLen > activePrompt.length) {
@@ -613,6 +649,7 @@ ${fields}
 
                     // Reset output generation
                     activePrompt = undefined
+                    activeInput = undefined
                     tokenStartLen = -1
                     promptProgress = 0
                     responseStart = false
@@ -626,7 +663,7 @@ ${fields}
                 } else {
                     if (existing) {
                         let messageContent = existing.querySelector('.message-content')
-                        messageContent.textContent = existing.textContent + response
+                        messageContent.textContent = messageContent.textContent + response
                             //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
                             //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
                     } else {}
