@@ -37,6 +37,7 @@
         #input:focus {
             outline: none;
         }
+        /* Button Styles */
         
         button {
             padding: 10px;
@@ -45,6 +46,38 @@
             border: none;
             outline: none;
             box-sizing: border-box;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: rgba(0, 0, 0, 1);
+        }
+        
+        .transparent-btn {
+            background: transparent;
+            color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .transparent-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .danger-btn {
+            background: rgb(244, 67, 54, 0.8);
+        }
+        
+        .danger-btn:hover {
+            background: rgb(244, 67, 54, 1);
+        }
+        
+        .messages-header {
+            display: flex;
+            justify-content: flex-end;
+            margin: 10px;
+        }
+        
+        .messages-header>button {
+            padding: 5px 10px;
         }
         
         #messages {
@@ -56,6 +89,10 @@
         }
         
         #messages>li {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
             padding: 10px;
             font-size: 14px;
             box-sizing: border-box;
@@ -216,6 +253,9 @@
             </div>
         </div>
     </form>
+    <div class="messages-header">
+        <button class='danger-btn' onclick="clearHistory()"><i class="fa-solid fa-eraser"></i> Clear All</button>
+    </div>
     <pre class='loading hidden'></pre>
     <ul id="messages"></ul>
     <script src="/socket.io.min.js"></script>
@@ -410,10 +450,25 @@ ${fields}
                 .join("");
             return hash;
         };
+        const clearHistory = () => {
+            if (confirm('Are you sure you want to clear all history messages?\nThis action cannot be undone and all messages will be lost.')) {
+                messages.replaceChildren()
+            }
+        }
         const say = (msg, id) => {
             let item = document.createElement('li');
             if (id) item.setAttribute("data-id", id)
-            item.innerHTML = msg;
+
+            let messageContent = document.createElement('span');
+            messageContent.className = 'message-content'
+            messageContent.innerHTML = msg;
+
+            let messageAction = document.createElement('button');
+            messageAction.className = 'message-action transparent-btn'
+            messageAction.innerHTML = '<i class="fa-solid fa-spinner fa-spin-pulse"></i>';
+
+            item.appendChild(messageContent)
+            item.appendChild(messageAction)
             messages.prepend(item);
         }
         socket.emit('request', {
@@ -447,7 +502,8 @@ ${fields}
                     promptProgress = tokenStartLen / activePrompt.length;
 
                     if (existing) {
-                        existing.textContent = activePrompt + '\n' + (promptProgress * 100) + '%'
+                        let messageContent = existing.querySelector('.message-content')
+                        messageContent.textContent = activePrompt + '\n' + (promptProgress * 100) + '%'
                     } else {
                         say(response, id)
                     }
@@ -465,9 +521,17 @@ ${fields}
                     tokenStartLen = -1
                     promptProgress = 0
                     responseStart = false
+
+                    // Add a delete button
+                    let messageAction = existing.querySelector('.message-action');
+                    messageAction.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+                    messageAction.addEventListener('click', function() {
+                        existing.remove();
+                    });
                 } else {
                     if (existing) {
-                        existing.textContent = existing.textContent + response
+                        let messageContent = existing.querySelector('.message-content')
+                        messageContent.textContent = existing.textContent + response
                             //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
                             //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
                     } else {}
