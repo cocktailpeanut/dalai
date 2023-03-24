@@ -39,6 +39,33 @@
         }
         /* Button Styles */
         
+        .icon-container {
+            position: relative;
+            display: inline-block;
+            margin-left: 3px;
+            color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .info-text {
+            visibility: hidden;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            white-space: normal;
+            font-size: 11px;
+            max-width: 150px;
+            overflow-wrap: break-word;
+        }
+        
+        .icon-container:hover .info-text {
+            visibility: visible;
+        }
+        
         button {
             padding: 10px;
             background: rgba(0, 0, 0, 0.8);
@@ -246,6 +273,10 @@
         <div class='form-header'></div>
         <div class="prompt-header">
             <label for="prompt-select">Select a template</label>
+            <div class="icon-container">
+                <i class="fa-solid fa-circle-info"></i>
+                <span class="info-text">Use the templates by replacing >PROMPT with your own prompt. Save custom prompts in ~/user/dalai/config/prompts as .txt files.</span>
+            </div>
             <select id="prompt-select"></select>
             <div class='stretch'></div>
         </div>
@@ -372,7 +403,7 @@ ${fields}
                 socket.emit('request', config)
                 config.id = null
                 loading(config.prompt)
-                input.textContent = promptSelect.value;
+                updateInputToPrompt()
             }
         });
         // input.addEventListener("keydown", (e) => {
@@ -398,7 +429,7 @@ ${fields}
         // Load prompts from files
 
         // Update the input text with the selected prompt value
-        const handlePromptChange = () => {
+        const updateInputToPrompt = () => {
             const selectedPromptValue = promptSelect.value;
             const currentInputValue = input.textContent;
 
@@ -427,13 +458,63 @@ ${fields}
                     return;
                 }
 
+                // Sort prompts alphabetically by category and prompt name
+                prompts.sort((a, b) => {
+                    const categoryA = getCategoryName(a.name);
+                    const categoryB = getCategoryName(b.name);
+                    if (categoryA !== categoryB) {
+                        return categoryA.localeCompare(categoryB);
+                    }
+                    return a.name.localeCompare(b.name);
+                });
+
                 // Populate prompt options
+                let currentCategory = "";
+                let currentOptgroup = null;
                 prompts.forEach(prompt => {
                     const option = document.createElement('option');
                     option.value = prompt.value;
                     option.textContent = prompt.name;
-                    promptSelect.appendChild(option);
+
+                    const category = getCategoryName(prompt.name);
+
+                    if (category !== currentCategory) {
+                        currentCategory = category;
+                        currentOptgroup = promptSelect.querySelector(`optgroup[label="${category}"]`);
+                        if (!currentOptgroup) {
+                            currentOptgroup = document.createElement('optgroup');
+                            currentOptgroup.label = category;
+                            promptSelect.appendChild(currentOptgroup);
+                        }
+                    }
+
+                    if (!currentOptgroup) {
+                        currentOptgroup = document.createElement('optgroup');
+                        currentOptgroup.label = "other";
+                        promptSelect.appendChild(currentOptgroup);
+                    }
+
+                    const subOption = document.createElement('option');
+                    subOption.value = prompt.value;
+                    subOption.textContent = getPromptName(prompt.name);
+                    currentOptgroup.appendChild(subOption);
                 });
+
+                function getCategoryName(name) {
+                    const categoryIndex = name.indexOf('-');
+                    if (categoryIndex !== -1) {
+                        return name.slice(categoryIndex + 1);
+                    }
+                    return "other";
+                }
+
+                function getPromptName(name) {
+                    const categoryIndex = name.indexOf('-');
+                    if (categoryIndex !== -1) {
+                        return name.slice(0, categoryIndex);
+                    }
+                    return name;
+                }
 
                 // Select the "default" prompt if it exists, otherwise select the first prompt
                 const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default');
@@ -441,13 +522,13 @@ ${fields}
                 promptSelect.value = initialPrompt.value;
                 input.textContent = initialPrompt.value;
 
-                promptSelect.addEventListener('change', handlePromptChange);
+                promptSelect.addEventListener('change', updateInputToPrompt);
                 resetButton.addEventListener('click', (e) => {
                     e.preventDefault() // Prevent form from submitting
-                    handlePromptChange()
+                    updateInputToPrompt()
                 });
 
-
+                updateInputToPrompt();
             })
             .catch(error => {
                 console.error('Error loading prompts:', error);

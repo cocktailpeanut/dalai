@@ -3,4 +3,7 @@ Below is an instruction that describes a task, paired with an input that provide
 Instruction:
 >PROMPT
 
+Input:
+>PROMPT
+
 Response:
