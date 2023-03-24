@@ -1,3 +1,8 @@
+@placeholder Say something to a helpful AI chatbot
+@endpattern User:
+@gotext Send
+@configend
+
 Below is a dialog, where User interacts with AI. AI is helpful, kind, obedient, honest, and knows its own limits. 
 
 Instruction

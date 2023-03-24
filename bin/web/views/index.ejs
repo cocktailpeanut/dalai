@@ -173,7 +173,7 @@
             height: 3px;
             width: 0;
             background: #2196f3;
-            transition: width 0.2s ease-in-out;
+            transition: width 1s ease-in;
         }
         
         .hidden {
@@ -594,7 +594,7 @@ ${fields}
                 function getPromptName(name) {
                     const categoryIndex = name.indexOf('-');
                     if (categoryIndex !== -1) {
-                        return name.slice(0, categoryIndex);
+                        return `${name.slice(categoryIndex+1, name.length)}/${name.slice(0, categoryIndex)}`
                     }
                     return name;
                 }

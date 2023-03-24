@@ -1,9 +1,15 @@
+@placeholder Describe the code you want to implement
+@endpattern \end{code}
+@gotext Code
+@configend
+
 Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
 
 ### Instruction:
->PROMPT
+Write a block of code that implements the provided input
 
 ### Input:
 >PROMPT
 
 ### Response:
+\begin{code}
