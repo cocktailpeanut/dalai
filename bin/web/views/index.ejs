@@ -465,12 +465,12 @@ ${fields}
             const templateConfig = {};
 
             // Regular expression to match parameters and their values
-            const parameterRegex = /@(\w+)\s+([\w\s">]+)\s*\n/g;
+            const parameterRegex = /@(\w+)\s+(.*)\n/g;
 
             // Match all parameter-value pairs in the input string
             let match;
             while ((match = parameterRegex.exec(template)) !== null) {
-                const [, parameter, value] = match;
+                const [fullMatch, parameter, value] = match;
                 if (parameter !== "configend") {
                     templateConfig[parameter] = value.trim();
                 }
@@ -481,8 +481,8 @@ ${fields}
             const text = template.substring(promptStartIndex).trim();
             templateConfig.prompt = text;
 
-            return templateConfig
-        }
+            return templateConfig;
+        };
 
         // Update the input text with the selected prompt value
         const updateInputToPrompt = (promptValue) => {
@@ -711,8 +711,6 @@ ${fields}
                     config.models = Array.from(new Set(config.models).add(response))
                 }
             } else {
-                console.log(request)
-                console.log(response)
                 const id = request.id
                 let existing = document.querySelector(`[data-id='${id}']`)
                 let loadingProgress = document.getElementById('loading-progress')
@@ -720,6 +718,11 @@ ${fields}
 
                 // Output is still your original prompt
                 if (!responseStart && activePrompt) {
+                    // Filter out common errors that the terminal may spit back
+                    if (response.includes(`repeat_penalty = `)) {
+                        return
+                    }
+
                     tokenStartLen += escapeNewLine(escapeDoubleQuotes(response)).length;
                     promptProgress = (tokenStartLen / activePrompt.length) * 100;
 
@@ -747,13 +750,11 @@ ${fields}
                         let messageContent = existing.querySelector('.message-content')
                         let newMessage = messageContent.textContent + response
 
-                        // If we hit endpattern, then stop it
-                        let containsEndIdx = request.endpattern ? newMessage.indexOf(request.endpattern) : -1;
+                        let containsEndIdx = request.endpattern ? newMessage.lastIndexOf(request.endpattern) : -1;
                         if (containsEndIdx > -1) {
-                            let resultString = response.substring(0, containsEndIdx - messageContent.textContent.length);
-                            messageContent.textContent = messageContent.textContent + resultString
+                            const resultString = messageContent.textContent.substring(0, containsEndIdx);
+                            messageContent.textContent = resultString;
 
-                            // Reset everything
                             socket.emit("request", {
                                 prompt: "/stop"
                             })
