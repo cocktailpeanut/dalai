@@ -294,7 +294,7 @@
             </div>
             <div class='info'>
                 <button id="prompt-reset">Reset</button>
-                <span>TIP: shift+enter for multiple lines</span>
+                <span>TIP: ctrl+enter (⌘+enter for mac) to submit</span>
             </div>
         </div>
     </form>
@@ -413,16 +413,12 @@ ${fields}
                 updateInputToPrompt()
             }
         });
-        // input.addEventListener("keydown", (e) => {
-        //     if (e.keyCode === 13) {
-        //         e.preventDefault();
-        //         if (e.shiftKey) {
-        //             document.execCommand("insertLineBreak");
-        //         } else {
-        //             form.requestSubmit()
-        //         }
-        //     }
-        // })
+        input.addEventListener("keydown", (e) => {
+            if (e.keyCode === 13 && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                form.requestSubmit()
+            }
+        })
         document.querySelector("#prompt-cancel").addEventListener("click", (e) => {
             e.preventDefault()
             e.stopPropagation()
