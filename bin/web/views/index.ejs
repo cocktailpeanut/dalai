@@ -137,6 +137,20 @@
         .message-content-container {
             display: flex;
             flex-direction: column;
+            gap: 5px;
+        }
+        
+        .message-content-container>p {
+            margin: 0;
+            margin-top: 10px;
+            padding: 0;
+            color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .message-no-prompt {
+            border-radius: 5px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.1);
         }
         
         .loading {
@@ -585,13 +599,20 @@ ${fields}
             let messageContentContainer = document.createElement('div');
             messageContentContainer.className = 'message-content-container'
             let messagePrompt = document.createElement('span');
-            messagePrompt.className = 'message-prompt'
+
             messagePrompt.innerHTML = msg;
+            messageContentContainer.appendChild(messagePrompt)
 
             let messageContent = document.createElement('span');
-            messageContent.className = 'message-content'
+            if (!showPromptCheckbox.checked) {
+                messageContent.className = `message-content ${!showPromptCheckbox.checked ? 'message-no-prompt' : ''}`
+                let messagePromptTitle = document.createElement('p');
+                messagePromptTitle.className = 'message-prompt-title info'
+                const currPromptName = promptSelect.options[promptSelect.selectedIndex].textContent
+                messagePromptTitle.textContent = currPromptName
+                messageContentContainer.appendChild(messagePromptTitle)
+            }
 
-            messageContentContainer.appendChild(messagePrompt)
             messageContentContainer.appendChild(messageContent)
 
             let messageAction = document.createElement('button');
