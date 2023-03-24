@@ -505,7 +505,7 @@ ${fields}
                         let messageContent = existing.querySelector('.message-content')
                         messageContent.textContent = activePrompt + '\n' + (promptProgress * 100) + '%'
                     } else {
-                        say(response, id)
+                        say(activePrompt, id)
                     }
 
                     if (tokenStartLen > activePrompt.length) {
