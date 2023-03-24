@@ -37,6 +37,14 @@
         #input:focus {
             outline: none;
         }
+        
+        #input:empty:before {
+            content: attr(placeholder);
+            color: lightgray;
+            display: block;
+            position: absolute;
+            font-family: "Campton", sans-serif;
+        }
         /* Button Styles */
         
         .icon-container {
@@ -302,7 +310,7 @@
         </div>
         <div class='input-container'>
             <div class='input-field'>
-                <div contenteditable id='input'></div>
+                <div contenteditable id='input' placeholder="test"></div>
                 <button id='prompt-run'>Go</button>
                 <button id="prompt-cancel" class='hidden'><i class="fa-solid fa-circle-notch fa-spin"></i> Cancel</button>
             </div>
@@ -415,7 +423,7 @@ ${fields}
             e.stopPropagation()
             if (input.textContent) {
                 //config.prompt = input.textContent.replaceAll("\n", "\\n");
-                config.prompt = showPromptCheckbox.checked ? input.textContent : promptSelect.value.replace('>PROMPT', input.textContent);
+                config.prompt = showPromptCheckbox.checked ? input.textContent : config.selectedPromptValue.replace('>PROMPT', input.textContent);
                 config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
                 document.querySelector("#prompt-run").classList.add("hidden")
                 document.querySelector("#prompt-cancel").classList.remove("hidden")
@@ -451,13 +459,54 @@ ${fields}
         })
 
         // Load prompts from files
+        const rawTemplateToObj = (template) => {
+            const templateConfig = {};
+
+            // Regular expression to match parameters and their values
+            const parameterRegex = /@(\w+)\s+([\w\s">]+)\s*\n/g;
+
+            // Match all parameter-value pairs in the input string
+            let match;
+            while ((match = parameterRegex.exec(template)) !== null) {
+                const [, parameter, value] = match;
+                if (parameter !== "configend") {
+                    templateConfig[parameter] = value.trim();
+                }
+            }
+
+            // Get the text after @configend and add it to the object
+            const promptStartIndex = template.indexOf("@configend") + "@configend".length;
+            const text = template.substring(promptStartIndex).trim();
+            templateConfig.prompt = text;
+
+            return templateConfig
+        }
 
         // Update the input text with the selected prompt value
         const updateInputToPrompt = (promptValue) => {
-            const selectedPromptValue = promptSelect.value;
+            const {
+                prompt: selectedPromptValue,
+                placeholder,
+                gotext,
+                endpattern
+            } = rawTemplateToObj(promptSelect.value)
+                // const selectedPromptValue = promptSelect.value;
             const currentInputValue = input.textContent;
 
-            input.textContent = selectedPromptValue;
+            config = {
+                ...config,
+                selectedPromptValue,
+                placeholder,
+                gotext,
+                endpattern
+            }
+
+            input.textContent = selectedPromptValue; // Update input to be value if given one to replace
+
+            input.setAttribute('placeholder', placeholder || "")
+            document.getElementById("prompt-run").textContent = gotext || "Go"
+            input.setAttribute('endpattern', endpattern || "")
+
             if (showPromptCheckbox.checked) {
                 // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
                 const promptIndex = input.textContent.indexOf('>PROMPT');
@@ -611,6 +660,8 @@ ${fields}
                 const currPromptName = promptSelect.options[promptSelect.selectedIndex].textContent
                 messagePromptTitle.textContent = currPromptName
                 messageContentContainer.appendChild(messagePromptTitle)
+            } else {
+                messageContent.className = `message-content`
             }
 
             messageContentContainer.appendChild(messageContent)
@@ -650,6 +701,7 @@ ${fields}
             request,
             response
         }) => {
+
             if (request.method === "installed") {
                 if (response == "\n\n<end>") {
                     document.querySelector(".form-header").innerHTML = renderHeader(config)
@@ -657,6 +709,8 @@ ${fields}
                     config.models = Array.from(new Set(config.models).add(response))
                 }
             } else {
+                console.log(request)
+                console.log(response)
                 const id = request.id
                 let existing = document.querySelector(`[data-id='${id}']`)
                 let loadingProgress = document.getElementById('loading-progress')
@@ -689,10 +743,33 @@ ${fields}
                 } else {
                     if (existing) {
                         let messageContent = existing.querySelector('.message-content')
-                        messageContent.textContent = messageContent.textContent + response
-                            //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
-                            //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
-                    } else {}
+                        let newMessage = messageContent.textContent + response
+
+                        // If we hit endpattern, then stop it
+                        let containsEndIdx = request.endpattern ? newMessage.indexOf(request.endpattern) : -1;
+                        if (containsEndIdx > -1) {
+                            let resultString = response.substring(0, containsEndIdx - messageContent.textContent.length);
+                            messageContent.textContent = messageContent.textContent + resultString
+
+                            // Reset everything
+                            socket.emit("request", {
+                                prompt: "/stop"
+                            })
+                            resetPromptRequest()
+
+                            // Add a delete button
+                            let messageAction = existing.querySelector('.message-action');
+                            messageAction.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+                            messageAction.addEventListener('click', function() {
+                                existing.remove();
+                            });
+                        } else {
+                            // Add token to message
+                            messageContent.textContent = newMessage
+                        }
+                        //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
+                        //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
+                    }
                 }
             }
         });

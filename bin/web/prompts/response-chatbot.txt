@@ -1,2 +1,7 @@
+@placeholder Say something to a highly intelligent chatbot
+@endpattern "
+@gotext Send
+@configend
+
 The expected response for a highly intelligent chatbot to ">PROMPT" is 
 "
