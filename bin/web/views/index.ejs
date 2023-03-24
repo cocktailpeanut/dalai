@@ -140,7 +140,6 @@
         }
         
         .loading {
-            margin-bottom: 10px;
             padding: 10px;
             box-sizing: border-box;
             color: rgba(0, 0, 0, 0.7);
@@ -430,10 +429,10 @@ ${fields}
             socket.emit("request", {
                 prompt: "/stop"
             })
-            document.querySelector("#prompt-run").classList.remove("hidden")
-            document.querySelector("#prompt-cancel").classList.add("hidden")
+            resetPromptRequest()
+
+            // Add a delete button
             let messageList = document.querySelector('#messages')
-                // Add a delete button
             let messageAction = messageList.querySelector('.message-action');
             messageAction.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
             messageAction.addEventListener('click', function() {
@@ -612,11 +611,23 @@ ${fields}
         })
 
         // Keep track of the output
-        let tokenStartLen = -2;
+        let tokenStartLen = 0;
         let responseStart = false;
         let activePrompt;
         let activeInput;
         let promptProgress = 0;
+
+        const resetPromptRequest = () => {
+            document.querySelector("#prompt-run").classList.remove("hidden")
+            document.querySelector("#prompt-cancel").classList.add("hidden")
+
+            // Reset output generation
+            activePrompt = undefined
+            activeInput = undefined
+            tokenStartLen = 0
+            promptProgress = 0
+            responseStart = false
+        }
 
         socket.on('result', async({
             request,
@@ -636,7 +647,7 @@ ${fields}
 
                 // Output is still your original prompt
                 if (!responseStart && activePrompt) {
-                    tokenStartLen += response.length;
+                    tokenStartLen += escapeNewLine(escapeDoubleQuotes(response)).length;
                     promptProgress = (tokenStartLen / activePrompt.length) * 100;
 
                     if (existing) {
@@ -645,23 +656,14 @@ ${fields}
                         say(activeInput, id)
                     }
 
-                    if (tokenStartLen > activePrompt.length) {
+                    if (tokenStartLen >= activePrompt.length) {
                         responseStart = true;
                         // Hide progress bar
                         loadingProgress.style.width = 0
                     }
                 } else if (response == "\n\n<end>") {
-                    document.querySelector("#prompt-run").classList.remove("hidden")
-                    document.querySelector("#prompt-cancel").classList.add("hidden")
-
-                    // Reset output generation
-                    activePrompt = undefined
-                    activeInput = undefined
-                    tokenStartLen = -1
-                    promptProgress = 0
-                    responseStart = false
-
-                    // Add a delete button
+                    resetPromptRequest()
+                        // Add a delete button
                     let messageAction = existing.querySelector('.message-action');
                     messageAction.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
                     messageAction.addEventListener('click', function() {
