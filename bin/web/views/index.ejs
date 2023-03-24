@@ -41,9 +41,7 @@
         #input:empty:before {
             content: attr(placeholder);
             color: lightgray;
-            display: block;
-            position: absolute;
-            font-family: "Campton", sans-serif;
+            position: relative;
         }
         /* Button Styles */
         
@@ -66,7 +64,7 @@
             border-radius: 3px;
             white-space: normal;
             font-size: 11px;
-            max-width: 150px;
+            width: 150px;
             overflow-wrap: break-word;
         }
         
@@ -301,11 +299,15 @@
             <label for="prompt-select">Select a template</label>
             <div class="icon-container">
                 <i class="fa-solid fa-circle-info"></i>
-                <span class="info-text">Use the templates by replacing >PROMPT with your own prompt. Save custom prompts in ~/user/dalai/config/prompts as .txt files.</span>
+                <span class="info-text">Templates help generate better results.<br/><br/>Add custom templates in ~/user/dalai/config/prompts as .txt files.</span>
             </div>
             <select id="prompt-select"></select>
             <input type="checkbox" id="show-prompt-checkbox" checked>
-            <label for="show-prompt-checkbox">Show Prompt</label>
+            <label for="show-prompt-checkbox">Show template</label>
+            <div class="icon-container">
+                <i class="fa-solid fa-circle-info"></i>
+                <span class="info-text">Uncheck this for a cleaner interaction with Dalai. <br/><br/> If checked, replace >PROMPT with your desired input.</span>
+            </div>
             <div class='stretch'></div>
         </div>
         <div class='input-container'>
