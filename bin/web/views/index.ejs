@@ -379,6 +379,13 @@ ${fields}
             })
             document.querySelector("#prompt-run").classList.remove("hidden")
             document.querySelector("#prompt-cancel").classList.add("hidden")
+            let messageList = document.querySelector('#messages')
+                // Add a delete button
+            let messageAction = messageList.querySelector('.message-action');
+            messageAction.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+            messageAction.addEventListener('click', function() {
+                existing.remove();
+            });
         })
 
         // Load prompts from files
