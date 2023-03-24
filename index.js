@@ -263,14 +263,17 @@ class Dalai {
       let ended = false
       let writeEnd = !req.skip_end
       await this.exec(`${main_bin_path} ${chunks.join(" ")}`, this.cores[Core].home, (proc, msg) => {
-        if (endpattern.test(msg)) ended = true
-        if (started && !ended) {
-          this.buffer(req, msg, cb)
-        } else if (ended && writeEnd) {
-          cb('\n\n<end>')
-          writeEnd = false
+        if(!started) {
+          if (startpattern.test(msg)) started = true
+        } else {
+          if (endpattern.test(msg)) ended = true
+          if (!ended) {
+            this.buffer(req, msg, cb)
+          } else if (ended && writeEnd) {
+            cb('\n\n<end>')
+            writeEnd = false
+          }
         }
-        if (startpattern.test(msg)) started = true
       })
     }
   }
