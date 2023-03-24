@@ -88,7 +88,8 @@
             padding: 0;
         }
         
-        #messages>li {
+        #messages>li,
+        .loading {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
@@ -256,7 +257,10 @@
     <div class="messages-header">
         <button class='danger-btn' onclick="clearHistory()"><i class="fa-solid fa-eraser"></i> Clear All</button>
     </div>
-    <pre class='loading hidden'></pre>
+    <li class='loading hidden'>
+        <span id="loading-message"></span>
+        <button class='transparent-btn message-action'><i class="fa-solid fa-spinner fa-spin-pulse"></i></button>
+    </li>
     <ul id="messages"></ul>
     <script src="/socket.io.min.js"></script>
     <script>
@@ -324,13 +328,14 @@ ${fields}
         const escapeDoubleQuotes = (arg) => navigator.userAgent.toLowerCase() === 'win' ? arg.replaceAll(/"/g, '`"') : arg.replaceAll(/"/g, '\\"')
         const loading = (on) => {
             if (on) {
-                document.querySelector(".loading").textContent = on
+                let messageContent = document.createElement('span');
+                document.getElementById("loading-message").textContent = on
                 document.querySelector(".loading").classList.remove("hidden")
 
                 activePrompt = escapeDoubleQuotes(escapeNewLine(on))
                 console.log('on', activePrompt)
             } else {
-                document.querySelector(".loading").textContent = ""
+                document.getElementById("loading-message").textContent = ""
                 document.querySelector(".loading").classList.add("hidden")
             }
         }
