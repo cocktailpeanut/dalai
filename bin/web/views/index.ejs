@@ -116,6 +116,13 @@
             background: #efefef;
         }
         
+        #loading-progress {
+            height: 3px;
+            width: 0;
+            background: #2196f3;
+            transition: width 0.2s ease-in-out;
+        }
+        
         .hidden {
             display: none !important;
         }
@@ -261,6 +268,7 @@
         <span id="loading-message"></span>
         <button class='transparent-btn message-action'><i class="fa-solid fa-spinner fa-spin-pulse"></i></button>
     </li>
+    <div id="loading-progress"></div>
     <ul id="messages"></ul>
     <script src="/socket.io.min.js"></script>
     <script>
@@ -499,16 +507,16 @@ ${fields}
             } else {
                 const id = request.id
                 let existing = document.querySelector(`[data-id='${id}']`)
+                let loadingProgress = document.getElementById('loading-progress')
                 loading(false)
 
                 // Output is still your original prompt
                 if (!responseStart && activePrompt) {
                     tokenStartLen += response.length;
-                    promptProgress = tokenStartLen / activePrompt.length;
+                    promptProgress = (tokenStartLen / activePrompt.length) * 100;
 
                     if (existing) {
-                        let messageContent = existing.querySelector('.message-content')
-                        messageContent.textContent = activePrompt + '\n' + (promptProgress * 100) + '%'
+                        loadingProgress.style.width = `${promptProgress}%`
                     } else {
                         say(activePrompt, id)
                     }
@@ -516,6 +524,7 @@ ${fields}
                     if (tokenStartLen > activePrompt.length) {
                         responseStart = true;
                         // Hide progress bar
+                        loadingProgress.style.width = 0
                     }
                 } else if (response == "\n\n<end>") {
                     document.querySelector("#prompt-run").classList.remove("hidden")
