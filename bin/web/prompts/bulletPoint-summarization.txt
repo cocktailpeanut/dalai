@@ -1,6 +1,0 @@
-@placeholder Paste text to be summarized into 1 sentence
-@gotext Summarize
-@configend
-
->PROMPT
-Explain and summarize the above in bullet points that are understandable by a primary school student:

@@ -3,5 +3,6 @@
 @gotext Code
 @configend
 
+Below is a codeblock with one comment that describes what the code is implementing.
 \begin{code}
 // >PROMPT\n

@@ -588,7 +588,7 @@ ${fields}
                 function getCategoryName(name) {
                     const categoryIndex = name.indexOf('-');
                     if (categoryIndex !== -1) {
-                        return name.slice(categoryIndex + 1);
+                        return name.slice(0, categoryIndex);
                     }
                     return "other";
                 }
@@ -596,7 +596,7 @@ ${fields}
                 function getPromptName(name) {
                     const categoryIndex = name.indexOf('-');
                     if (categoryIndex !== -1) {
-                        return `${name.slice(categoryIndex+1, name.length)}/${name.slice(0, categoryIndex)}`
+                        return `${name.slice(0, categoryIndex)}/${name.slice(categoryIndex+1, name.length)}`
                     }
                     return name;
                 }
@@ -705,7 +705,6 @@ ${fields}
         }) => {
             if (request.method === "installed") {
                 if (response == "\n\n<end>") {
-                    console.log('failed')
                     document.querySelector(".form-header").innerHTML = renderHeader(config)
                 } else {
                     config.models = Array.from(new Set(config.models).add(response))
@@ -719,7 +718,6 @@ ${fields}
                 // Output is still your original prompt
                 if (!responseStart && activePrompt) {
                     // Filter out common errors that the terminal may spit back
-                    console.log(response)
                     if (response.includes(`repeat_penalty = `)) {
                         console.log('NAH')
                         return
