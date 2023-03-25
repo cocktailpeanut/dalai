@@ -127,7 +127,8 @@
             justify-content: space-between;
             align-items: flex-start;
             gap: 10px;
-            padding: 10px;
+            padding: 20px;
+            padding-right: 10px;
             font-size: 14px;
             box-sizing: border-box;
         }
@@ -160,7 +161,6 @@
         }
         
         .loading {
-            padding: 10px;
             box-sizing: border-box;
             color: rgba(0, 0, 0, 0.7);
             font-size: 14px;
@@ -325,11 +325,11 @@
     <div class="messages-header">
         <button class='danger-btn' onclick="clearHistory()"><i class="fa-solid fa-eraser"></i> Clear All</button>
     </div>
+    <div id="loading-progress"></div>
     <li class='loading hidden'>
         <span id="loading-message"></span>
         <button class='transparent-btn message-action'><i class="fa-solid fa-spinner fa-spin-pulse"></i></button>
     </li>
-    <div id="loading-progress"></div>
     <ul id="messages"></ul>
     <script src="/socket.io.min.js"></script>
     <script>
