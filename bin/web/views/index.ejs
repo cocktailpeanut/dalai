@@ -398,6 +398,11 @@ ${fields}
         };
         const say = (msg, id) => {
             let item = document.createElement('li');
+            // When item is clicked, copy it to the input
+            item.addEventListener('click', (e) => {
+                input.textContent = e.target.textContent;
+                input.focus();
+            });
             if (id) item.setAttribute("data-id", id)
             item.innerHTML = msg;
             messages.prepend(item);
