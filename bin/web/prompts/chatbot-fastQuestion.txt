@@ -1,0 +1,9 @@
+@placeholder Ask a question...
+@endpattern Q:
+@gotext Send
+@configend
+
+I’m going to ask you some questions. Your response should be comprehensive and accurate. You should respond knowing your own limits.
+
+Q: >PROMPT
+A:

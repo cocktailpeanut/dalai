@@ -1,4 +1,4 @@
-@placeholder Paste the tweet you are replying to
+@placeholder Paste the tweet you are replying to...
 @endpattern ### Response:
 @gotext Tweet
 @configend

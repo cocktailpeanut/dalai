@@ -1,4 +1,4 @@
-@placeholder Describe the code comment that describes the code you are generating
+@placeholder Write a code comment that describes the code you are trying to generate...
 @endpattern \end{code}
 @gotext Code
 @configend

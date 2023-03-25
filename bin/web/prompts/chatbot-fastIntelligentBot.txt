@@ -1,4 +1,4 @@
-@placeholder Say something to a highly intelligent chatbot
+@placeholder Say something to a highly intelligent chatbot...
 @endpattern "
 @gotext Send
 @configend

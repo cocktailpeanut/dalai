@@ -1,4 +1,4 @@
-@placeholder Describe the code you want to implement
+@placeholder Ask a coding question...
 @endpattern \end{code}
 @gotext Code
 @configend

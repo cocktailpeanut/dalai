@@ -1,8 +1,10 @@
-@placeholder Paste text to be summarized into 1 sentence
+@placeholder Paste text to be summarized into bullet points...
 @gotext Summarize
+@endpattern \end{itemize}
 @configend
 
 >PROMPT
 
 Explain and summarize the above in bullet points that are understandable by a primary school student:
-*
+{itemize}
+\item 

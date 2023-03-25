@@ -1,4 +1,4 @@
-@placeholder Paste a tweet to analyze
+@placeholder Paste a tweet to analyze...
 @endpattern ###
 @gotext Analyze Tweet
 @configend

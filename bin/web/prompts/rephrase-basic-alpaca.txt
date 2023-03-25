@@ -1,5 +1,5 @@
-@placeholder Write the text to be rephrased
-@endpattern ### Response:
+@placeholder Write the text to be rephrased...
+@endpattern ###
 @gotext Rephrase
 @configend
 
