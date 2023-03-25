@@ -193,6 +193,9 @@
         <div class="prompt-header">
             <label for="prompt-select">Select a template</label>
             <select id="prompt-select"></select>
+            <!-- checkbox to lock selection -->
+            <label for="prompt-lock">Lock?</label>
+            <input id="prompt-lock" type="checkbox" /> 
             <div class='stretch'></div>
         </div>
         <div class='input-container'>
@@ -281,6 +284,7 @@ ${fields}
             }
         }
         const promptSelect = document.getElementById('prompt-select');
+        const promptLock = document.getElementById('prompt-lock');
         const resetButton = document.querySelector("#prompt-reset")
         document.querySelector("form").addEventListener("input", (e) => {
             if (e.target.tagName === "SELECT") {
@@ -305,7 +309,9 @@ ${fields}
                 socket.emit('request', config)
                 config.id = null
                 loading(config.prompt)
-                input.textContent = promptSelect.value;
+                if (!promptLock.checked) {
+                    input.textContent = promptSelect.value;
+                }
             }
         });
         // input.addEventListener("keydown", (e) => {
@@ -332,6 +338,9 @@ ${fields}
 
         // Update the input text with the selected prompt value
         const handlePromptChange = () => {
+            if (promptLock.checked) {
+                return;
+            }
             const selectedPromptValue = promptSelect.value;
             const currentInputValue = input.textContent;
 
