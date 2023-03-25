@@ -602,7 +602,7 @@ ${fields}
                 }
 
                 // Select the "default" prompt if it exists, otherwise select the first prompt
-                const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default');
+                const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default (alpaca)');
                 const initialPrompt = defaultPrompt || prompts[0];
                 promptSelect.value = initialPrompt.value;
                 input.textContent = initialPrompt.value;
@@ -703,9 +703,9 @@ ${fields}
             request,
             response
         }) => {
-
             if (request.method === "installed") {
                 if (response == "\n\n<end>") {
+                    console.log('failed')
                     document.querySelector(".form-header").innerHTML = renderHeader(config)
                 } else {
                     config.models = Array.from(new Set(config.models).add(response))
@@ -719,7 +719,9 @@ ${fields}
                 // Output is still your original prompt
                 if (!responseStart && activePrompt) {
                     // Filter out common errors that the terminal may spit back
+                    console.log(response)
                     if (response.includes(`repeat_penalty = `)) {
+                        console.log('NAH')
                         return
                     }
 
@@ -768,7 +770,9 @@ ${fields}
                             });
                         } else {
                             // Add token to message
-                            messageContent.textContent = newMessage
+                            if (newMessage.trim().length > 0) { // if it's just whitespace, don't update message 
+                                messageContent.textContent = newMessage
+                            }
                         }
                         //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
                         //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
