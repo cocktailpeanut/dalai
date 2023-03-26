@@ -1,0 +1,11 @@
+@placeholder Ask a question about javascript and get a quick answer... (i.e. "How do i combine array?"). Note: This isn't good for code output, for that, use jsComment2Code instead
+@endpattern You:
+@gotext Ask
+@configend
+
+You: How do I combine arrays?
+JavaScript chatbot: You can use the concat() method.
+You: How do you make an alert appear after 10 seconds?
+JavaScript chatbot: You can use the setTimeout() method.
+You: >PROMPT
+JavaScript chatbot: 

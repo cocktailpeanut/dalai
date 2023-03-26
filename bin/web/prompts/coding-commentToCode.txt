@@ -1,8 +1,0 @@
-@placeholder Write a code comment that describes the code you are trying to generate...
-@endpattern \end{code}
-@gotext Code
-@configend
-
-Below is a codeblock with one comment that describes what the code is implementing.
-\begin{code}
-// >PROMPT
