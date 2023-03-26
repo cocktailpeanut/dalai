@@ -750,8 +750,17 @@ ${fields}
                         let messageContent = existing.querySelector('.message-content')
                         let newMessage = messageContent.textContent + response
 
-                        const pattern = new RegExp(request.endpattern, "g");
-                        let containsEndPattern = pattern.test(newMessage)
+                        let containsEndPattern = false;
+                        let escapedEndPattern;
+                        let pattern;
+                        // If there is an endpattern in the template, see if we've hit it
+                        if (request.endpattern) {
+                            escapedEndPattern = request.endpattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                            pattern = new RegExp(escapedEndPattern, "g");
+                            containsEndPattern = pattern.test(newMessage)
+                        }
+
+                        // If we've hit it, remove the endpattern and end the response
                         if (containsEndPattern) {
                             const containsEndIdx = pattern.lastIndex - request.endpattern.length;
                             const resultString = messageContent.textContent.substring(0, containsEndIdx);
