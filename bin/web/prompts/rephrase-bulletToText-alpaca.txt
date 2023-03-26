@@ -1,0 +1,14 @@
+@placeholder Provide the bullet point list to be rephrased to complete sentences...
+@endpattern ###
+@gotext Rephrase
+@configend
+
+Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+### Instruction:
+Rephrase the given bullet point list input into a comprehensive statement.
+
+### Input:
+>PROMPT
+
+### Response:

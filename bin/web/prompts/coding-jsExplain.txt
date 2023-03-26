@@ -1,0 +1,8 @@
+@placeholder Paste javascript code to get an explanation of what it's doing...
+@endpattern */
+@gotext Explain
+@configend
+
+>PROMPT
+/*
+Here's what the above code is doing:

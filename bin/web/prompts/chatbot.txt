@@ -1,2 +1,0 @@
-The expected response for a highly intelligent chatbot to ">PROMPT" is 
-"

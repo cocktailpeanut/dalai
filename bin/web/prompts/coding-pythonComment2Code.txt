@@ -1,0 +1,10 @@
+@placeholder Write a code comment that describes the code you are trying to generate... (i.e. "Takes an array and prints each item in the array")
+@endpattern \end{code}
+@gotext Code
+@configend
+
+Below is a codeblock with one comment that describes what the code is implementing.
+\begin{code}
+"""
+>PROMPT
+"""

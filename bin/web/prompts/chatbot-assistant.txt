@@ -1,0 +1,11 @@
+@placeholder Say something to a helpful AI assistant...
+@endpattern You:
+@gotext Send
+@configend
+
+A dialog, where a user interacts with an AI assistant. AI assistant is helpful, kind, obedient, honest, and knows its own limits.
+
+You: Hello, AI.
+AI: Hello! How can I assist you today?
+You: >PROMPT
+AI:

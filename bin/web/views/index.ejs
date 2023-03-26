@@ -25,7 +25,7 @@
         
         #input {
             white-space: pre-wrap;
-            border: 1px solid rgba(0,0,0,0.2);
+            border: 1px solid rgba(0, 0, 0, 0.2);
             padding: 20px;
             outline: none;
             flex-grow: 1;
@@ -38,6 +38,40 @@
             outline: none;
         }
         
+        #input:empty:before {
+            content: attr(placeholder);
+            color: lightgray;
+            position: relative;
+        }
+        /* Button Styles */
+        
+        .icon-container {
+            position: relative;
+            display: inline-block;
+            margin-left: 3px;
+            color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .info-text {
+            visibility: hidden;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            white-space: normal;
+            font-size: 11px;
+            width: 150px;
+            overflow-wrap: break-word;
+        }
+        
+        .icon-container:hover .info-text {
+            visibility: visible;
+        }
+        
         button {
             padding: 10px;
             background: rgba(0, 0, 0, 0.8);
@@ -45,6 +79,38 @@
             border: none;
             outline: none;
             box-sizing: border-box;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: rgba(0, 0, 0, 1);
+        }
+        
+        .transparent-btn {
+            background: transparent;
+            color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .transparent-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .danger-btn {
+            background: rgb(244, 67, 54, 0.8);
+        }
+        
+        .danger-btn:hover {
+            background: rgb(244, 67, 54, 1);
+        }
+        
+        .messages-header {
+            display: flex;
+            justify-content: flex-end;
+            margin: 10px;
+        }
+        
+        .messages-header>button {
+            padding: 5px 10px;
         }
         
         #messages {
@@ -55,8 +121,14 @@
             padding: 0;
         }
         
-        #messages>li {
-            padding: 10px;
+        #messages>li,
+        .loading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 20px;
+            padding-right: 10px;
             font-size: 14px;
             box-sizing: border-box;
         }
@@ -69,13 +141,37 @@
             white-space: pre-wrap;
         }
         
-        .loading {
-            margin-bottom: 10px;
+        .message-content-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .message-content-container>p {
+            margin: 0;
+            margin-top: 10px;
+            padding: 0;
+            color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .message-no-prompt {
+            border-radius: 5px;
             padding: 10px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .loading {
             box-sizing: border-box;
             color: rgba(0, 0, 0, 0.7);
             font-size: 14px;
             background: #efefef;
+        }
+        
+        #loading-progress {
+            height: 3px;
+            width: 0;
+            background: #2196f3;
+            transition: width 1s ease-in;
         }
         
         .hidden {
@@ -85,18 +181,20 @@
         .input-container {
             background: rgba(0, 0, 0, 0.06);
         }
+        
         .input-container button {
-          padding: 30px;
-          margin-left: 10px;
+            padding: 30px;
+            margin-left: 10px;
         }
         
         .info {
             font-size: 12px;
             padding: 0 5px 10px;
         }
+        
         .info button {
-          padding: 5px 10px;
-          margin-right: 10px;
+            padding: 5px 10px;
+            margin-right: 10px;
         }
         
         .form-header {
@@ -104,7 +202,7 @@
             align-items: center;
             flex-wrap: wrap;
             margin: 0;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.9);
             padding: 10px 20px;
         }
         
@@ -121,12 +219,13 @@
             box-sizing: border-box;
             width: 100px;
         }
+        
         .form-header select {
-          width: 150px;
+            width: 150px;
         }
         
         .logo {
-          color: white;
+            color: white;
             font-weight: bold;
             text-decoration: none;
             display: block;
@@ -151,36 +250,42 @@
             text-align: right;
             display: block;
             padding: 5px 0px;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 12px;
         }
+        
         .prompt-header {
-          display: flex;
-          align-items: center;
-          padding: 10px 20px 0;
-          box-sizing: border-box;
-          font-size: 14px;
-          background: rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            padding: 10px 20px 0;
+            box-sizing: border-box;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.06);
         }
+        
         .prompt-header select {
-          margin: 0 10px;
-          flex-grow: 1;
-          padding: 5px;
-          border: 1px solid rgba(0,0,0,0.2);
-          max-width: 200px;
+            margin: 0 10px;
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            max-width: 200px;
         }
+        
         .prompt-header button {
-          padding: 7px 10px;
-          font-size: 12px;
+            padding: 7px 10px;
+            font-size: 12px;
         }
+        
         button {
-          cursor: pointer;
+            cursor: pointer;
         }
+        
         #prompt-cancel {
-          background: none;
-          color: white;
-          background: rgba(0,0,0,0.7);
+            background: none;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
         }
+        
         #prompt-cancel i {
             padding: 5px;
         }
@@ -192,50 +297,67 @@
         <div class='form-header'></div>
         <div class="prompt-header">
             <label for="prompt-select">Select a template</label>
+            <div class="icon-container">
+                <i class="fa-solid fa-circle-info"></i>
+                <span class="info-text">Templates help generate better results.<br/><br/>Add custom templates in ~/user/dalai/config/prompts as .txt files.</span>
+            </div>
             <select id="prompt-select"></select>
+            <input type="checkbox" id="show-prompt-checkbox" checked>
+            <label for="show-prompt-checkbox">Show template</label>
+            <div class="icon-container">
+                <i class="fa-solid fa-circle-info"></i>
+                <span class="info-text">Uncheck this for a cleaner interaction with Dalai. <br/><br/> If checked, replace >PROMPT with your desired input.</span>
+            </div>
             <div class='stretch'></div>
         </div>
         <div class='input-container'>
             <div class='input-field'>
-                <div contenteditable id='input'></div>
+                <div contenteditable id='input' placeholder="test"></div>
                 <button id='prompt-run'>Go</button>
                 <button id="prompt-cancel" class='hidden'><i class="fa-solid fa-circle-notch fa-spin"></i> Cancel</button>
             </div>
             <div class='info'>
-              <button id="prompt-reset">Reset</button>
-              <span>TIP: shift+enter for multiple lines</span>
+                <button id="prompt-reset">Reset</button>
+                <span>TIP: ctrl+enter (⌘+enter for mac) to submit</span>
             </div>
         </div>
     </form>
-    <pre class='loading hidden'></pre>
+    <div class="messages-header">
+        <button class='danger-btn' onclick="clearHistory()"><i class="fa-solid fa-eraser"></i> Clear All</button>
+    </div>
+    <div id="loading-progress"></div>
+    <li class='loading hidden'>
+        <span id="loading-message"></span>
+        <button class='transparent-btn message-action'><i class="fa-solid fa-spinner fa-spin-pulse"></i></button>
+    </li>
     <ul id="messages"></ul>
     <script src="/socket.io.min.js"></script>
     <script>
         const str = localStorage.getItem("config")
         let config
         if (str) {
-          try {
-            config = JSON.parse(str)
-          } catch (e) {
-          }
+            try {
+                config = JSON.parse(str)
+            } catch (e) {}
         }
         if (!config) {
-          config = {
-              seed: -1,
-              threads: 4,
-              n_predict: 200,
-              top_k: 40,
-              top_p: 0.9,
-              temp: 0.8,
-              repeat_last_n: 64,
-              repeat_penalty: 1.3,
-              debug: false,
-              models: []
-          }
+            config = {
+                seed: -1,
+                threads: 4,
+                n_predict: 200,
+                top_k: 40,
+                top_p: 0.9,
+                temp: 0.8,
+                repeat_last_n: 64,
+                repeat_penalty: 1.3,
+                debug: false,
+                models: []
+            }
         }
         const socket = io();
         const form = document.getElementById('form');
         const input = document.querySelector('#input');
+        const showPromptCheckbox = document.getElementById('show-prompt-checkbox');
         const model = document.querySelector('#model');
         const renderHeader = (config) => {
             const fields = [{
@@ -271,12 +393,19 @@ ${fields}
 </div>
 </div>`
         }
-        const loading = (on) => {
-            if (on) {
-                document.querySelector(".loading").textContent = on
+
+        const escapeNewLine = (arg) => navigator.userAgent.toLowerCase() === 'win' ? arg.replaceAll(/\n/g, "\\n").replaceAll(/\r/g, "\\r") : arg
+        const escapeDoubleQuotes = (arg) => navigator.userAgent.toLowerCase() === 'win' ? arg.replaceAll(/"/g, '`"') : arg.replaceAll(/"/g, '\\"')
+        const loading = (prompt, input) => {
+            if (prompt) {
+                let messageContent = document.createElement('span');
+                document.getElementById("loading-message").textContent = input
                 document.querySelector(".loading").classList.remove("hidden")
+
+                activePrompt = escapeDoubleQuotes(escapeNewLine(prompt))
+                activeInput = input;
             } else {
-                document.querySelector(".loading").textContent = ""
+                document.getElementById("loading-message").textContent = ""
                 document.querySelector(".loading").classList.add("hidden")
             }
         }
@@ -296,7 +425,7 @@ ${fields}
             e.stopPropagation()
             if (input.textContent) {
                 //config.prompt = input.textContent.replaceAll("\n", "\\n");
-                config.prompt = input.textContent
+                config.prompt = showPromptCheckbox.checked ? input.textContent : config.selectedPromptValue.replace('>PROMPT', input.textContent) || input.textContent;
                 config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
                 document.querySelector("#prompt-run").classList.add("hidden")
                 document.querySelector("#prompt-cancel").classList.remove("hidden")
@@ -304,49 +433,103 @@ ${fields}
                 localStorage.setItem("config", JSON.stringify(config))
                 socket.emit('request', config)
                 config.id = null
-                loading(config.prompt)
-                input.textContent = promptSelect.value;
+                loading(config.prompt, input.textContent)
+                updateInputToPrompt()
             }
         });
-        // input.addEventListener("keydown", (e) => {
-        //     if (e.keyCode === 13) {
-        //         e.preventDefault();
-        //         if (e.shiftKey) {
-        //             document.execCommand("insertLineBreak");
-        //         } else {
-        //             form.requestSubmit()
-        //         }
-        //     }
-        // })
+        input.addEventListener("keydown", (e) => {
+            if (e.keyCode === 13 && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                form.requestSubmit()
+            }
+        })
         document.querySelector("#prompt-cancel").addEventListener("click", (e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          socket.emit("request", {
-            prompt: "/stop"
-          })
-          document.querySelector("#prompt-run").classList.remove("hidden")
-          document.querySelector("#prompt-cancel").classList.add("hidden")
+            e.preventDefault()
+            e.stopPropagation()
+            socket.emit("request", {
+                prompt: "/stop"
+            })
+            resetPromptRequest()
+
+            // Add a delete button
+            let messageList = document.querySelector('#messages')
+            let messageAction = messageList.querySelector('.message-action');
+            messageAction.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+            messageAction.addEventListener('click', function() {
+                existing.remove();
+            });
         })
 
         // Load prompts from files
+        const rawTemplateToObj = (template) => {
+            const templateConfig = {};
+
+            // Regular expression to match parameters and their values
+            const parameterRegex = /@(\w+)\s+(.*)\n/g;
+
+            // Match all parameter-value pairs in the input string
+            let match;
+            while ((match = parameterRegex.exec(template)) !== null) {
+                const [fullMatch, parameter, value] = match;
+                if (parameter !== "configend") {
+                    templateConfig[parameter] = value.trim();
+                }
+            }
+
+            // Get the text after @configend and add it to the object
+            const promptStartIndex = template.indexOf("@configend") + "@configend".length;
+            const text = template.substring(promptStartIndex).trim();
+            templateConfig.prompt = text;
+
+            return templateConfig;
+        };
 
         // Update the input text with the selected prompt value
-        const handlePromptChange = () => {
-            const selectedPromptValue = promptSelect.value;
+        const updateInputToPrompt = (promptValue) => {
+            const {
+                prompt: selectedPromptValue,
+                placeholder,
+                gotext,
+                endpattern
+            } = rawTemplateToObj(promptSelect.value)
+                // const selectedPromptValue = promptSelect.value;
             const currentInputValue = input.textContent;
 
-            input.textContent = selectedPromptValue;
+            config = {
+                ...config,
+                selectedPromptValue,
+                placeholder,
+                gotext,
+                endpattern
+            }
 
-            // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
-            const promptIndex = input.textContent.indexOf('>PROMPT');
-            if (promptIndex >= 0) {
-                const range = document.createRange();
-                const selection = window.getSelection();
-                const promptEndIndex = promptIndex + ">PROMPT".length;
-                range.setStart(input.childNodes[0], promptIndex);
-                range.setEnd(input.childNodes[0], promptEndIndex);
-                selection.removeAllRanges();
-                selection.addRange(range);
+            input.textContent = selectedPromptValue; // Update input to be value if given one to replace
+
+            input.setAttribute('placeholder', placeholder || "")
+            document.getElementById("prompt-run").textContent = gotext || "Go"
+            input.setAttribute('endpattern', endpattern || "")
+
+            if (showPromptCheckbox.checked) {
+                // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
+                const promptIndex = input.textContent.indexOf('>PROMPT');
+                if (promptIndex >= 0) {
+                    const range = document.createRange();
+                    const selection = window.getSelection();
+                    let promptEndIndex
+                        // Replace the >PROMPT value if provided
+                    if (promptValue) {
+                        input.textContent = selectedPromptValue.replace('>PROMPT', promptValue);
+                        promptEndIndex = promptIndex + promptValue.length;
+                    } else {
+                        promptEndIndex = promptIndex + ">PROMPT".length;
+                    }
+                    range.setStart(input.childNodes[0], promptIndex);
+                    range.setEnd(input.childNodes[0], promptEndIndex);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+            } else {
+                input.textContent = ""
             }
 
             // Focus the input
@@ -360,27 +543,77 @@ ${fields}
                     return;
                 }
 
+                // Sort prompts alphabetically by category and prompt name
+                prompts.sort((a, b) => {
+                    const categoryA = getCategoryName(a.name);
+                    const categoryB = getCategoryName(b.name);
+                    if (categoryA !== categoryB) {
+                        return categoryA.localeCompare(categoryB);
+                    }
+                    return a.name.localeCompare(b.name);
+                });
+
                 // Populate prompt options
+                let currentCategory = "";
+                let currentOptgroup = null;
                 prompts.forEach(prompt => {
                     const option = document.createElement('option');
                     option.value = prompt.value;
                     option.textContent = prompt.name;
-                    promptSelect.appendChild(option);
+
+                    const category = getCategoryName(prompt.name);
+
+                    if (category !== currentCategory) {
+                        currentCategory = category;
+                        currentOptgroup = promptSelect.querySelector(`optgroup[label="${category}"]`);
+                        if (!currentOptgroup) {
+                            currentOptgroup = document.createElement('optgroup');
+                            currentOptgroup.label = category;
+                            promptSelect.appendChild(currentOptgroup);
+                        }
+                    }
+
+                    if (!currentOptgroup) {
+                        currentOptgroup = document.createElement('optgroup');
+                        currentOptgroup.label = "other";
+                        promptSelect.appendChild(currentOptgroup);
+                    }
+
+                    const subOption = document.createElement('option');
+                    subOption.value = prompt.value;
+                    subOption.textContent = getPromptName(prompt.name);
+                    currentOptgroup.appendChild(subOption);
                 });
 
+                function getCategoryName(name) {
+                    const categoryIndex = name.indexOf('-');
+                    if (categoryIndex !== -1) {
+                        return name.slice(0, categoryIndex);
+                    }
+                    return "other";
+                }
+
+                function getPromptName(name) {
+                    const categoryIndex = name.indexOf('-');
+                    if (categoryIndex !== -1) {
+                        return `${name.slice(0, categoryIndex)}/${name.slice(categoryIndex+1, name.length)}`
+                    }
+                    return name;
+                }
+
                 // Select the "default" prompt if it exists, otherwise select the first prompt
-                const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default');
+                const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default (alpaca)');
                 const initialPrompt = defaultPrompt || prompts[0];
                 promptSelect.value = initialPrompt.value;
                 input.textContent = initialPrompt.value;
 
-                promptSelect.addEventListener('change', handlePromptChange);
+                promptSelect.addEventListener('change', () => updateInputToPrompt());
                 resetButton.addEventListener('click', (e) => {
                     e.preventDefault() // Prevent form from submitting
-                    handlePromptChange()
+                    updateInputToPrompt()
                 });
 
-
+                updateInputToPrompt();
             })
             .catch(error => {
                 console.error('Error loading prompts:', error);
@@ -396,39 +629,162 @@ ${fields}
                 .join("");
             return hash;
         };
+
+        showPromptCheckbox.addEventListener('change', function() {
+            if (showPromptCheckbox.checked) {
+                updateInputToPrompt(input.textContent)
+            } else {
+                input.textContent = ''
+            }
+        });
+
+        const clearHistory = () => {
+            if (confirm('Are you sure you want to clear all history messages?\nThis action cannot be undone and all messages will be lost.')) {
+                messages.replaceChildren()
+            }
+        }
         const say = (msg, id) => {
             let item = document.createElement('li');
             if (id) item.setAttribute("data-id", id)
-            item.innerHTML = msg;
+
+            let messageContentContainer = document.createElement('div');
+            messageContentContainer.className = 'message-content-container'
+            let messagePrompt = document.createElement('span');
+
+            messagePrompt.innerHTML = msg;
+            messageContentContainer.appendChild(messagePrompt)
+
+            let messageContent = document.createElement('span');
+            if (!showPromptCheckbox.checked) {
+                messageContent.className = `message-content ${!showPromptCheckbox.checked ? 'message-no-prompt' : ''}`
+                let messagePromptTitle = document.createElement('p');
+                messagePromptTitle.className = 'message-prompt-title info'
+                const currPromptName = promptSelect.options[promptSelect.selectedIndex].textContent
+                messagePromptTitle.textContent = currPromptName
+                messageContentContainer.appendChild(messagePromptTitle)
+            } else {
+                messageContent.className = `message-content`
+            }
+
+            messageContentContainer.appendChild(messageContent)
+
+            let messageAction = document.createElement('button');
+            messageAction.className = 'message-action transparent-btn'
+            messageAction.innerHTML = '<i class="fa-solid fa-spinner fa-spin-pulse"></i>';
+
+            item.appendChild(messageContentContainer)
+            item.appendChild(messageAction)
             messages.prepend(item);
         }
         socket.emit('request', {
             method: "installed"
         })
+
+        // Keep track of the output
+        let tokenStartLen = 0;
+        let responseStart = false;
+        let activePrompt;
+        let activeInput;
+        let promptProgress = 0;
+
+        const resetPromptRequest = () => {
+            document.querySelector("#prompt-run").classList.remove("hidden")
+            document.querySelector("#prompt-cancel").classList.add("hidden")
+
+            // Reset output generation
+            activePrompt = undefined
+            activeInput = undefined
+            tokenStartLen = 0
+            promptProgress = 0
+            responseStart = false
+        }
+
         socket.on('result', async({
             request,
             response
         }) => {
-            loading(false)
             if (request.method === "installed") {
                 if (response == "\n\n<end>") {
-                  document.querySelector(".form-header").innerHTML = renderHeader(config)
+                    document.querySelector(".form-header").innerHTML = renderHeader(config)
                 } else {
-                  config.models = Array.from(new Set(config.models).add(response))
+                    config.models = Array.from(new Set(config.models).add(response))
                 }
             } else {
-                if (response == "\n\n<end>") {
-                  document.querySelector("#prompt-run").classList.remove("hidden")
-                  document.querySelector("#prompt-cancel").classList.add("hidden")
-                } else {
-                    const id = request.id
-                    let existing = document.querySelector(`[data-id='${id}']`)
+                const id = request.id
+                let existing = document.querySelector(`[data-id='${id}']`)
+                let loadingProgress = document.getElementById('loading-progress')
+                loading(false)
+
+                // Output is still your original prompt
+                if (!responseStart && activePrompt) {
+                    // Filter out common errors that the terminal may spit back
+                    if (response.includes(`repeat_penalty = `)) {
+                        console.log('NAH')
+                        return
+                    }
+
+                    tokenStartLen += escapeNewLine(escapeDoubleQuotes(response)).length;
+                    promptProgress = (tokenStartLen / activePrompt.length) * 100;
+
                     if (existing) {
-                        existing.textContent = existing.textContent + response
-                            //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
-                            //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
+                        loadingProgress.style.width = `${promptProgress}%`
                     } else {
-                        say(response, id)
+                        say(activeInput, id)
+                    }
+
+                    if (tokenStartLen >= activePrompt.length) {
+                        responseStart = true;
+                        // Hide progress bar
+                        loadingProgress.style.width = 0
+                    }
+                } else if (response == "\n\n<end>") {
+                    resetPromptRequest()
+                        // Add a delete button
+                    let messageAction = existing.querySelector('.message-action');
+                    messageAction.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+                    messageAction.addEventListener('click', function() {
+                        existing.remove();
+                    });
+                } else {
+                    if (existing) {
+                        let messageContent = existing.querySelector('.message-content')
+                        let newMessage = messageContent.textContent + response
+
+                        let containsEndPattern = false;
+                        let escapedEndPattern;
+                        let pattern;
+                        // If there is an endpattern in the template, see if we've hit it
+                        if (request.endpattern) {
+                            escapedEndPattern = request.endpattern.replace(/[-\/\\^$*+?.()|[\]{}]/ig, '\\$&');
+                            pattern = new RegExp(escapedEndPattern, "g");
+                            containsEndPattern = pattern.test(newMessage)
+                        }
+
+                        // If we've hit it, remove the endpattern and end the response
+                        if (containsEndPattern) {
+                            const containsEndIdx = pattern.lastIndex - request.endpattern.length;
+                            const resultString = messageContent.textContent.substring(0, containsEndIdx);
+                            messageContent.textContent = resultString;
+
+                            socket.emit("request", {
+                                prompt: "/stop"
+                            })
+                            resetPromptRequest()
+
+                            // Add a delete button
+                            let messageAction = existing.querySelector('.message-action');
+                            messageAction.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+                            messageAction.addEventListener('click', function() {
+                                existing.remove();
+                            });
+                        } else {
+                            // Add token to message
+                            if (newMessage.trim().length > 0) { // if it's just whitespace, don't update message 
+                                messageContent.textContent = newMessage
+                            }
+                        }
+                        //existing.innerHTML = existing.innerHTML.replaceAll(/\r?\n\x1B\[\d+;\d+H./g, "");
+                        //existing.textContent = existing.textContent.replaceAll("\\n", "\n");
                     }
                 }
             }

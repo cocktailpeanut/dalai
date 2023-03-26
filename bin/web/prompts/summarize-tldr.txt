@@ -1,0 +1,8 @@
+@placeholder Paste text to be summarized into bullet points...
+@gotext Summarize
+@endpattern \n
+@configend
+
+>PROMPT
+
+Tl;dr - 

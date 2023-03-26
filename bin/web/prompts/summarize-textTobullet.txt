@@ -1,0 +1,9 @@
+@placeholder Paste text to be summarized into bullet points...
+@gotext Summarize
+@endpattern \end{itemize}
+@configend
+
+>PROMPT
+
+Explain and summarize the above in short, concise bullet points that are understandable by a second-grade student:
+/begin{itemize}

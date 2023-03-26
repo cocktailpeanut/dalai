@@ -1,3 +1,8 @@
+@placeholder Paste a tweet to analyze...
+@endpattern ###
+@gotext Analyze Tweet
+@configend
+
 Tweet: 'I hate it when my phone battery dies.'
 Sentiment: Negative
 ###

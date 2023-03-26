@@ -1,0 +1,10 @@
+@placeholder Write a request or instruction...
+@endpattern ###
+@configend
+
+Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+### Instruction:
+>PROMPT
+
+### Response:

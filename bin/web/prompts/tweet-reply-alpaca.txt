@@ -1,0 +1,14 @@
+@placeholder Paste the tweet you are replying to...
+@endpattern ### Response:
+@gotext Tweet
+@configend
+
+Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+### Instruction:
+Given an input tweet, write an appropriate tweet reply that's funny or insightful. Make the response short form like a twitter tweet.
+
+### Input:
+>PROMPT
+
+### Response:
