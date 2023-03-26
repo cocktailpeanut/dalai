@@ -5,5 +5,5 @@
 
 >PROMPT
 
-Explain and summarize the above in bullet points that are understandable by a second-grade student:
-\begin{itemize}
+Explain and summarize the above in short, concise bullet points that are understandable by a second-grade student:
+/begin{itemize}
