@@ -425,7 +425,7 @@ ${fields}
             e.stopPropagation()
             if (input.textContent) {
                 //config.prompt = input.textContent.replaceAll("\n", "\\n");
-                config.prompt = showPromptCheckbox.checked ? input.textContent : config.selectedPromptValue.replace('>PROMPT', input.textContent);
+                config.prompt = showPromptCheckbox.checked ? input.textContent : config.selectedPromptValue.replace('>PROMPT', input.textContent) || input.textContent;
                 config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
                 document.querySelector("#prompt-run").classList.add("hidden")
                 document.querySelector("#prompt-cancel").classList.remove("hidden")
