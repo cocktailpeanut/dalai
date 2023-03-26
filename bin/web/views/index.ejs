@@ -750,8 +750,10 @@ ${fields}
                         let messageContent = existing.querySelector('.message-content')
                         let newMessage = messageContent.textContent + response
 
-                        let containsEndIdx = request.endpattern ? newMessage.lastIndexOf(request.endpattern) : -1;
-                        if (containsEndIdx > -1) {
+                        const pattern = new RegExp(request.endpattern, "g");
+                        let containsEndPattern = pattern.test(newMessage)
+                        if (containsEndPattern) {
+                            const containsEndIdx = pattern.lastIndex - request.endpattern.length;
                             const resultString = messageContent.textContent.substring(0, containsEndIdx);
                             messageContent.textContent = resultString;
 
