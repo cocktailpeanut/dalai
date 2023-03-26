@@ -755,7 +755,7 @@ ${fields}
                         let pattern;
                         // If there is an endpattern in the template, see if we've hit it
                         if (request.endpattern) {
-                            escapedEndPattern = request.endpattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                            escapedEndPattern = request.endpattern.replace(/[-\/\\^$*+?.()|[\]{}]/ig, '\\$&');
                             pattern = new RegExp(escapedEndPattern, "g");
                             containsEndPattern = pattern.test(newMessage)
                         }
