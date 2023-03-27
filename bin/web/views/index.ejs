@@ -283,7 +283,7 @@ ${fields}
         const promptSelect = document.getElementById('prompt-select');
         const resetButton = document.querySelector("#prompt-reset")
         document.querySelector("form").addEventListener("input", (e) => {
-            if (e.target.tagName === "SELECT") {
+            if (e.target.tagName === "SELECT" && e.target.name === 'model') {
                 config[e.target.name] = config.models[e.target.selectedIndex]
             } else if (e.target.type === "checkbox") {
                 config[e.target.name] = e.target.checked
