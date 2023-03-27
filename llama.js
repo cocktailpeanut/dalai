@@ -117,7 +117,14 @@ npx dalai install 7B 13B
         console.log(`Skip quantization, files already exists: ${outputFile1} and ${outputFile2}}`)
         continue
       }
-      const bin_path = platform === "win32" ? path.resolve(this.home, "build", "Release") : this.home
+      let bin_path = this.home;
+      if( platform === "win32") { 
+        if (fs.existsSync( path.resolve(this.home, "build", "Release", "quantize.exe") )) {
+          bin_path = path.resolve(this.home, "build", "Release");
+        } else {
+          // Some versions of Microsoft Visual Studio 2022 build the executable in '.\build\bin\Release'
+          bin_path = path.resolve(this.home, "build", "bin", "Release");
+        }
       await this.root.exec(`./quantize ${outputFile1} ${outputFile2} 2`, bin_path)
     }
   }
