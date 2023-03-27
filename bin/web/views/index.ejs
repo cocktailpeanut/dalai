@@ -25,17 +25,15 @@
         
         #input {
             white-space: pre-wrap;
-            border: 1px solid rgba(0,0,0,0.2);
+            border: 1px solid rgba(0, 0, 0, 0.2);
             padding: 20px;
             outline: none;
-            flex-grow: 1;
-            font-size: 14px;
             box-sizing: border-box;
             background: white;
-        }
-        
-        #input:focus {
-            outline: none;
+            resize: none;
+            width: 100%;
+            height: auto;
+            font-family: inherit;
         }
         
         button {
@@ -85,18 +83,20 @@
         .input-container {
             background: rgba(0, 0, 0, 0.06);
         }
+        
         .input-container button {
-          padding: 30px;
-          margin-left: 10px;
+            padding: 30px;
+            margin-left: 10px;
         }
         
         .info {
             font-size: 12px;
             padding: 0 5px 10px;
         }
+        
         .info button {
-          padding: 5px 10px;
-          margin-right: 10px;
+            padding: 5px 10px;
+            margin-right: 10px;
         }
         
         .form-header {
@@ -104,7 +104,7 @@
             align-items: center;
             flex-wrap: wrap;
             margin: 0;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.9);
             padding: 10px 20px;
         }
         
@@ -121,12 +121,13 @@
             box-sizing: border-box;
             width: 100px;
         }
+        
         .form-header select {
-          width: 150px;
+            width: 150px;
         }
         
         .logo {
-          color: white;
+            color: white;
             font-weight: bold;
             text-decoration: none;
             display: block;
@@ -151,36 +152,42 @@
             text-align: right;
             display: block;
             padding: 5px 0px;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 12px;
         }
+        
         .prompt-header {
-          display: flex;
-          align-items: center;
-          padding: 10px 20px 0;
-          box-sizing: border-box;
-          font-size: 14px;
-          background: rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            padding: 10px 20px 0;
+            box-sizing: border-box;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.06);
         }
+        
         .prompt-header select {
-          margin: 0 10px;
-          flex-grow: 1;
-          padding: 5px;
-          border: 1px solid rgba(0,0,0,0.2);
-          max-width: 200px;
+            margin: 0 10px;
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            max-width: 200px;
         }
+        
         .prompt-header button {
-          padding: 7px 10px;
-          font-size: 12px;
+            padding: 7px 10px;
+            font-size: 12px;
         }
+        
         button {
-          cursor: pointer;
+            cursor: pointer;
         }
+        
         #prompt-cancel {
-          background: none;
-          color: white;
-          background: rgba(0,0,0,0.7);
+            background: none;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
         }
+        
         #prompt-cancel i {
             padding: 5px;
         }
@@ -197,13 +204,13 @@
         </div>
         <div class='input-container'>
             <div class='input-field'>
-                <div contenteditable id='input'></div>
+                <textarea id='input' rows="1"></textarea>
                 <button id='prompt-run'>Go</button>
                 <button id="prompt-cancel" class='hidden'><i class="fa-solid fa-circle-notch fa-spin"></i> Cancel</button>
             </div>
             <div class='info'>
-              <button id="prompt-reset">Reset</button>
-              <span>TIP: shift+enter for multiple lines</span>
+                <button id="prompt-reset">Reset</button>
+                <span>TIP: shift+enter for multiple lines</span>
             </div>
         </div>
     </form>
@@ -214,24 +221,23 @@
         const str = localStorage.getItem("config")
         let config
         if (str) {
-          try {
-            config = JSON.parse(str)
-          } catch (e) {
-          }
+            try {
+                config = JSON.parse(str)
+            } catch (e) {}
         }
         if (!config) {
-          config = {
-              seed: -1,
-              threads: 4,
-              n_predict: 200,
-              top_k: 40,
-              top_p: 0.9,
-              temp: 0.8,
-              repeat_last_n: 64,
-              repeat_penalty: 1.3,
-              debug: false,
-              models: []
-          }
+            config = {
+                seed: -1,
+                threads: 4,
+                n_predict: 200,
+                top_k: 40,
+                top_p: 0.9,
+                temp: 0.8,
+                repeat_last_n: 64,
+                repeat_penalty: 1.3,
+                debug: false,
+                models: []
+            }
         }
         const socket = io();
         const form = document.getElementById('form');
@@ -294,9 +300,9 @@ ${fields}
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             e.stopPropagation()
-            if (input.textContent) {
+            if (input.value) {
                 //config.prompt = input.textContent.replaceAll("\n", "\\n");
-                config.prompt = input.textContent
+                config.prompt = input.value
                 config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
                 document.querySelector("#prompt-run").classList.add("hidden")
                 document.querySelector("#prompt-cancel").classList.remove("hidden")
@@ -305,8 +311,18 @@ ${fields}
                 socket.emit('request', config)
                 config.id = null
                 loading(config.prompt)
-                input.textContent = promptSelect.value;
+                input.value = promptSelect.value;
             }
+        });
+
+        const adjustInputHeight = () => {
+            input.style.height = 'auto';
+            input.style.height = input.scrollHeight + 'px';
+
+        }
+
+        input.addEventListener('input', () => {
+            adjustInputHeight()
         });
         // input.addEventListener("keydown", (e) => {
         //     if (e.keyCode === 13) {
@@ -319,13 +335,13 @@ ${fields}
         //     }
         // })
         document.querySelector("#prompt-cancel").addEventListener("click", (e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          socket.emit("request", {
-            prompt: "/stop"
-          })
-          document.querySelector("#prompt-run").classList.remove("hidden")
-          document.querySelector("#prompt-cancel").classList.add("hidden")
+            e.preventDefault()
+            e.stopPropagation()
+            socket.emit("request", {
+                prompt: "/stop"
+            })
+            document.querySelector("#prompt-run").classList.remove("hidden")
+            document.querySelector("#prompt-cancel").classList.add("hidden")
         })
 
         // Load prompts from files
@@ -333,21 +349,20 @@ ${fields}
         // Update the input text with the selected prompt value
         const handlePromptChange = () => {
             const selectedPromptValue = promptSelect.value;
-            const currentInputValue = input.textContent;
+            const currentInputValue = input.value;
 
-            input.textContent = selectedPromptValue;
+            input.value = selectedPromptValue;
 
             // Move the cursor to the first instance of ">PROMPT" and select only the word ">PROMPT"
-            const promptIndex = input.textContent.indexOf('>PROMPT');
+            const promptIndex = input.value.indexOf('>PROMPT');
             if (promptIndex >= 0) {
                 const range = document.createRange();
-                const selection = window.getSelection();
+                const selection = document.getSelection();
                 const promptEndIndex = promptIndex + ">PROMPT".length;
-                range.setStart(input.childNodes[0], promptIndex);
-                range.setEnd(input.childNodes[0], promptEndIndex);
-                selection.removeAllRanges();
-                selection.addRange(range);
+                input.setSelectionRange(promptIndex, promptEndIndex);
             }
+
+            adjustInputHeight()
 
             // Focus the input
             input.focus();
@@ -372,7 +387,8 @@ ${fields}
                 const defaultPrompt = prompts.find(prompt => prompt.name.toLowerCase() === 'default');
                 const initialPrompt = defaultPrompt || prompts[0];
                 promptSelect.value = initialPrompt.value;
-                input.textContent = initialPrompt.value;
+                input.value = initialPrompt.value;
+                adjustInputHeight()
 
                 promptSelect.addEventListener('change', handlePromptChange);
                 resetButton.addEventListener('click', (e) => {
@@ -412,14 +428,14 @@ ${fields}
             loading(false)
             if (request.method === "installed") {
                 if (response == "\n\n<end>") {
-                  document.querySelector(".form-header").innerHTML = renderHeader(config)
+                    document.querySelector(".form-header").innerHTML = renderHeader(config)
                 } else {
-                  config.models = Array.from(new Set(config.models).add(response))
+                    config.models = Array.from(new Set(config.models).add(response))
                 }
             } else {
                 if (response == "\n\n<end>") {
-                  document.querySelector("#prompt-run").classList.remove("hidden")
-                  document.querySelector("#prompt-cancel").classList.add("hidden")
+                    document.querySelector("#prompt-run").classList.remove("hidden")
+                    document.querySelector("#prompt-cancel").classList.add("hidden")
                 } else {
                     const id = request.id
                     let existing = document.querySelector(`[data-id='${id}']`)
