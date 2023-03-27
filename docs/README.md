@@ -472,7 +472,7 @@ Using node.js, you just need to initialize a Dalai object with `new Dalai()` and
 ```javascript
 const Dalai = require('dalai')
 new Dalai().request({
-  model: "7B",
+  model: "llama.7B",
   prompt: "The following is a conversation between a boy and a girl:",
 }, (token) => {
   process.stdout.write(token)
@@ -501,7 +501,7 @@ Then once the server is running, simply make requests to it by passing the `ws:/
 const Dalai = require("dalai")
 new Dalai().request({
   url: "ws://localhost:3000",
-  model: "7B",
+  model: "llama.7B",
   prompt: "The following is a conversation between a boy and a girl:",
 }, (token) => {
   console.log("token", token)
