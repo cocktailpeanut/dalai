@@ -444,16 +444,8 @@ class Dalai {
     const root_pip_paths = (platform === "win32" ? ["pip3", "pip", path.resolve(this.home, "python", "python -m pip")] : ["pip3", "pip"])
 
     // 3.2. Build tools
-    if (platform === "linux") {
-      // ubuntu debian
-      success = await this.exec("apt-get install build-essential python3-venv -y")
-      if (!success) {
-        // fefdora
-        success = await this.exec("dnf install make automake gcc gcc-c++ kernel-devel python3-virtualenv -y")
-      }
-    } else {
-      // for win32 / darwin
-      for(let root_pip_path of root_pip_paths) {
+    if (platform === "win32") {
+      for (let root_pip_path of root_pip_paths) {
         success = await this.exec(`${root_pip_path} install --user virtualenv`)
         if (success) {
           break;
@@ -466,7 +458,6 @@ class Dalai {
       if (!success) {
         throw new Error("cannot install virtualenv")
       }
-
     }
 
     // 3.3. virtualenv
