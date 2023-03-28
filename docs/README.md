@@ -12,6 +12,11 @@ Run LLaMA and Alpaca on your computer.
 
 <img src="npx2.png" class='round'>
 
+```
+npx dalai llama install 7B
+npx dalai serve
+```
+
 ## TO GET
 
 Both alpaca and llama working on your computer!
