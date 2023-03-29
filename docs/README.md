@@ -111,18 +111,34 @@ You do NOT have to install all models, you can install one by one. Let's take a 
 
 # Quickstart
 
-## Docker compose
+## Docker Compose
+Requires that you have docker and docker compose installed and running. To verify this, simply run:
 
-Requires that you have docker installed and running.
-```
+- `docker version`
+- `docker-compose version`
+
+To run dalai and alpaca, simply run:
+- `./start_docker.sh` to start the container and 
+- Once the container is up and the model has been downloaded, access the site in the browser `http://127.0.0.1:3000/` or simply run in the terminal `open http://127.0.0.1:3000/`.
+- `./stop_docker.sh`to stop the container. 
+
+___Note 1: This will dave the models in the `./models` folder.___
+
+___Note 2: You can specify a different model by modifying `docker-compose.yml`___
+
+**Windows Users**
+
+Start Container:
+```cmd
 docker compose build
-docker compose run dalai npx dalai alpaca install 7B # or a different model
-docker compose up -d
+docker-compose run --rm dalai npx dalai alpaca install 7B # or a different model
+docker-compose -p dalai up -d
 ```
 
-This will dave the models in the `./models` folder
-
-View the site at http://127.0.0.1:3000/
+Stop Container
+```cmd
+docker-compose -p dalai down
+```
 
 ## Mac
 
