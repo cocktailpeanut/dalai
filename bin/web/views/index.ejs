@@ -297,6 +297,7 @@ ${fields}
             if (input.textContent) {
                 //config.prompt = input.textContent.replaceAll("\n", "\\n");
                 config.prompt = input.textContent
+                config.model = form.querySelector('#model option[selected]').value
                 config.id = "TS-" + Date.now() + "-" + Math.floor(Math.random() * 100000)
                 document.querySelector("#prompt-run").classList.add("hidden")
                 document.querySelector("#prompt-cancel").classList.remove("hidden")
