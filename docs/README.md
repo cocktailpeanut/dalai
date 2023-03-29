@@ -8,6 +8,12 @@ Run LLaMA and Alpaca on your computer.
 
 ---
 
+# Warnings
+Please be aware that the installation process requires the use of **torrents** for downloading files.
+In some countries, including Germany, this method of file sharing may be **illegal** or subject to **fines and penalties**.
+
+---
+
 ## JUST RUN THIS
 
 <img src="npx2.png" class='round'>
