@@ -29,6 +29,15 @@ const stripAnsi = (str) => {
   const regex = new RegExp(pattern, 'g')
   return str.replace(regex, '');
 }
+const winEscape = (str) => {
+  return str
+  .replaceAll(/\\n/g, "\n")
+  .replaceAll(/\\r/g, "\r")
+  .replaceAll(/\\t/g, "\t")
+  .replaceAll(/\\b/g, "\b")
+  .replaceAll(/\\f/g, "\f")
+  .replaceAll(/\\/g, "")
+}
 
 class Dalai {
   constructor(home) {
