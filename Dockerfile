@@ -4,12 +4,13 @@ FROM python:3.10-slim-buster
 EXPOSE 3000
 
 # Install dependencies
-RUN apt-get update \
+RUN apt-get update && \
+    apt-get upgrade -y \
     && apt-get install -y \
         build-essential \
         curl \
         g++ \
-	git \
+	    git \
         make \
         python3-venv \
         software-properties-common
@@ -28,7 +29,5 @@ RUN npm install dalai@0.3.1
 
 RUN npx dalai alpaca setup
 
-
 # Run the dalai server
 CMD [ "npx", "dalai", "serve" ]
-
