@@ -19,7 +19,7 @@ class Alpaca {
       // CMake on Windows
       const venv_path = path.join(this.root.home, "venv")
       const cmake_path = path.join(venv_path, "Scripts", "cmake")
-      await this.root.exec("mkdir build", this.home)      
+      await this.root.exec("mkdir build", this.home)
       await this.root.exec(`Remove-Item -path ${path.resolve(this.home, "build", "CMakeCache.txt")}`, this.home)
 
       let PS_COUNTER = 0
@@ -87,7 +87,7 @@ class Alpaca {
             url = "https://huggingface.co/Pi3141/alpaca-7B-ggml/resolve/main/ggml-model-q4_0.bin"
             await this.root.down(url, path.resolve(dir, "ggml-model-q4_0.bin"))
             break;
-          
+
           case "13B":
             /*
             await this.root.torrent.add('magnet:?xt=urn:btih:053b3d54d2e77ff020ebddf51dad681f2a651071&dn=ggml-alpaca-13b-q4.bin&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.com%3A2810%2Fannounce', dir)
@@ -105,7 +105,7 @@ class Alpaca {
             url = "https://huggingface.co/Pi3141/alpaca-30B-ggml/resolve/main/ggml-model-q4_0.bin"
             await this.root.down(url, path.resolve(dir, "ggml-model-q4_0.bin"))
             break;
-          
+
           default:
             console.log("Select either model 7B, 13B, or 30B")
             break;
