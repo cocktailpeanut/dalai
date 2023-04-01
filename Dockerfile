@@ -31,4 +31,3 @@ RUN npx dalai alpaca setup
 
 # Run the dalai server
 CMD [ "npx", "dalai", "serve" ]
-

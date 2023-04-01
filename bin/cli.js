@@ -22,7 +22,7 @@ if (argv._.length > 0) {
   } else {
     if (args.length > 0) {
       let core = cmd
-      let [method, ...callparams] = args 
+      let [method, ...callparams] = args
       let dalai = new Dalai(home)
       console.log({ method, callparams })
       // 1. install => install the core module
@@ -69,7 +69,7 @@ if (argv._.length > 0) {
 //  } else {
 //    if (args.length > 0) {
 //      let core = cmd
-//      let [method, ...callparams] = args 
+//      let [method, ...callparams] = args
 //      let dalai = new Dalai()
 //      console.log({ method, callparams })
 //      // 1. install => install the core module

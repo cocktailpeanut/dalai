@@ -19,7 +19,7 @@ class LLaMA {
       // CMake on Windows
       const venv_path = path.join(this.root.home, "venv")
       const cmake_path = path.join(venv_path, "Scripts", "cmake")
-      await this.root.exec("mkdir build", this.home)      
+      await this.root.exec("mkdir build", this.home)
       await this.root.exec(`Remove-Item -path ${path.resolve(this.home, "build", "CMakeCache.txt")}`, this.home)
       let PS_COUNTER = 0
       await this.root.exec(`${cmake_path} ..`, path.resolve(this.home, "build"), (proc, data) => {
@@ -63,7 +63,7 @@ class LLaMA {
 #
 #   ERROR
 #   The arguments must be one or more of the following:
-# 
+#
 #   7B, 13B, 30B, 65B
 #
 ##########################################################
@@ -71,7 +71,7 @@ class LLaMA {
 [Example]
 
 # install just 7B (default)
-npx dalai install   
+npx dalai install
 
 # install 7B manually
 npx dalai install 7B
