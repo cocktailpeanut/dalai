@@ -10,7 +10,7 @@ class LLaMA {
   constructor(root) {
     this.root = root
     this.home = path.resolve(this.root.home, "llama")
-    this.url = "https://github.com/candywrap/llama.cpp.git"
+    this.url = "https://github.com/ggerganov/llama.cpp.git"
   }
   async make() {
     console.log("make")
