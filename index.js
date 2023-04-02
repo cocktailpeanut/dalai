@@ -547,7 +547,7 @@ class Dalai {
   connect(req, cb) {
     const socket = io(req.url)
     socket.emit('request', req)
-    socket.on('response', cb)
+    socket.on('result', cb)
     socket.on('error', function(e) {
       throw e
     });
