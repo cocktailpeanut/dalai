@@ -97,7 +97,7 @@ class Alpaca {
               path.resolve(dir, "ggml-model-q4_0.bin")
             )
             */
-            url = "https://huggingface.co/Pi3141/alpaca-13B-ggml/resolve/main/ggml-model-q4_0.bin"
+            url = "https://huggingface.co/Pi3141/alpaca-13B-ggml/resolve/main/ggml-model-q4_1.bin"
             await this.root.down(url, path.resolve(dir, "ggml-model-q4_0.bin"))
             break;
 
