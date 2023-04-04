@@ -111,8 +111,16 @@ npx dalai install 7B 13B
     }
     for(let i=0; i<num[model]; i++) {
       const suffix = (i === 0 ? "" : `.${i}`)
+
+      const potentialOutputFiles = fs.readdirSync(`./models/${model}/`).filter(f => f.endsWith(`.bin`))
+      
+      if (potentialOutputFiles.length === 0) {
+        throw new Error(`No bin file found in ./models/${model}/`)
+      }
+
       const outputFile1 = path.resolve(this.home, `./models/${model}/ggml-model-f16.bin${suffix}`)
-      const outputFile2 = path.resolve(this.home, `./models/${model}/ggml-model-q4_0.bin${suffix}`)
+      const outputFile2 = path.resolve(this.home, `./models/${model}/${potentialOutputFiles[0]}${suffix}`)
+
       if (fs.existsSync(outputFile1) && fs.existsSync(outputFile2)) {
         console.log(`Skip quantization, files already exists: ${outputFile1} and ${outputFile2}}`)
         continue
