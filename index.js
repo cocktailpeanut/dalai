@@ -225,13 +225,19 @@ class Dalai {
       seed: req.seed || -1,
       threads: req.threads || 8,
       n_predict: req.n_predict || 128,
-      model: `models/${Model || "7B"}/ggml-model-q4_0.bin`,
+      model: "",
     }
 
     let e = await exists(path.resolve(this.home, Core, "models", Model))
     if (!e) {
       cb(`File does not exist: ${Model}. Try "dalai ${Core} get ${Model}" first.`)
       return
+    } else {
+      const potentialBinFiles = await fs.promises.readdir(path.resolve(this.home, Core, "models", Model))
+      if (potentialBinFiles.length === 0) {
+        cb(`No model files found in ${Model}. Try "dalai ${Core} get ${Model}" first.`) 
+      }
+      o.model = path.resolve(this.home, Core, "models", Model, potentialBinFiles[0])
     }
 
     if (req.top_k) o.top_k = req.top_k
@@ -367,8 +373,11 @@ class Dalai {
 
       console.log({ modelFolders })
       for(let modelFolder of modelFolders) {
-        let e = await exists(path.resolve(modelsPath, modelFolder, 'ggml-model-q4_0.bin'))
-        if (e) {
+        // get bin files in model folder
+
+        const binFiles = fs.readdirSync(path.resolve(modelsPath, modelFolder)).filter((f) => f.endsWith(".bin"))
+
+        if (binFiles.length !== 0) {
           modelNames.push(`${core}.${modelFolder}`)
           console.log("exists", modelFolder)
         }

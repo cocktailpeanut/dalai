@@ -65,10 +65,34 @@ class Alpaca {
       * 5. Download models + convert + quantize
       *
       **************************************************************************************************************/
-      const outputFile = path.resolve(this.home, 'models', model, 'ggml-model-q4_0.bin')
-      if (fs.existsSync(outputFile)) {
-        console.log(`Skip conversion, file already exists: ${outputFile}`)
-      } else {
+      
+      const currentVersions = {
+        "7B": 'ggml-model-q4_0.bin',
+        "13B": 'ggml-model-q4_1.bin',
+        "30B": 'ggml-model-q4_0.bin',
+      }
+
+      const outputFile = path.resolve(this.home, 'models', model, currentVersions[model])
+
+      const modelExists = (f) => {
+        if (fs.existsSync(f)) {
+          console.log(`Skip conversion, file already exists: ${f}`)
+          return true
+        }
+        // delete other model files in folder in case of an upgrade
+
+        const dir = path.dirname(f);
+        const files = fs.readdirSync(dir);
+        if (files.length !== 0) console.log("Upgrading model, removing old files...")
+
+        for (const file of files) {
+          fs.unlinkSync(path.join(dir, file));
+          console.log(`Removed old model file: ${file} in ${dir}`)
+        }
+        return false
+      }
+      
+      if (!modelExists(outputFile)) {
         const dir = path.resolve(this.home, "models", model)
         console.log("dir", dir)
         await fs.promises.mkdir(dir, { recursive: true }).catch((e) => {
@@ -76,39 +100,12 @@ class Alpaca {
         })
         console.log("downloading torrent")
         let url
-        switch (model) {
-          case "7B":
-            //await this.root.torrent.add('magnet:?xt=urn:btih:5aaceaec63b03e51a98f04fd5c42320b2a033010&dn=ggml-alpaca-7b-q4.bin&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce', dir)
-            //console.log("renaming")
-            //await fs.promises.rename(
-            //  path.resolve(dir, "ggml-alpaca-7b-q4.bin"),
-            //  path.resolve(dir, "ggml-model-q4_0.bin")
-            //)
-            url = "https://huggingface.co/Pi3141/alpaca-7B-ggml/resolve/main/ggml-model-q4_0.bin"
-            await this.root.down(url, path.resolve(dir, "ggml-model-q4_0.bin"))
-            break;
-          
-          case "13B":
-            /*
-            await this.root.torrent.add('magnet:?xt=urn:btih:053b3d54d2e77ff020ebddf51dad681f2a651071&dn=ggml-alpaca-13b-q4.bin&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.com%3A2810%2Fannounce', dir)
-            console.log("renaming")
-            await fs.promises.rename(
-              path.resolve(dir, "ggml-alpaca-13b-q4.bin"),
-              path.resolve(dir, "ggml-model-q4_0.bin")
-            )
-            */
-            url = "https://huggingface.co/Pi3141/alpaca-13B-ggml/resolve/main/ggml-model-q4_0.bin"
-            await this.root.down(url, path.resolve(dir, "ggml-model-q4_0.bin"))
-            break;
 
-          case "30B":
-            url = "https://huggingface.co/Pi3141/alpaca-30B-ggml/resolve/main/ggml-model-q4_0.bin"
-            await this.root.down(url, path.resolve(dir, "ggml-model-q4_0.bin"))
-            break;
-          
-          default:
-            console.log("Select either model 7B, 13B, or 30B")
-            break;
+        if (Object.keys(currentVersions).includes(model)) {
+          url = `https://huggingface.co/Pi3141/alpaca-${model}-ggml/resolve/main/${currentVersions[model]}`
+            await this.root.down(url, path.resolve(dir, currentVersions[model]))
+        } else {
+          console.log("Select either model 7B, 13B, or 30B")
         }
       }
     }
