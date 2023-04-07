@@ -10,7 +10,13 @@ Run LLaMA and Alpaca on your computer.
 
 ## JUST RUN THIS
 
-<img src="npx2.png" class='round'>
+```sh
+# install model
+npx dalai llama install 7B
+
+# launch web UI + socket.io API
+npx dalai serve
+```
 
 ## TO GET
 
