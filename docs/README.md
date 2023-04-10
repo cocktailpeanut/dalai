@@ -212,7 +212,7 @@ and open http://localhost:3000 in your browser. Have fun!
 
 ## Windows
 
-### Step 1. Install Visual Studio
+### Step 1.1. Install Visual Studio
 
 On windows, you need to install Visual Studio before installing Dalai.
 
@@ -229,6 +229,12 @@ When installing Visual Studio, make sure to check the 3 options as highlighted b
 3. Desktop development with C++
 
 ![vs.png](vs.png)
+
+---
+
+### Step 1.2. Install Node.js
+
+Install Node.js from the <a href="https://nodejs.org/" class="btn">official website</a>.
 
 ---
 
