@@ -340,7 +340,7 @@ class Dalai {
     let models_path = path.resolve(engine.home, "models")
     let temp_path = path.resolve(this.home, "tmp")
     let temp_models_path = path.resolve(temp_path, "models")
-    // 1. make sure the folders exist
+    // 1. make sure the models_path and temp_path exist and temp_models_path doesn't exist
     if (!fs.existsSync(models_path)) {
       await fs.promises.mkdir(models_path, { recursive: true }).catch((e) => { console.log("1", e)})
     }
