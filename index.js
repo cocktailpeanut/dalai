@@ -178,7 +178,7 @@ class Dalai {
 //    this.progressBar.update(1);
 //    await new Promise((resolve, reject) => {
 //      _7z.unpack(path.resolve(this.home, "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"), this.home, (err) => {
-//        if (err) { 
+//        if (err) {
 //          reject(err)
 //        } else {
 //          resolve()
@@ -189,7 +189,7 @@ class Dalai {
 //    await fs.promises.rm(path.resolve(this.home, "x86_64-12.2.0-release-win32-seh-msvcrt-rt_v10-rev2.7z"))
 //  }
   async query(req, cb) {
-    
+
     console.log(`> query:`, req)
     if (req.method === "installed") {
       let models = await this.installed()
@@ -215,8 +215,11 @@ class Dalai {
     if (!req.prompt) {
       return
     }
-
-    let [Core, Model] = req.models[0].split(".")
+    if (!req.model) {
+      cb("Please specify a model")
+      return
+    }
+    let [Core, Model] = req.model.split(".")
     Model = Model.toUpperCase()
 
     console.log( { Core, Model } )
@@ -286,7 +289,7 @@ class Dalai {
           // otherwise flush
           this.queue.push(msg[i])
           let queueContent = this.queue.join("")
-          
+
           if (!this.bufferStarted && ["\n", "\b", "\f", "\r", "\t"].includes(queueContent)) {
             // if the buffer hasn't started and incoming tokens are whitespaces, ignore
           } else {
@@ -306,7 +309,7 @@ class Dalai {
         cb(this.htmlencode(msg))
       } else {
         cb(msg)
-      } 
+      }
     }
   }
   async uninstall(core, ...models) {
@@ -337,7 +340,7 @@ class Dalai {
     let models_path = path.resolve(engine.home, "models")
     let temp_path = path.resolve(this.home, "tmp")
     let temp_models_path = path.resolve(temp_path, "models")
-    await fs.promises.mkdir(models_path, { recursive: true }).catch((e) => { })
+    await fs.promises.mkdir(models_path, { recursive: true }).catch((e) => { console.log(e)})
     await fs.promises.mkdir(temp_path, { recursive: true }).catch((e) => { console.log("1", e) })
     // 1. move the models folder to ../tmp
     await fs.promises.rename(models_path, temp_models_path).catch((e) => { console.log("2", e) })
@@ -347,6 +350,7 @@ class Dalai {
     await fs.promises.rm(models_path, { recursive: true }).catch((e) => { console.log("3", e) })
     // 4. move back the files inside /tmp
     await fs.promises.rename(temp_models_path, models_path).catch((e) => { console.log("4", e) })
+
     // next add the models
     let res = await this.cores[core].add(...models)
     return res
@@ -438,7 +442,7 @@ class Dalai {
 
     // 3.1. Python: Windows doesn't ship with python, so install a dedicated self-contained python
     if (platform === "win32") {
-      await this.python() 
+      await this.python()
     }
     const root_python_paths = (platform === "win32" ? ["python3", "python", path.resolve(this.home, "python", "python.exe")] : ["python3", "python"])
     const root_pip_paths = (platform === "win32" ? ["pip3", "pip", path.resolve(this.home, "python", "python -m pip")] : ["pip3", "pip"])
@@ -499,7 +503,7 @@ class Dalai {
       success = await this.exec(`${pip_path} install --user --upgrade pip setuptools wheel`)
       if (!success) {
         throw new Error("pip setuptools wheel upgrade failed")
-        return  
+        return
       }
     }
     success = await this.exec(`${pip_path} install torch torchvision torchaudio sentencepiece numpy`)
@@ -508,7 +512,7 @@ class Dalai {
       success = await this.exec(`${pip_path} install --user torch torchvision torchaudio sentencepiece numpy`)
       if (!success) {
         throw new Error("dependency installation failed")
-        return  
+        return
       }
     }
 
