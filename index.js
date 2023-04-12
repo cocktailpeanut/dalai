@@ -16,6 +16,7 @@ const semver = require('semver');
 //const _7z = require('7zip-min');
 const EasyDl = require("easydl");
 const chalk = require("chalk");
+const bytes = require("bytes");
 const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 const L = require("./llama")
@@ -140,13 +141,19 @@ class Dalai {
     const multibar = new cliProgress.MultiBar({
       clearOnComplete: false,
       hideCursor: true,
-      format: `${chalk.bold("{filename}")} ${chalk.yellow("{percentage}%")} ${chalk.cyan("{bar}")} ${chalk.grey("{eta_formatted}")}`,
+      autopadding: true,
+      format: `${chalk.bold("{filename}")}  ${chalk.yellow("{percentage}%")} ${chalk.cyan("{bar}")} {speed}${chalk.grey("{eta_formatted}")}`,
     }, cliProgress.Presets.shades_classic);
+
+    const longestFileName = items.reduce((acc, item) => {
+      return Math.max(acc, path.basename(item.dest).trim().length);
+    }, 0);
 
     async function downloadFile(url, dest, headers) {
       const bar = multibar.create(100, 0);
       bar.update(0, {
-        filename: path.basename(dest)
+        speed: "",
+        filename: path.basename(dest).trim().padEnd(longestFileName, " "),
       });
       
       const download = new EasyDl(url, dest, {
@@ -159,7 +166,9 @@ class Dalai {
       });
   
       download.on("progress", (progressReport) => {
-        bar.update(Math.floor(progressReport.total.percentage));
+        bar.update(progressReport.total.percentage, {
+          speed: Number.isFinite(progressReport.total.speed) ? chalk.blue((bytes(progressReport.total.speed) + "/s").padEnd(10)) + chalk.grey(" | ") : ""
+        });
       });
   
       let recentError = null;
