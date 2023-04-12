@@ -14,7 +14,7 @@ const term = require( 'terminal-kit' ).terminal;
 const Downloader = require("nodejs-file-downloader");
 const semver = require('semver');
 //const _7z = require('7zip-min');
-const axios = require('axios')
+const EasyDl = require("easydl");
 const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 const L = require("./llama")
@@ -102,33 +102,34 @@ class Dalai {
     }
     return encodedStr;
   }
-  down(url, dest, headers) {
-    return new Promise((resolve, reject) => {
-      const task = path.basename(dest)
-      this.startProgress(task)
-      axios({
-        url,
-        method: 'GET',
-        responseType: 'stream',
-        maxContentLength: Infinity,
-        headers,
-        onDownloadProgress: progressEvent => {
-          const progress = (progressEvent.loaded / progressEvent.total) * 100;
-          this.progress(task, progress)
-        }
+  async down(url, dest, headers) {
+    const task = path.basename(dest);
 
-      }).then(response => {
-        const writer = fs.createWriteStream(dest);
-        response.data.pipe(writer);
-        writer.on('finish', () => {
-          this.progressBar.update(1);
-          term("\n")
-          resolve()
-        });
-      }).catch(error => {
-        reject(error)
-      });
-    })
+    const download = new EasyDl(url, dest, {
+      connections: 10,
+      maxRetry: 30,
+      existBehavior: "overwrite",
+      httpOptions: {
+        headers: headers || {}
+      }
+    });
+
+    download.on('progress', (progressReport) => {
+      this.progress(task, progressReport.total.percentage);
+    });
+
+    let recentError = null;
+    download.on("error", (error) => {
+      recentError = error;
+    });
+
+    const success = await download.wait();
+
+    if (!success)
+      throw recentError || new Error("Download failed");
+
+    this.progressBar.update(1);
+    term("\n");
   }
   async python () {
     // install self-contained python => only for windows for now
