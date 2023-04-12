@@ -138,6 +138,7 @@ npx dalai install 7B 13B
     const resolvedPath = path.resolve(this.home, "models", model)
     await fs.promises.mkdir(resolvedPath, { recursive: true }).catch((e) => { })
 
+    const filesToDownload = [];
     for(let file of files) {
      if (fs.existsSync(path.resolve(resolvedPath, file))) {
        console.log(`Skip file download, it already exists: ${file}`)
@@ -145,12 +146,18 @@ npx dalai install 7B 13B
      }
 
       const url = `https://agi.gpt4.org/llama/LLaMA/${model}/${file}`
-      await this.root.down(url, path.resolve(resolvedPath, file), {
-        "User-Agent": "Mozilla/5.0"
-      })
+      filesToDownload.push({
+        url,
+        dest: path.resolve(resolvedPath, file),
+        headers: {
+          "User-Agent": "Mozilla/5.0"
+        }
+      });
     }
+    await this.root.multiDownload(filesToDownload);
 
     const files2 = ["tokenizer_checklist.chk", "tokenizer.model"]
+    const filesToDownload2 = [];
     for(let file of files2) {
 //      if (fs.existsSync(path.resolve(this.home, "models", file))) {
 //        console.log(`Skip file download, it already exists: ${file}`)
@@ -158,10 +165,15 @@ npx dalai install 7B 13B
 //      }
       const url = `https://agi.gpt4.org/llama/LLaMA/${file}`
       const dir = path.resolve(this.home, "models")
-      await this.root.down(url, path.resolve(dir, file), {
-        "User-Agent": "Mozilla/5.0"
-      })
+      filesToDownload2.push({
+        url,
+        dest: path.resolve(dir, file),
+        headers: {
+          "User-Agent": "Mozilla/5.0"
+        }
+      });
     }
+    await this.root.multiDownload(filesToDownload2);
 
   }
 }

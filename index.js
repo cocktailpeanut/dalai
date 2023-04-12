@@ -14,12 +14,15 @@ const term = require( 'terminal-kit' ).terminal;
 const Downloader = require("nodejs-file-downloader");
 const semver = require('semver');
 //const _7z = require('7zip-min');
-const axios = require('axios')
+const EasyDl = require("easydl");
+const chalk = require("chalk");
+const bytes = require("bytes");
 const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 const L = require("./llama")
 const A = require("./alpaca")
 const TorrentDownloader = require("./torrent")
+const cliProgress = require("cli-progress");
 const exists = s => new Promise(r=>fs.access(s, fs.constants.F_OK, e => r(!e)))
 const escapeNewLine = (platform, arg) => platform === 'win32' ? arg.replaceAll(/\n/g, "\\n").replaceAll(/\r/g, "\\r") : arg
 const escapeDoubleQuotes = (platform, arg) => platform === 'win32' ? arg.replaceAll(/"/g, '`"') : arg.replaceAll(/"/g, '\\"')
@@ -102,33 +105,97 @@ class Dalai {
     }
     return encodedStr;
   }
-  down(url, dest, headers) {
-    return new Promise((resolve, reject) => {
-      const task = path.basename(dest)
-      this.startProgress(task)
-      axios({
-        url,
-        method: 'GET',
-        responseType: 'stream',
-        maxContentLength: Infinity,
-        headers,
-        onDownloadProgress: progressEvent => {
-          const progress = (progressEvent.loaded / progressEvent.total) * 100;
-          this.progress(task, progress)
-        }
+  async down(url, dest, headers) {
+    const task = path.basename(dest)
+    this.startProgress(task)
 
-      }).then(response => {
-        const writer = fs.createWriteStream(dest);
-        response.data.pipe(writer);
-        writer.on('finish', () => {
-          this.progressBar.update(1);
-          term("\n")
-          resolve()
-        });
-      }).catch(error => {
-        reject(error)
+    const download = new EasyDl(url, dest, {
+      connections: 5,
+      maxRetry: 30,
+      existBehavior: "overwrite",
+      httpOptions: {
+        headers: headers || {}
+      }
+    });
+
+    download.on("progress", (progressReport) => {
+      this.progress(task, progressReport.total.percentage);
+    });
+
+    let recentError = null;
+    download.on("error", (error) => {
+      recentError = error;
+    });
+
+    await new Promise((accept, reject) => {
+      download.once("end", () => accept());
+      download.once("close", () => reject(recentError || new Error("download failed")));
+
+      download.start();
+    });
+
+    this.progressBar.update(1);
+    term("\n");
+  }
+  async multiDownload(items) {
+    const multibar = new cliProgress.MultiBar({
+      clearOnComplete: false,
+      hideCursor: true,
+      autopadding: true,
+      format: `${chalk.bold("{filename}")}  ${chalk.yellow("{percentage}%")} ${chalk.cyan("{bar}")} {speed}${chalk.grey("{eta_formatted}")}`,
+    }, cliProgress.Presets.shades_classic);
+
+    const longestFileName = items.reduce((acc, item) => {
+      return Math.max(acc, path.basename(item.dest).trim().length);
+    }, 0);
+
+    async function downloadFile(url, dest, headers) {
+      const bar = multibar.create(100, 0);
+      bar.update(0, {
+        speed: "",
+        filename: path.basename(dest).trim().padEnd(longestFileName, " "),
       });
-    })
+      
+      const download = new EasyDl(url, dest, {
+        connections: 5,
+        maxRetry: 30,
+        existBehavior: "overwrite",
+        httpOptions: {
+          headers: headers || {}
+        }
+      });
+  
+      download.on("progress", (progressReport) => {
+        bar.update(progressReport.total.percentage, {
+          speed: Number.isFinite(progressReport.total.speed) ? chalk.blue((bytes(progressReport.total.speed) + "/s").padEnd(10)) + chalk.grey(" | ") : ""
+        });
+      });
+  
+      let recentError = null;
+      download.on("error", (error) => {
+        recentError = error;
+      });
+  
+      await new Promise((accept, reject) => {
+        download.once("end", () => accept());
+        download.once("close", () => reject(recentError || new Error("download failed")));
+  
+        download.start();
+      });
+
+      bar.update(100);
+      bar.stop();
+    }
+
+    const downloads = [];
+    for (const item of items) {
+      const { url, dest, headers } = item;
+      downloads.push(downloadFile(url, dest, headers));
+    }
+
+    await Promise.all(downloads);
+    multibar.stop();
+    term("\n");
   }
   async python () {
     // install self-contained python => only for windows for now
