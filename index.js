@@ -103,7 +103,8 @@ class Dalai {
     return encodedStr;
   }
   async down(url, dest, headers) {
-    const task = path.basename(dest);
+    const task = path.basename(dest)
+    this.startProgress(task)
 
     const download = new EasyDl(url, dest, {
       connections: 10,
@@ -123,10 +124,12 @@ class Dalai {
       recentError = error;
     });
 
-    const success = await download.wait();
+    download.start();
 
-    if (!success)
-      throw recentError || new Error("Download failed");
+    await new Promise((accept, reject) => {
+      download.once("end", () => accept());
+      download.once("close", () => reject(recentError) || new Error("download failed"));
+    });
 
     this.progressBar.update(1);
     term("\n");
