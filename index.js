@@ -15,11 +15,13 @@ const Downloader = require("nodejs-file-downloader");
 const semver = require('semver');
 //const _7z = require('7zip-min');
 const EasyDl = require("easydl");
+const chalk = require("chalk");
 const platform = os.platform()
 const shell = platform === 'win32' ? 'powershell.exe' : 'bash';
 const L = require("./llama")
 const A = require("./alpaca")
 const TorrentDownloader = require("./torrent")
+const cliProgress = require("cli-progress");
 const exists = s => new Promise(r=>fs.access(s, fs.constants.F_OK, e => r(!e)))
 const escapeNewLine = (platform, arg) => platform === 'win32' ? arg.replaceAll(/\n/g, "\\n").replaceAll(/\r/g, "\\r") : arg
 const escapeDoubleQuotes = (platform, arg) => platform === 'win32' ? arg.replaceAll(/"/g, '`"') : arg.replaceAll(/"/g, '\\"')
@@ -107,7 +109,7 @@ class Dalai {
     this.startProgress(task)
 
     const download = new EasyDl(url, dest, {
-      connections: 10,
+      connections: 5,
       maxRetry: 30,
       existBehavior: "overwrite",
       httpOptions: {
@@ -115,7 +117,7 @@ class Dalai {
       }
     });
 
-    download.on('progress', (progressReport) => {
+    download.on("progress", (progressReport) => {
       this.progress(task, progressReport.total.percentage);
     });
 
@@ -124,14 +126,66 @@ class Dalai {
       recentError = error;
     });
 
-    download.start();
-
     await new Promise((accept, reject) => {
       download.once("end", () => accept());
-      download.once("close", () => reject(recentError) || new Error("download failed"));
+      download.once("close", () => reject(recentError || new Error("download failed")));
+
+      download.start();
     });
 
     this.progressBar.update(1);
+    term("\n");
+  }
+  async multiDownload(items) {
+    const multibar = new cliProgress.MultiBar({
+      clearOnComplete: false,
+      hideCursor: true,
+      format: `${chalk.bold("{filename}")} ${chalk.yellow("{percentage}%")} ${chalk.cyan("{bar}")} ${chalk.grey("{eta_formatted}")}`,
+    }, cliProgress.Presets.shades_classic);
+
+    async function downloadFile(url, dest, headers) {
+      const bar = multibar.create(100, 0);
+      bar.update(0, {
+        filename: path.basename(dest)
+      });
+      
+      const download = new EasyDl(url, dest, {
+        connections: 5,
+        maxRetry: 30,
+        existBehavior: "overwrite",
+        httpOptions: {
+          headers: headers || {}
+        }
+      });
+  
+      download.on("progress", (progressReport) => {
+        bar.update(Math.floor(progressReport.total.percentage));
+      });
+  
+      let recentError = null;
+      download.on("error", (error) => {
+        recentError = error;
+      });
+  
+      await new Promise((accept, reject) => {
+        download.once("end", () => accept());
+        download.once("close", () => reject(recentError || new Error("download failed")));
+  
+        download.start();
+      });
+
+      bar.update(100);
+      bar.stop();
+    }
+
+    const downloads = [];
+    for (const item of items) {
+      const { url, dest, headers } = item;
+      downloads.push(downloadFile(url, dest, headers));
+    }
+
+    await Promise.all(downloads);
+    multibar.stop();
     term("\n");
   }
   async python () {
