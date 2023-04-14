@@ -29,7 +29,7 @@ Both alpaca and llama working on your computer!
 
 # Intro
 
-## 1. Cross platform
+## 1. Cross-platform
 
 Dalai runs on all of the following operating systems:
 
@@ -120,7 +120,7 @@ docker compose run dalai npx dalai alpaca install 7B # or a different model
 docker compose up -d
 ```
 
-This will dave the models in the `./models` folder
+This will save the models in the `./models` folder
 
 View the site at http://127.0.0.1:3000/
 
@@ -177,7 +177,7 @@ In case homebrew is not installed on your computer, install it by running:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-> Or you can find the same instruction on the homebrew hompage: https://brew.sh/
+> Or you can find the same instruction on the homebrew homepage: https://brew.sh/
 
 #### 2. Install dependencies
 
@@ -481,7 +481,7 @@ new Dalai().request({
 
 #### 2. Non node.js (socket.io)
 
-To make use of this in a browser or any other language, you can use thie socket.io API.
+To make use of this in a browser or any other language, you can use the socket.io API.
 
 ##### Step 1. start a server
 
