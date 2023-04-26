@@ -230,6 +230,7 @@
               repeat_last_n: 64,
               repeat_penalty: 1.3,
               debug: false,
+              ctx_size: 2048,
               models: []
           }
         }
@@ -241,7 +242,7 @@
             const fields = [{
                 key: "debug",
                 type: "checkbox"
-            }, "n_predict", "repeat_last_n", "repeat_penalty", "top_k", "top_p", "temp", "seed", "threads"].map((key) => {
+            }, "n_predict", "repeat_last_n", "repeat_penalty", "top_k", "top_p", "temp", "seed", "threads","ctx_size"].map((key) => {
                 if (typeof key === "string") {
                     return `<div class='kv'>
 <label>${key}</label>
