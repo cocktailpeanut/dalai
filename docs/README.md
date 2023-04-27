@@ -10,6 +10,8 @@ Run LLaMA and Alpaca on your computer.
 
 ## JUST RUN THIS
 
+[![](https://uohmivykqgnnbiouffke.supabase.co/storage/v1/object/public/landingpage/createdevenv2.svg)](https://console.brev.dev/environment/new?os=ejmrvoj8m&us=62ga2fflb&repo=https://github.com/cocktailpeanut/dalai&repo=https://github.com/brevdev/template-setup-scripts&instance=g5.2xlarge&diskStorage=100Gi&region=us-west-2&setupRepo=https://github.com/brevdev/template-setup-scripts&setupPath=dalai.sh)
+
 <img src="npx2.png" class='round'>
 
 ## TO GET
