@@ -120,7 +120,7 @@ docker compose run dalai npx dalai alpaca install 7B # or a different model
 docker compose up -d
 ```
 
-This will dave the models in the `./models` folder
+This will have the models in the `./models` folder
 
 View the site at http://127.0.0.1:3000/
 
