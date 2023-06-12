@@ -326,6 +326,10 @@ class Dalai {
 
     let engine = this.cores[core]
 
+    if (!engine) {
+      throw new Error(`Unable to find engine for core: ${core}`)
+    }
+
     const venv_path = path.join(this.home, "venv")
     let ve = await exists(venv_path)
     if (!ve) {
