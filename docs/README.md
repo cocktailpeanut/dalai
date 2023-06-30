@@ -177,7 +177,7 @@ In case homebrew is not installed on your computer, install it by running:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-> Or you can find the same instruction on the homebrew hompage: https://brew.sh/
+> Or you can find the same instruction on the homebrew homepage: https://brew.sh/
 
 #### 2. Install dependencies
 
@@ -481,7 +481,7 @@ new Dalai().request({
 
 #### 2. Non node.js (socket.io)
 
-To make use of this in a browser or any other language, you can use thie socket.io API.
+To make use of this in a browser or any other language, you can use this socket.io API.
 
 ##### Step 1. start a server
 
